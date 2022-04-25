@@ -19,6 +19,6 @@ setup(
     author='Mathieu Vander Donckt',
     author_email='mathieu.vanderdonckt@uliege.be',
 
-    packages=['TRAPPIST_utils'],
+    packages=['./'],
     package_dir={'trappist_reduction':'./'}
 )
