@@ -20,4 +20,5 @@ setup(
     author_email='mathieu.vanderdonckt@uliege.be',
 
     packages=['trap_reduction'],
+    package_dir={'trap_reduction':'./'}
 )
