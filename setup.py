@@ -12,7 +12,7 @@ see https://github.com/MichaelKim0407/tutorial-pip-package
 from setuptools import setup
 
 setup(
-    name='TRAPPIST-utils',
+    name='TRAPPIST_utils',
     version=0,
 
     url='https://github.com/mathvdd/TRAPPIST-utils',
