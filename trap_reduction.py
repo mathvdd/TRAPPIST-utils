@@ -39,6 +39,12 @@ ZP = {'OH': [3090, 10.56e-9,   1.791,  1.698e-2,  0.98,   1,  1.60],
 filt_list = ['OH','CN','C2','C3','NH','BC','RC','GC','R','I', 'B', 'V'] #to be coherent with the subsets file for progtrap2.cl
 
 def renameftsfits(raw_path):
+    """
+    Rename 'fts' into 'fits'
+    
+    Parameters:
+        raw_path (str): path to the folder containing the fits files (subfolders will be affected as well)
+    """
     print("rename fts into fits")
     count = 0
     for path, subdirs, files in os.walk(raw_path):
@@ -49,6 +55,13 @@ def renameftsfits(raw_path):
     print("renamed", count, "fts files")
                 
 def pythrename(raw_path, tmpdata_dir):
+    """
+    Rename fits files to the trappist format and copy them to the tmpdata folder
+    
+    Parameters:
+        raw_path (str): path to the raw file folder
+        tmpdata_dir (str): path to the directory where the files are to be copied
+    """
     count = 0
     for path, subdirs, files in os.walk(raw_path):
         for file in files:
@@ -72,6 +85,14 @@ def clrename(iraf_dir, raw_path):
                       'cl < wrapper_rename.cl']))
 
 def check_calib(fitstable, filt_list=filt_list):
+    """
+    Check whether all necessary calibration are available in the directory before recduction
+    Return False if there is a warning flag
+    
+    Parameters:
+        fitstable: table with fits file parameters (see get_fitstable())
+        filt_list, optional: list of filters to take into consideration. Default is ['OH','CN','C2','C3','NH','BC','RC','GC','R','I', 'B', 'V']
+    """
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
@@ -127,6 +148,13 @@ def check_calib(fitstable, filt_list=filt_list):
     return warning_flag #can be used to stop the script only if there is a warning
 
 def get_fitstable(raw_dir):
+    """
+    Scan a directory to get a table with relevant infos from the fits headers
+    Return the table
+    
+    Parameters:
+        raw_dir (str): path to the directory to scan
+    """
     fitstable = pd.DataFrame(columns=('file','type', 'filt', 'exptime', 'observatory'))
     dir_list = [raw_dir,
                 os.path.join(raw_dir, "Calibration"),
@@ -152,7 +180,16 @@ def get_fitstable(raw_dir):
                         fitstable.loc[fitstable.shape[0]] = [imfile, imtype, imfilter, imexptime, imobservatory]
     return fitstable
 
-def generate_ZP(calib_dir, ephemeris, fitslist, ZPparams=ZP):
+def generate_ZP(calib_dir, ephemeris, fitstable, ZPparams=ZP):
+    """
+    Generate calib.dat file with closest zero points
+    
+    Parameters:
+        calib_dir (str): path to the directory containing zero point files. calib.dat will be copied there
+        ephemeris: ephemeris object (see get_ephem.py)
+        fitstable: table containing the fits files info (see get_fitstable())
+        ZPparams, optional: table containing constant values in the calib.dat file. default should be fine at all time
+    """
     import datetime
     import jdcal
     warning_flag = False
@@ -188,7 +225,7 @@ def generate_ZP(calib_dir, ephemeris, fitslist, ZPparams=ZP):
     ZPtable_closest = ZPtable.loc[(ZPtable['JDstart'] == periodJD[0]) & (ZPtable['JDend'] == periodJD[1])]
     
     # get the list of matching filters and print the calib file
-    filtlist = fitslist.loc[fitslist['type'].isin(['LIGHT', 'Light Frame']), 'filt'].drop_duplicates().values.tolist()
+    filtlist = fitstable.loc[fitstable['type'].isin(['LIGHT', 'Light Frame']), 'filt'].drop_duplicates().values.tolist()
 
     with open(os.path.join(calib_dir, "calib.dat"), 'w') as f:
         # the Rc filter is refered as R in the fits headers and the calib.dat file
@@ -219,6 +256,12 @@ def generate_ZP(calib_dir, ephemeris, fitslist, ZPparams=ZP):
 
 
 def clreduce(iraf_dir):
+    """
+    Wrapper to launch iraf progtrap3 in python
+    
+    Parameters:
+        iraf_dir (str): path to the home iraf directory
+    """
     print('reduceand calibrate images from the tmpdata into the tmpout folder')
     with open(os.path.join(iraf_dir, 'wrapper_reduce.cl'), 'w') as f:
         f.write('\n'.join(['progtrap3',
@@ -240,6 +283,12 @@ def set_pixsize_in_clafrhocalcext(fitstable):
     return pixsize
     
 def clafrhocalcext(iraf_dir, pixsize, solocomete, soloinitx, soloinity, soloinitcboxsize):
+    """
+    Wrapper to launch iraf afrhocalcext in python
+    
+    Parameters:
+        iraf_dir (str): path to the home iraf directory
+    """
     print('launch afrhocalext.cl')
     with open(os.path.join(iraf_dir, 'wrapper_afrhocalcext.cl'), 'w') as f:
         f.write('\n'.join(['afrhocalcext ' + pixsize + ' ' + solocomete + ' ' + soloinitx + ' ' + soloinity + ' ' + soloinitcboxsize,
@@ -249,6 +298,14 @@ def clafrhocalcext(iraf_dir, pixsize, solocomete, soloinitx, soloinity, soloinit
                       'cl < wrapper_afrhocalcext.cl']))
 
 def check_darks(iraf_dir,tmpout_dir):
+    """
+    Checks if all darks are made for every line of list_D_exptime
+    return False if not
+
+    Parameters:
+        iraf_dir (str): path to the home iraf directory
+        tmpout_dir (str): path to the directory to check
+    """
     warning_flag = False
     with open(os.path.join(iraf_dir, 'list_D_exptime'), newline='') as f:
         reader = csv.reader(f)
@@ -354,6 +411,12 @@ def generate_haserinput_from_reduced(rad_dir, haser_dir, copy_rad = False, fc=fc
             f.write('\n') #need a blank end line for hasercalcext to work
 
 def check_haser_continuum(tmpout):
+    """
+    Check if there is a BC image for duct continuum correction
+    
+    Parameters:
+        tmpout (str): directory to check
+    """
     # check if there is a continuum image to correct for the dust continuum with the haser script
     # for now only BC is considered but also look for the others
     warning_flag = False
@@ -374,6 +437,14 @@ def check_haser_continuum(tmpout):
     return warning_flag, narrowcontlist
 
 def generate_haserinput(tmpout, fc=fc, fz=0):
+    """
+    generate the haserinput file for the iraf script.
+    
+    Parameters:
+        tmpout (str): working directory
+        fc (dic, optional): dictionnaru containing the fc for each filter. See file for default
+        fz (int, optional): value of fz. default =0
+    """
     output_list = []
     fitstable = get_fitstable(tmpout)
     filelist = fitstable.loc[fitstable['type'].isin(['LIGHT', 'Light Frame']) &
@@ -478,6 +549,12 @@ def generate_haserinput(tmpout, fc=fc, fz=0):
 # 
 # =============================================================================
 def clhasercalctest(iraf_dir, arg='no'):
+    """
+    Wrapper to launch iraf hasercalctest in python
+    
+    Parameters:
+        iraf_dir (str): path to the home iraf directory
+    """
     print('launch hasercalctest.cl')
     with open(os.path.join(iraf_dir, 'wrapper_hasercalctest.cl'), 'w') as f:
         if arg=='yes':
@@ -491,6 +568,12 @@ def clhasercalctest(iraf_dir, arg='no'):
                       'cl < wrapper_hasercalctest.cl']))
     
 def clean_afrhotot(direc):
+    """
+    Clean the afrhotot files to keep only the last computed value for each image
+    
+    Parameters:
+        direc (str): path to the working directory
+    """
     for path, subdirs, files in os.walk(direc):
         for file in files:
             if 'afrho' in file and 'tot' in file and ".png" not in file:
