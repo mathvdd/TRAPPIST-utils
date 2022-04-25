@@ -15,7 +15,7 @@ setup(
     name='TRAPPIST_utils',
     version=0,
 
-    url='https://github.com/mathvdd/TRAPPIST-utils',
+    url='https://github.com/mathvdd/TRAPPIST_utils',
     author='Mathieu Vander Donckt',
     author_email='mathieu.vanderdonckt@uliege.be',
 
