@@ -1,6 +1,8 @@
 # TRAPPIST-utils
 Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf scripts. Main functions are highlighted bellow.
 
+[trap_reduction](#trap_reductionpy)
+
 ## trap_reduction.py
 **renameftsfits**(raw_path):
 
