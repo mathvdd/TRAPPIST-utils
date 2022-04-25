@@ -1,0 +1,507 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Nov 25 15:51:19 2021
+
+@author: Mathieu Vander Donckt
+mathieu.vanderdonckt@uliege.be
+"""
+
+import os
+import csv
+import pandas as pd
+from astropy.io import fits
+import shutil
+# Add a rename fts to fits for TS images
+#Add check if all flats are there
+
+fc = {'OH':5,
+      'NH':20,
+      'CN':25,
+      'C3':190,
+      'C2':170}
+
+#see calib08140914.dat
+ZP = {'OH': [3090, 10.56e-9,   1.791,  1.698e-2,  0.98,   1,  1.60],
+      'NH': [3362,  8.42e-9,   1.188,  1.907e-2,  0.99,   2,  0.65],
+      'CN': [3870,  8.6e-9,    1.031,  1.812e-2,  0.99,   4,  0.36],
+      'C3': [4062,  8.16e-9,   0.497,  3.352e-3,  0.19,   5,  0.29],
+      'BC': [4450,  6.21e-9,   0.0,    1.,        1.,     7,  0.25],
+      'C2': [5141,  3.887e-9, -0.423,  5.433e-3,  0.66,   8,  0.15],
+      'GC': [5260,  3.616e-9, -0.507,  1.,        1.,     9,  0.14],
+      'RC': [7128,  1.316e-9, -1.276,  1.,        1.,    11,  0.05],
+      'B': [4440,  6.4e-9,    0.0,    1.,        1,     12,  0.25],
+      'V': [5483,  3.67e-9,  -0.649,  1.,        1,     13,  0.14],
+      'R': [6855,  1.92e-9,  -1.019,  1.,        1,     14,  0.098],
+      'I': [8637,  9.39e-10, -1.375,  1.,        1,     15,  0.043]
+      }
+
+filt_list = ['OH','CN','C2','C3','NH','BC','RC','GC','R','I', 'B', 'V'] #to be coherent with the subsets file for progtrap2.cl
+
+def renameftsfits(raw_path):
+    print("rename fts into fits")
+    count = 0
+    for path, subdirs, files in os.walk(raw_path):
+        for file in files:
+            if os.path.join(path, file).endswith(".fts"):
+                os.rename(os.path.join(path, file), os.path.join(path, file)[:-3] + 'fits')
+                count += 1
+    print("renamed", count, "fts files")
+                
+def pythrename(raw_path, tmpdata_dir):
+    count = 0
+    for path, subdirs, files in os.walk(raw_path):
+        for file in files:
+            if os.path.join(path, file).endswith(".fits"):
+                print(os.path.join(path, file))
+                with fits.open(os.path.join(path, file)) as hdul:
+                    obsdate = hdul[0].header['DATE-OBS']
+                shutil.copy(os.path.join(path, file), os.path.join(tmpdata_dir, "TRAP." + obsdate[:19] + ".fits"))
+                count += 1
+            elif os.path.join(path, file).endswith(".fts"):
+                print("WARNING: convert fts to fits")
+    print("renamed and copied", count, "files in", tmpdata_dir)
+    
+def clrename(iraf_dir, raw_path):
+    print('rename and set the data in tmpdata')
+    with open(os.path.join(iraf_dir, 'wrapper_rename.cl'), 'w') as f:
+        f.write('\n'.join(['renamefits ' + raw_path + ' yes',
+                      'logout']))
+    os.system('\n'.join(['cd ' + iraf_dir,
+                      'source activate iraf27', #conda activate not working
+                      'cl < wrapper_rename.cl']))
+
+def check_calib(fitstable, filt_list=filt_list):
+    pd.set_option('display.max_rows', 500)
+    pd.set_option('display.max_columns', 500)
+    pd.set_option('display.width', 1000)
+    print("filter list set to", filt_list)
+    
+    # light_filters = fitstable.loc[fitstable['type'].isin(['LIGHT', 'Light Frame']), 'filter'].drop_duplicates().values.tolist()
+    lighttable = fitstable.loc[(fitstable['type'].isin(['LIGHT', 'Light Frame'])) & (fitstable['filt'].isin(filt_list)), ['file', 'filt', 'exptime']]
+    lighttable['nb_flat'] = None
+    lighttable['nb_dark'] = None
+    lighttable['nb_bias'] = (fitstable['type'].isin(['BIAS', 'Bias Frame'])).sum()
+    
+    for index, row in lighttable.iterrows() :
+        lighttable.at[index, 'nb_flat'] = ((fitstable['type'].isin(['FLAT', 'Flat Frame'])) & (fitstable.filt == row['filt'])).sum()
+        lighttable.at[index, 'nb_dark'] = ((fitstable['type'].isin(['DARK', 'Dark Frame'])) & (fitstable.exptime == row['exptime'])).sum()
+    print(lighttable)    
+    
+    
+    nb_flat_dark = ((fitstable['type'].isin(['DARK', 'Dark Frame'])) & (fitstable.exptime == 15)).sum()
+    print("\nNumber of dark frames for flat correction (exptime = 15s):", nb_flat_dark, "\n")
+    
+    warning_flag = False
+    for index, row in lighttable.iterrows() :
+        if row['nb_flat'] == 0:
+            print("WARNING: no flat for", row['file'])
+            warning_flag = True
+        elif row['nb_flat'] < 3:
+            print("WARNING: less than 3 flats for", row['file'])
+            warning_flag = True
+        if row['nb_dark'] == 0:
+            print("WARNING: no dark (",row['exptime'],") for", row['file'])
+            warning_flag = True
+        elif row['nb_dark'] < 3:
+            print("WARNING: less than 3 darks (",row['exptime'],") for", row['file'])
+            warning_flag = True
+        if row['nb_bias'] == 0:
+            print("WARNING: no bias for", row['file'])
+            warning_flag = True
+        elif row['nb_bias'] < 3:
+            print("WARNING: less than 3 bias for", row['file'])
+            warning_flag = True
+    if nb_flat_dark == 0:
+        print("WARNING: no darks (15s) for flats")
+        warning_flag = True
+    elif nb_flat_dark < 3:
+        print("WARNING: less than 3 darks (15s) for flats")
+        warning_flag = True
+        
+    # check if there is a BC filter for narrow bands
+    if lighttable['filt'].isin(['OH', 'C2', 'C3', 'CN', 'NH']).any() and (lighttable['filt'].isin(['BC']).any() == False):
+        print("WARNING: Narrow band images while no continuum BC image")
+        warning_flag = True
+    
+    return warning_flag #can be used to stop the script only if there is a warning
+
+def get_fitstable(raw_dir):
+    fitstable = pd.DataFrame(columns=('file','type', 'filt', 'exptime', 'observatory'))
+    dir_list = [raw_dir,
+                os.path.join(raw_dir, "Calibration"),
+                os.path.join(raw_dir, "AutoFlat"),
+                os.path.join(raw_dir, "Flat"),
+                os.path.join(raw_dir, "Autoflat")]
+    for directory in dir_list:
+        if os.path.exists(directory):
+            for file in os.listdir(directory):
+                if 'tmp' not in file and file.endswith(".fits") or file.endswith(".fts"):
+                    with fits.open(os.path.join(directory, file)) as hdul:
+                        imfile = os.path.join(directory, file)[len(raw_dir)+1:]
+                        imtype = hdul[0].header['IMAGETYP']
+                        try:
+                            imfilter = hdul[0].header['FILTER']
+                        except:
+                            imfilter = None
+                        imexptime = hdul[0].header['EXPTIME']
+                        try:
+                            imobservatory = hdul[0].header['OBSERVAT']
+                        except:
+                            imobservatory = None
+                        fitstable.loc[fitstable.shape[0]] = [imfile, imtype, imfilter, imexptime, imobservatory]
+    return fitstable
+
+def generate_ZP(calib_dir, ephemeris, fitslist, ZPparams=ZP):
+    import datetime
+    import jdcal
+    warning_flag = False
+    if ephemeris.observatory == 'Oukaimeden':
+        ZPtable = pd.read_csv(os.path.join(calib_dir, "median_ZPC_North.log"), header=None, sep="\s+")
+        observ = 'TN'
+    elif ephemeris.observatory == 'TRAPPIST':
+        ZPtable = pd.read_csv(os.path.join(calib_dir, "median_ZPC_South.log"), header=None, delim_whitespace=True)
+        observ = 'TS'
+    else:
+        print('WARNING: observatory not well defined')
+        warning_flag = True
+    ZPtable = ZPtable.drop([1,2,4,5,8,9,10,12,14,16], axis=1)
+    ZPtable.columns = ['filt','lambda','JDstart','JDend','ZPmed','ZPav','ZPsig','n']
+    
+    # get the closest date
+    startdate = datetime.datetime.strptime(ephemeris.parameters['START_TIME'], '%Y-%m-%d %H:%M')
+    # enddate = datetime.datetime.strptime(eph.parameters['STOP_TIME'], '%Y-%m-%d %H:%M')
+    startdateJD = sum(jdcal.gcal2jd(startdate.year, startdate.month, startdate.day))
+    if startdateJD > 2459950:
+        print("WARNING: need tu update the code on February 24, 2023")
+        warning_flag = True
+    datediff = 10000000000
+    for index, row in ZPtable.iterrows():
+        midpointJD = 2450000 + (row['JDstart'] + (row['JDend'] - row['JDstart'])/2)
+        ddiff = startdateJD - midpointJD
+        if abs(datediff) > abs(ddiff):
+            datediff = ddiff
+            periodJD = (row['JDstart'], row['JDend'])
+    if datediff > 50:
+        print("WARNING: update the ZP file, closest calibration midpoint at", datediff, "days")
+        warning_flag = True
+    ZPtable_closest = ZPtable.loc[(ZPtable['JDstart'] == periodJD[0]) & (ZPtable['JDend'] == periodJD[1])]
+    
+    # get the list of matching filters and print the calib file
+    filtlist = fitslist.loc[fitslist['type'].isin(['LIGHT', 'Light Frame']), 'filt'].drop_duplicates().values.tolist()
+
+    with open(os.path.join(calib_dir, "calib.dat"), 'w') as f:
+        # the Rc filter is refered as R in the fits headers and the calib.dat file
+        ZPtable_closest['filt'] = ZPtable_closest['filt'].replace(['Rc'],'R')
+        ZPtable_closest['filt'] = ZPtable_closest['filt'].replace(['Ic'],'I')
+        # ZPtable_closest.loc[ZPtable_closest['filt'] == "Rc", 'filt']  = 'R'
+        # ZPtable_closest['filt'] = ZPtable_closest['filt'].replace({'Rc':'R'})
+        for filt in filtlist:
+            if filt in ZPtable_closest['filt'].values.tolist():
+                ZPval = ZPtable_closest.loc[ZPtable_closest['filt'] == filt, 'ZPmed']
+                ZPsig = ZPtable_closest.loc[ZPtable_closest['filt'] == filt, 'ZPsig']
+                line = filt + ' ' + ' '.join([str(int) for int in ZPparams.get(filt)]) + ' ' + str(ZPval.values)[1:-1] + ' ' + str(ZPsig.values)[1:-1]
+                f.write(line + '\n')
+            else:
+                print("WARNING:", filt, "filter not found in the ZP table for the closest date", periodJD)
+                warning_flag = True
+        f.write('\n# Generated by trap_reduction.generate_ZP() for ' + observ + ' for the ' + startdate.strftime('%m/%d/%Y') + " JD " + str(startdateJD) + '.\n# see calib08140914.dat\n')
+    
+    return warning_flag
+    
+# import directory_structure
+# import get_ephem
+# ds = directory_structure.directory_structure()
+# fitslist = get_fitstable(os.path.join(ds.raw, "20210403"))
+# eph = get_ephem.ephemeris()
+# eph.retrieve_param_from_fits(ds.tmpout)
+# generate_ZP(ds.calib, eph, fitslist)
+
+
+def clreduce(iraf_dir):
+    print('reduceand calibrate images from the tmpdata into the tmpout folder')
+    with open(os.path.join(iraf_dir, 'wrapper_reduce.cl'), 'w') as f:
+        f.write('\n'.join(['progtrap3',
+                      'logout']))
+    os.system('\n'.join(['cd ' + iraf_dir,
+                      'source activate iraf27', #conda activate not working
+                      'cl < wrapper_reduce.cl']))
+    
+def set_pixsize_in_clafrhocalcext(fitstable):
+    obs = fitstable.loc[fitstable['type'].isin(['LIGHT','Light Frame']), 'observatory'][0]
+    if obs == 'Oukaimeden':
+        pixsize = ('TN', '0.60')
+        print('Observatory set to TRAPPIST-North, Oukaimeden (observatory). pixsize = 0.60')
+    elif obs == 'TRAPPIST':
+        pixsize = ('TS', '0.65')
+        print('Observatory set to La Silla--TRAPPIST (observatory). pixsize = 0.65')
+    else:
+        print('problem defining observatory and pixsize')
+    return pixsize
+    
+def clafrhocalcext(iraf_dir, pixsize, solocomete, soloinitx, soloinity, soloinitcboxsize):
+    print('launch afrhocalext.cl')
+    with open(os.path.join(iraf_dir, 'wrapper_afrhocalcext.cl'), 'w') as f:
+        f.write('\n'.join(['afrhocalcext ' + pixsize + ' ' + solocomete + ' ' + soloinitx + ' ' + soloinity + ' ' + soloinitcboxsize,
+                      'logout']))
+    os.system('\n'.join(['cd ' + iraf_dir,
+                      'source activate iraf27', #conda activate not working
+                      'cl < wrapper_afrhocalcext.cl']))
+
+def check_darks(iraf_dir,tmpout_dir):
+    warning_flag = False
+    with open(os.path.join(iraf_dir, 'list_D_exptime'), newline='') as f:
+        reader = csv.reader(f)
+        exptimes = []
+        for row in reader:
+          exptimes.append(row[0])  
+        print('checking if darks exists for exptimes', exptimes)
+        for exptime in exptimes:
+            dark_file = os.path.join(tmpout_dir, 'Dark_' + exptime + '.fits')
+            if os.path.exists(dark_file) == False:
+                print("WARNING: " + dark_file + " not found")
+                warning_flag = True
+    return warning_flag
+
+    
+
+# Old version.
+# Will generate them all in one file instead
+# def generate_haserinput(folder_path, fc=fc, fz=0):
+#     #add an option if there is no BC filter
+#     print('generate haser input. Check fc and fz')
+#     filelist = os.listdir(folder_path)
+#     filelist_filter = []
+#     for file in filelist:
+#             if file[0:4] == 'rad_':
+#                 with open(os.path.join(folder_path, file), newline='') as f:
+#                     reader = csv.reader(f)
+#                     filter_type = next(reader)[0].split()[14]
+#                     filelist_filter.append((file, filter_type))
+#     #check if it will run with the current folder configuration. May need to change this function later for bathching
+#     i = 0
+#     for item in filelist_filter:
+#         if item[1] == 'BC':
+#             BC_file = item
+#             i +=1
+#     if i != 1:
+#         input(i, "BC file(s) found. Check BC files date and rerun/modify the script")
+#     else:
+#         print("BC file found")
+#     for filt in fc:
+#         output_list = []
+#         for item in filelist_filter:
+#             if filt == item[1]:
+#                 output_list.append(item[0][4:] + ' ' + BC_file[0] + ' ' + str(fc.get(filt)) + ' ' + str(fz))
+#         if len(output_list) > 0:
+#             file_path = os.path.join(folder_path, 'Haserimput.test' + filt + '-BC')
+#             print("creating " + file_path)
+#             with open(file_path, 'w') as f:
+#                 f.write('\n'.join(output_list))
+#                 f.write('\n') #need a blank end line for hasercalcext to work
+   
+def generate_haserinput_from_reduced(rad_dir, haser_dir, copy_rad = False, fc=fc, fz=0, tel =''):
+    '''obselete. was made to be run after files from other recipes were ordered in the reduced file
+    see generate_haserinput for calculations in the tmpout directory'''
+    print('generate haser input. Check fc and fz. will just do the filters documented in fc')
+    #creates a table with all the profiles in the rad_dir
+    radtable = pd.DataFrame(columns=('path','file', 'filt'))
+    for path, subdirs, files in os.walk(rad_dir):
+        if tel == '':
+            input('need to specify telescope')
+        elif tel in path: #need to distinguish between TN and TS for ephemerids
+            for file in files:
+                if 'rad_' in file and ".png" not in file:
+                    with open(os.path.join(path, file), newline='') as f:
+                        reader = csv.reader(f)
+                        filter_type = next(reader)[0].split()[14]
+                        radtable.loc[radtable.shape[0]] = [path, file, filter_type]
+                #creates ephem.brol for the haser recipe
+                if file == "ephem.brol":
+                    with open(os.path.join(path, file),'r') as firstfile, open(os.path.join(haser_dir, 'ephem.brol'),'a') as secondfile:
+                        for line in firstfile:   
+                            secondfile.write(line)
+    #looks if the filer is in the filter list, search for BC filter and write the line in the haserinput list
+    output_list = []
+    for index, row in radtable.iterrows():
+        if row['filt'] in fc:
+            BCtable = radtable.loc[(radtable['path'] == row['path']) & (radtable['filt'] == 'BC')]
+            if len(BCtable.index) != 1:
+                print(BCtable)
+                print(path)
+                print("table length:", len(BCtable.index))
+                input('less or more than one BC radial profile in the folder')
+            output_list.append(row['file'][4:]
+                               + ' '
+                               + BCtable.iloc[0]['file']
+                               + ' ' +
+                               str(fc.get(row['filt']))
+                               + ' ' +
+                               str(fz))
+            if copy_rad == True:
+                shutil.copy(os.path.join(row['path'], row['file']), os.path.join(haser_dir, row['file']))
+                shutil.copy(os.path.join(row['path'], 'radplus_' + row['file'][4:]), os.path.join(haser_dir, 'radplus_' + row['file'][4:]))
+                shutil.copy(os.path.join(row['path'], 'radeplus_' + row['file'][4:]), os.path.join(haser_dir, 'radeplus_' + row['file'][4:]))
+                shutil.copy(os.path.join(row['path'], 'radmoins_' + row['file'][4:]), os.path.join(haser_dir, 'radmoins_' + row['file'][4:]))
+                shutil.copy(os.path.join(row['path'], 'rademoins_' + row['file'][4:]), os.path.join(haser_dir, 'rademoins_' + row['file'][4:]))
+                shutil.copy(os.path.join(BCtable.iloc[0]['path'], BCtable.iloc[0]['file']), os.path.join(haser_dir, BCtable.iloc[0]['file']))
+    # print hasercalcinput
+    if len(output_list) > 0:
+        file_path = os.path.join(haser_dir, 'Haserimput.testall-BC')
+        print("creating " + file_path)
+        with open(file_path, 'w') as f:
+            f.write('\n'.join(output_list))
+            f.write('\n') #need a blank end line for hasercalcext to work
+
+def check_haser_continuum(tmpout):
+    # check if there is a continuum image to correct for the dust continuum with the haser script
+    # for now only BC is considered but also look for the others
+    warning_flag = False
+    fitslist = get_fitstable(tmpout)
+    # narrowcontlist = fitslist.loc[(fitslist.type == 'Light Frame') & fitslist.filt.isin(['BC', 'RC', 'GC', 'UC'])]
+    narrowcontlist = fitslist.loc[fitslist.type.isin(['Light Frame', 'LIGHT']) & fitslist.filt.isin(['BC', 'RC', 'GC', 'UC'])]
+    nb_BC = len(narrowcontlist.loc[fitslist.filt == 'BC'])
+    if nb_BC == 1:
+        print('BC image found')
+    elif nb_BC > 1:
+        print("WARNING: more than one BC image found (" + str(nb_BC) + ')')
+        warning_flag = True
+    elif nb_BC == 0:
+        print("WARNING: no BC images found for dust continuum correction")
+        print('Narrow continuum images found:')
+        print(narrowcontlist)
+        warning_flag = True
+    return warning_flag, narrowcontlist
+
+def generate_haserinput(tmpout, fc=fc, fz=0):
+    output_list = []
+    fitstable = get_fitstable(tmpout)
+    filelist = fitstable.loc[fitstable['type'].isin(['LIGHT', 'Light Frame']) &
+                             fitstable.file.str.contains('TRAP')]
+    BCtable = filelist.loc[(filelist['filt'] == 'BC')]
+
+    for index, row in filelist.iterrows():
+        if row['filt'] in fc:
+            output_list.append(row['file'] + '.txt'
+                + ' '
+                + 'rad_' + BCtable.iloc[0]['file'] + '.txt'
+                + ' ' +
+                str(fc.get(row['filt']))
+                + ' ' +
+                str(fz))
+    if len(output_list) > 0:
+        file_path = os.path.join(tmpout, 'inputhaser-BC')
+        print("creating " + file_path)
+        with open(file_path, 'w') as f:
+            f.write('\n'.join(output_list))
+            f.write('\n') #need a blank end line for hasercalcext to work
+
+    
+    
+# import directory_structure
+# ds = directory_structure.directory_structure()
+# check_haser_continuum(ds.tmpout)
+# generate_haserinput(ds.tmpout) 
+
+
+    #             filelist_filter = []
+    #             with open(os.path.join(path, file), newline='') as f:
+    #                 reader = csv.reader(f)
+    #                 filter_type = next(reader)[0].split()[14]
+    #                 filelist_filter.append((file, filter_type))
+    # #check if it will run with the current folder configuration. May need to change this function later for bathching
+    # i = 0
+    # for item in filelist_filter:
+    #     if item[1] == 'BC':
+    #         BC_file = item
+    #         i +=1
+    # if i != 1:
+    #     input(i, "BC file(s) found. Check BC files date and rerun/modify the script")
+    # else:
+    #     print("BC file found")
+    # output_list = []
+    # inc_filt = []
+    # for item in filelist_filter:
+    #     if item[1] in fc:
+    #         output_list.append(item[0][4:] + ' ' + BC_file[0] + ' ' + str(fc.get(item[1])) + ' ' + str(fz))
+    #         if item[1] not in inc_filt:
+    #             inc_filt.append(item[1])
+    # if len(output_list) > 0:
+    #     file_path = os.path.join(folder_path, 'Haserimput.testall-BC')
+    #     print("creating " + file_path)
+    #     print("include filters:", inc_filt)
+    #     with open(file_path, 'w') as f:
+    #         f.write('\n'.join(output_list))
+    #         f.write('\n') #need a blank end line for hasercalcext to work
+    # else:
+    #     print("no radial profile with associated filter found. Please check fc or files. No haserinput written")
+
+                            
+# =============================================================================
+# def generate_haserinput(folder_path, fc=fc, fz=0):
+#     #add an option if there is no BC filter
+#     print('generate haser input. Check fc and fz. will just do the filters documented in fc')
+#     filelist = os.listdir(folder_path)
+#     filelist_filter = []
+#     for file in filelist:
+#             if file[0:4] == 'rad_':
+#                 with open(os.path.join(folder_path, file), newline='') as f:
+#                     reader = csv.reader(f)
+#                     filter_type = next(reader)[0].split()[14]
+#                     filelist_filter.append((file, filter_type))
+#     #check if it will run with the current folder configuration. May need to change this function later for bathching
+#     i = 0
+#     for item in filelist_filter:
+#         if item[1] == 'BC':
+#             BC_file = item
+#             i +=1
+#     if i != 1:
+#         input(i, "BC file(s) found. Check BC files date and rerun/modify the script")
+#     else:
+#         print("BC file found")
+#     output_list = []
+#     inc_filt = []
+#     for item in filelist_filter:
+#         if item[1] in fc:
+#             output_list.append(item[0][4:] + ' ' + BC_file[0] + ' ' + str(fc.get(item[1])) + ' ' + str(fz))
+#             if item[1] not in inc_filt:
+#                 inc_filt.append(item[1])
+#     if len(output_list) > 0:
+#         file_path = os.path.join(folder_path, 'Haserimput.testall-BC')
+#         print("creating " + file_path)
+#         print("include filters:", inc_filt)
+#         with open(file_path, 'w') as f:
+#             f.write('\n'.join(output_list))
+#             f.write('\n') #need a blank end line for hasercalcext to work
+#     else:
+#         print("no radial profile with associated filter found. Please check fc or files. No haserinput written")
+# 
+# =============================================================================
+def clhasercalctest(iraf_dir, arg='no'):
+    print('launch hasercalctest.cl')
+    with open(os.path.join(iraf_dir, 'wrapper_hasercalctest.cl'), 'w') as f:
+        if arg=='yes':
+            f.write('\n'.join(['hasercalctest yes',
+                          'logout']))
+        elif arg=='no':
+            f.write('\n'.join(['hasercalctest no',
+                          'logout']))
+    os.system('\n'.join(['cd ' + iraf_dir,
+                      'source activate iraf27', #conda activate not working
+                      'cl < wrapper_hasercalctest.cl']))
+    
+def clean_afrhotot(direc):
+    for path, subdirs, files in os.walk(direc):
+        for file in files:
+            if 'afrho' in file and 'tot' in file and ".png" not in file:
+                afrhofile = os.path.join(path, file)
+                print(afrhofile)
+                df = pd.read_csv(afrhofile, header=None, sep="\s+")
+                df.drop_duplicates(subset =0, keep = 'last', inplace = True)
+                df.to_csv(afrhofile, index=False, sep=" ", header=False)
+                
+    
+    
+# import directory_structure
+# ds = directory_structure.directory_structure()
+# clean_afrhotot("/home/Mathieu/Documents/TRAPPIST/reduced_data/2020T2/20211004TS")
