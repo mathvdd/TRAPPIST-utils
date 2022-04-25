@@ -13,7 +13,7 @@ from setuptools import setup
 
 setup(
     name='TRAPPIST-utils',
-    version='dev',
+    version=0,
 
     url='https://github.com/mathvdd/TRAPPIST-utils',
     author='Mathieu Vander Donckt',
