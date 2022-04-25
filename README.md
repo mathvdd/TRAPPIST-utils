@@ -3,6 +3,12 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 
 [trap_reduction](#trap_reductionpy)
 
+[get_ephem](#get_ephempy)
+
+[NAS_query](#NAS_querypy)
+
+[trap_plot](#trap_plotpy)
+
 ## trap_reduction.py
 **renameftsfits**(raw_path):
 
