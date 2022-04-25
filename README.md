@@ -5,7 +5,7 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 
 [get_ephem](#get_ephempy)
 
-[NAS_query](#NAS_querypy)
+[NAS_query](#query_NASpy)
 
 [trap_plot](#trap_plotpy)
 
