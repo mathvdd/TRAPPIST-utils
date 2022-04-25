@@ -19,5 +19,5 @@ setup(
     author='Mathieu Vander Donckt',
     author_email='mathieu.vanderdonckt@uliege.be',
 
-    packages=['./trap_reduction', 'trap_plot', 'query_NAS', 'get_ephem'],
+    packages=['trap_reduction'],
 )
