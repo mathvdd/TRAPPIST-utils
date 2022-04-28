@@ -92,7 +92,7 @@ def NAS_build(NAS_path, export_path, keyword=''):
 
 # query("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.txt")
 # query("/NASTS/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS1_query.txt")
-# query("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt")
+# NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202204')
 # queryZ("/NASTN/Data_TrappistNord/ACP Astronomy/Images")
     
 def queryZ(NAS_path):
@@ -432,103 +432,101 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=0, fi
                         print("copied", item.split('/')[-1])
             break
 
-# =============================================================================
-# def lookforcalib(copy=True):
-#     """
-#     old version
-#     """
-#     ####################################
-#     ### PARAMETERS
-#     
-#     ### uncomment line bellow if querying for a light image
-#     imtype = ['LIGHT', 'Light Frame']
-#     obj = "CK19T040" #target name in the fits header. only for lights
-#     
-#     ### uncomment line bellow if querying for dark frames
-#     # imtype = ['DARK', 'Dark Frame']
-#     exptime = 600 #exposure time. only for darks
-#         
-#     ### uncomment line bellow if querying for flat frames
-#     # imtype = ['FLAT', 'Flat Frame']
-#     filt = 'GC' #filter. only for flats
-#     
-#     ### uncomment line bellow if querying for bias frames
-#     # imtype = ['BIAS', 'Bias Frame']
-#     
-#     night = (2022,3,25) ### set the observation night
-#     NASfitstable = loadcsvtable("/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.txt") ### path to the indexed database
-#     # output_fold = "/home/Mathieu/Documents/TRAPPIST/raw_data/2020T2/TS/20210703/Calibration" ### path to the output folder
-#     subf_year = str(night[0])
-#     if night[1] > 9:
-#         subf_month = str(night[1])
-#     else:
-#         subf_month = '0' + str(night[1])
-#     if night[2] > 9:
-#         subf_day = str(night[2])
-#     else:
-#         subf_day = '0' + str(night[2])
-#     subfold_name = subf_year + subf_month + subf_day
-#     output_fold = "/home/Mathieu/Documents/TRAPPIST/raw_data/CK19L030/TS/" +  subfold_name + "/Calibration"
-#     
-#     ####################################
-#     
-#     obsnight = pd.Timestamp(year=night[0], month=night[1], day=night[2], hour=23, minute=59)
-#     dayinterval = 0
-#     while True:
-#         lower_interval = obsnight - datetime.timedelta(days = dayinterval, hours = 12)
-#         upper_interval = obsnight + datetime.timedelta(days = dayinterval, hours = 12)
-#         if 'DARK' in imtype:
-#             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
-#                                           & (NASfitstable['date'] <= upper_interval)
-#                                           & (NASfitstable['binning'] == 2)
-#                                           & NASfitstable['type'].isin(imtype)
-#                                           & (NASfitstable['exptime'] == exptime)]
-#         elif 'FLAT' in imtype:
-#             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
-#                                           & (NASfitstable['date'] <= upper_interval)
-#                                           & (NASfitstable['binning'] == 2)
-#                                           & NASfitstable['type'].isin(imtype)
-#                                           & (NASfitstable['filter'] == filt)]
-#         elif 'LIGHT' in imtype:
-#             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
-#                                           & (NASfitstable['date'] <= upper_interval)
-#                                           & (NASfitstable['binning'] == 2)
-#                                           & NASfitstable['type'].isin(imtype)
-#                                           & (NASfitstable['object'] == obj)
-#                                            # & (NASfitstable['filter'] == filt)
-#                                           ]
-#         elif 'BIAS' in imtype:
-#             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
-#                                           & (NASfitstable['date'] <= upper_interval)
-#                                           & (NASfitstable['binning'] == 2)
-#                                           & NASfitstable['type'].isin(imtype)]
-#             # print(NASfitstable['object'][0])
-#         if len(calibtable.index) == 0:
-#             dayinterval += 1
-#         else:
-#             print("day interval of", dayinterval)
-#             # print(calibtable)
-#             caliblist = []
-#             for item in sorted(calibtable['file']):
-#                 print(item)
-#                 caliblist.append(item)
-#                 
-#             ### copy the files from the NAS into the output folder 
-#             if copy == True:
-#                 print("output_fold set to", output_fold)
-#                 trans = input("transfer files?: (y/n)")
-#                 if trans == 'y' or trans == 'Y':
-#                     for item in caliblist:
-#                         # print(os.path.join(output_fold, item.split('/')[-1]))
-#                         if 'DARK' in imtype:
-#                             shutil.copy(item, os.path.join(output_fold, 'extra' + str(exptime) + item.split('/')[-1]))
-#                         elif 'FLAT' in imtype:
-#                             shutil.copy(item, os.path.join(output_fold, 'extra' + filt + item.split('/')[-1]))
-#                         elif 'BIAS' in imtype:
-#                             shutil.copy(item, os.path.join(output_fold, 'extra' + '0' + item.split('/')[-1]))
-#                         print("copied", item.split('/')[-1])
-#             break
-# =============================================================================
+def lookforcalib_old(copy=True):
+    """
+    old version
+    """
+    ####################################
+    ### PARAMETERS
+    
+    ### uncomment line bellow if querying for a light image
+    # imtype = ['LIGHT', 'Light Frame']
+    obj = "CK19T040" #target name in the fits header. only for lights and for the output path
+    
+    ### uncomment line bellow if querying for dark frames
+    imtype = ['DARK', 'Dark Frame']
+    exptime = 1500 #exposure time. only for darks
+        
+    ### uncomment line bellow if querying for flat frames
+    # imtype = ['FLAT', 'Flat Frame']
+    filt = 'GC' #filter. only for flats
+    
+    ### uncomment line bellow if querying for bias frames
+    # imtype = ['BIAS', 'Bias Frame']
+    
+    night = (2022,4,26) ### set the observation night
+    NASfitstable = loadcsvtable("/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.txt") ### path to the indexed database
+    # output_fold = "/home/Mathieu/Documents/TRAPPIST/raw_data/2020T2/TS/20210703/Calibration" ### path to the output folder
+    subf_year = str(night[0])
+    if night[1] > 9:
+        subf_month = str(night[1])
+    else:
+        subf_month = '0' + str(night[1])
+    if night[2] > 9:
+        subf_day = str(night[2])
+    else:
+        subf_day = '0' + str(night[2])
+    subfold_name = subf_year + subf_month + subf_day
+    output_fold = "/home/Mathieu/Documents/TRAPPIST/raw_data/" + obj + "/TS/" +  subfold_name + "/Calibration"
+    
+    ####################################
+    
+    obsnight = pd.Timestamp(year=night[0], month=night[1], day=night[2], hour=23, minute=59)
+    dayinterval = 0
+    while True:
+        lower_interval = obsnight - datetime.timedelta(days = dayinterval, hours = 12)
+        upper_interval = obsnight + datetime.timedelta(days = dayinterval, hours = 12)
+        if 'DARK' in imtype:
+            calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
+                                          & (NASfitstable['date'] <= upper_interval)
+                                          & (NASfitstable['binning'] == 2)
+                                          & NASfitstable['type'].isin(imtype)
+                                          & (NASfitstable['exptime'] == exptime)]
+        elif 'FLAT' in imtype:
+            calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
+                                          & (NASfitstable['date'] <= upper_interval)
+                                          & (NASfitstable['binning'] == 2)
+                                          & NASfitstable['type'].isin(imtype)
+                                          & (NASfitstable['filter'] == filt)]
+        elif 'LIGHT' in imtype:
+            calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
+                                          & (NASfitstable['date'] <= upper_interval)
+                                          & (NASfitstable['binning'] == 2)
+                                          & NASfitstable['type'].isin(imtype)
+                                          & (NASfitstable['object'] == obj)
+                                           # & (NASfitstable['filter'] == filt)
+                                          ]
+        elif 'BIAS' in imtype:
+            calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
+                                          & (NASfitstable['date'] <= upper_interval)
+                                          & (NASfitstable['binning'] == 2)
+                                          & NASfitstable['type'].isin(imtype)]
+            # print(NASfitstable['object'][0])
+        if len(calibtable.index) == 0:
+            dayinterval += 1
+        else:
+            print("day interval of", dayinterval)
+            # print(calibtable)
+            caliblist = []
+            for item in sorted(calibtable['file']):
+                print(item)
+                caliblist.append(item)
+                
+            ### copy the files from the NAS into the output folder 
+            if copy == True:
+                print("output_fold set to", output_fold)
+                trans = input("transfer files?: (y/n)")
+                if trans == 'y' or trans == 'Y':
+                    for item in caliblist:
+                        # print(os.path.join(output_fold, item.split('/')[-1]))
+                        if 'DARK' in imtype:
+                            shutil.copy(item, os.path.join(output_fold, 'extra' + str(exptime) + item.split('/')[-1]))
+                        elif 'FLAT' in imtype:
+                            shutil.copy(item, os.path.join(output_fold, 'extra' + filt + item.split('/')[-1]))
+                        elif 'BIAS' in imtype:
+                            shutil.copy(item, os.path.join(output_fold, 'extra' + '0' + item.split('/')[-1]))
+                        print("copied", item.split('/')[-1])
+            break
 
 
-# lookforcalib(copy=False)
+# lookforcalib_old(copy=True)

@@ -30,7 +30,7 @@ ephemeris = None # necessary not to ask for the target name every time
 
 # ds.raw = os.path.join(ds.raw, "2020T2darktest")
 # ds.reduced = os.path.join(ds.reduced, "2020T2darktest")
-ds.raw = "/home/Mathieu/Documents/TRAPPIST/raw_data/CK20T020/TN/20210403"
+ds.raw = "/home/Mathieu/Documents/TRAPPIST/raw_data/CK17K020/TS/20220426"
 ds.reduced= "/home/Mathieu/Documents/TRAPPIST/reduced_data/CK17K020"
 
 for path, subdirs, files in os.walk(ds.raw):

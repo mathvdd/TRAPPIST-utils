@@ -18,8 +18,8 @@ import get_ephem
 import trap_plot
 
 #started 2022-03-21 TS
-startdate = datetime.datetime.strptime('2022-03-21' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
-enddate = datetime.datetime.strptime('2022-03-28' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
+startdate = datetime.datetime.strptime('2022-04-16' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
+enddate = datetime.datetime.strptime('2022-04-27' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
 obs = 'TS'
 
 ########################
@@ -202,7 +202,7 @@ for path in list_to_reduce:
         while True:
             haserinput_warning, narrowcontlist = trap_reduction.check_haser_continuum(ds.tmpout)
             if haserinput_warning == True:
-                print("no BC filter")
+                print("no or more than one BC filter")
                 print("narrowband continuum filters:")
                 print(str(narrowcontlist))
                 # with open(os.path.join(ds.tmpout, 'nohaser'),'w') as nohaserfile:

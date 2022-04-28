@@ -288,6 +288,11 @@ def clafrhocalcext(iraf_dir, pixsize, solocomete, soloinitx, soloinity, soloinit
     
     Parameters:
         iraf_dir (str): path to the home iraf directory
+        pixsize (float): size of the image pixel
+        solocomete ()
+        soloinitx
+        soloinity
+        soloinitcboxsize
     """
     print('launch afrhocalext.cl')
     with open(os.path.join(iraf_dir, 'wrapper_afrhocalcext.cl'), 'w') as f:
