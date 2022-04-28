@@ -409,7 +409,6 @@ def plot_centering_profile(input_dir, output_dir=None):
     
     plt.style.use(astropy_mpl_style)
     for path, subdirs, files in os.walk(input_dir):
-        output_dir = path if output_dir is None else output_dir
         for file in files:
             if 'centerlist' in file:
                 centerfile = os.path.join(path, file)
@@ -420,13 +419,16 @@ def plot_centering_profile(input_dir, output_dir=None):
                         fitspath = os.path.join(path, fitsname)
                         radpath = os.path.join(path, 'rad_' + fitsname + '.txt')
                     elif os.path.isfile(os.path.join(path[:-9],'images', fitsname)):
-                        print('found in the reduced  images folder?')
+                        # print('found in the reduced images folder')
                         fitspath = os.path.join(path[:-9],'images', fitsname)
                         radpath = os.path.join(path[:-9], 'profiles', 'rad_' + fitsname + '.txt')
                     else:
                         print('error finding fits file')
                     
-                    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14,6))
+                    
+                    save_dir = path if output_dir is None else output_dir
+                    # print(path, save_dir)
+                    
                     filt = row[5]
                     ctnmethod = row[10]
                     
@@ -438,38 +440,55 @@ def plot_centering_profile(input_dir, output_dir=None):
                     pixelcropping = 350 #remove border of the image
                     
                     image_data = fits.getdata(fitspath, ext=0)
-                    circ5arcsec = Circle((xcent-pixelcropping,ycent-pixelcropping),radius = 5/pixsize, alpha=0.5, fill=False, color='red', label='5arcsec')
-                    arcsec10k = 206265*10000/(delta*1.5*100000000)
-                    circ10k = Circle((xcent-pixelcropping,ycent-pixelcropping),radius = arcsec10k/pixsize, alpha=0.5, fill=False, color='blue', label='10k km')
-                    ax1.add_patch(circ5arcsec)
-                    ax1.add_patch(circ10k)
-                    ax1.axis('off')
-                    ax1.legend()
+                    # circ5arcsec = Circle((xcent-pixelcropping,ycent-pixelcropping),radius = 5/pixsize, alpha=0.5, fill=False, color='red', label='5arcsec')
+                    # arcsec10k = 206265*10000/(delta*1.5*100000000)
+                    # circ10k = Circle((xcent-pixelcropping,ycent-pixelcropping),radius = arcsec10k/pixsize, alpha=0.5, fill=False, color='blue', label='10k km')
+                    
                     
                     # plotting radial profile
+                    
                     df = pd.read_csv(radpath, header=None, sep="\s+")
-                    ax2.plot(df[2-1][:40], df[4-1][:40])
-                    ax2.axvline(x=5/pixsize,color='red', alpha=0.5, linestyle='--')
-                    ax2.axvline(x=arcsec10k/pixsize,color='blue', alpha=0.5, linestyle='--')
-                    ax2.set_ylabel('Median flux (ADU/s)')
-                    ax2.set_xlabel('Distance from the nucleus (pixel)')
                 
                     # add this because savefig can bug after imshow with lognorm
+
+                    def plot_this_thing():
+                        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14,6))
+                        circ5arcsec = Circle((xcent-pixelcropping,ycent-pixelcropping),radius = 5/pixsize, alpha=0.5, fill=False, color='red', label='5arcsec')
+                        arcsec10k = 206265*10000/(delta*1.5*100000000)
+                        circ10k = Circle((xcent-pixelcropping,ycent-pixelcropping),radius = arcsec10k/pixsize, alpha=0.5, fill=False, color='blue', label='10k km')
+                        
+                        ax1.add_patch(circ5arcsec)
+                        ax1.add_patch(circ10k)
+                        ax1.axis('off')
+                        ax1.legend()
+                        ax2.plot(df[2-1][:40], df[4-1][:40])
+                        ax2.axvline(x=5/pixsize,color='red', alpha=0.5, linestyle='--')
+                        ax2.axvline(x=arcsec10k/pixsize,color='blue', alpha=0.5, linestyle='--')
+                        ax2.set_ylabel('Median flux (ADU/s)')
+                        ax2.set_xlabel('Distance from the nucleus (pixel)')
+                        return fig, ax1
+                          
                     try:
+                        fig,ax1=plot_this_thing()
+                        
                         plt.suptitle(filt + ' ' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ')\n' + fitsname)
                         ax1.imshow(image_data[pixelcropping:-pixelcropping,pixelcropping:-pixelcropping], cmap='pink', norm=colors.LogNorm(vmin=np.median(image_data), vmax=image_data[int(xcent), int(ycent)]*2))
-                        plt.savefig(os.path.join(output_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
+                        fig.savefig(os.path.join(save_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
                     except:
                         print('ERROR LOGSCALE')
+                        plt.close()
+                        fig,ax1=plot_this_thing()
+                       
                         plt.suptitle(filt + ' ' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ') error logscale\n' + fitsname)
                         ax1.imshow(image_data[pixelcropping:-pixelcropping,pixelcropping:-pixelcropping], cmap='binary')
-                        plt.savefig(os.path.join(output_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
+                        plt.savefig(os.path.join(save_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
                     
                     
                     plt.tight_layout()
                     plt.show()
+                    plt.close()
                     
-# plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/tmpout')
+# plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/reduced_data')
 
 
 def plot_afrho(input_dir, saveplot=''):

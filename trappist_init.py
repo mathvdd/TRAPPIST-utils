@@ -30,8 +30,8 @@ ephemeris = None # necessary not to ask for the target name every time
 
 # ds.raw = os.path.join(ds.raw, "2020T2darktest")
 # ds.reduced = os.path.join(ds.reduced, "2020T2darktest")
-ds.raw = "/home/Mathieu/Documents/TRAPPIST/raw_data/CK21E030/TS/20220425"
-ds.reduced= "/home/Mathieu/Documents/TRAPPIST/reduced_data/CK21E030"
+ds.raw = "/home/Mathieu/Documents/TRAPPIST/raw_data/CK21A010/TS/20220401"
+ds.reduced= "/home/Mathieu/Documents/TRAPPIST/reduced_data/CK21A010"
 
 for path, subdirs, files in os.walk(ds.raw):
     if 'Calibration' not in path and 'Autoflat' not in path and (any('.fits' in file for file in files) or any('.fts' in file for file in files)):
@@ -79,7 +79,7 @@ for path, subdirs, files in os.walk(ds.raw):
         print('--- launching afrhocalcext ---')
         trap_reduction.clafrhocalcext(ds.iraf, pixsize[1], str(0), str(0), str(0), str(0)) #launch a first reduction of all the files by default
         while True:
-            trap_plot.plot_centering(ds.tmpout)
+            trap_plot.plot_centering_profile(ds.tmpout)
             centerlist = pd.read_csv(os.path.join(ds.tmpout, 'centerlist'),header=None, sep=' ',usecols=[0,2,3,5,10], names=['file', 'xcent', 'ycent', 'filt', 'ctnmethod'])
             print(centerlist)
             while True:
