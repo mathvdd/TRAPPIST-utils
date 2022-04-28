@@ -30,8 +30,8 @@ ephemeris = None # necessary not to ask for the target name every time
 
 # ds.raw = os.path.join(ds.raw, "2020T2darktest")
 # ds.reduced = os.path.join(ds.reduced, "2020T2darktest")
-ds.raw = "/home/Mathieu/Documents/TRAPPIST/raw_data/CK17K020/TS/20220426"
-ds.reduced= "/home/Mathieu/Documents/TRAPPIST/reduced_data/CK17K020"
+ds.raw = "/home/Mathieu/Documents/TRAPPIST/raw_data/CK21E030/TS/20220425"
+ds.reduced= "/home/Mathieu/Documents/TRAPPIST/reduced_data/CK21E030"
 
 for path, subdirs, files in os.walk(ds.raw):
     if 'Calibration' not in path and 'Autoflat' not in path and (any('.fits' in file for file in files) or any('.fts' in file for file in files)):

@@ -279,3 +279,19 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
     Returns
     -------
     None.
+
+**plot_centering_profile**(input_dir, output_dir=None):
+
+    Same as plot_centering + a plot of the radial profile
+    Create a png for each image with the centering given by the pipeline at a radius of 5'' and 10 000 km.
+
+    Parameters
+    ----------
+    input_dir : str
+        path of the folder containing the image and centerlist (typicaly tmpout)
+    output_dir : str, optional
+        path for outputting the images. If None, uses input_dir. The default is None.
+
+    Returns
+    -------
+    None.

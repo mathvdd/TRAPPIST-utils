@@ -368,7 +368,6 @@ def plot_centering(input_dir, output_dir=None):
                     
                     try:
                         plt.imshow(image_data[pixelcropping:-pixelcropping,pixelcropping:-pixelcropping], cmap='pink', norm=colors.LogNorm(vmin=np.median(image_data), vmax=image_data[int(xcent), int(ycent)]*2))
-                        plt.savefig(os.path.join(output_dir, fitsname[:-5] + '_centering.png'))
                     except:
                         plt.close()
                         print('ERROR logscale ', fitspath)
@@ -382,12 +381,95 @@ def plot_centering(input_dir, output_dir=None):
                         plt.suptitle(filt + ' ' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ') error logscale')
                         ax.set_title(fitsname)
                         plt.imshow(image_data[pixelcropping:-pixelcropping,pixelcropping:-pixelcropping], cmap='binary')
-                        plt.savefig(os.path.join(output_dir, fitsname[:-5] + '_centering.png'))
+                        
+                    plt.savefig(os.path.join(output_dir, fitsname[:-5] + '_centering.png'))
                     plt.show()
                     # plt.savefig(os.path.join(path, fitsname[:-5] + '.png'))
                     # plt.close()
                     
-# plot_centering('/home/Mathieu/Documents/TRAPPIST/reduced_data/test')
+# plot_centering('/home/Mathieu/Documents/TRAPPIST/tmpout')
+
+def plot_centering_profile(input_dir, output_dir=None):
+    """
+    Same as plot_centering + a plot of the radial profile
+    Create a png for each image with the centering given by the pipeline at a radius of 5'' and 10 000 km.
+
+    Parameters
+    ----------
+    input_dir : str
+        path of the folder containing the image and centerlist (typicaly tmpout)
+    output_dir : str, optional
+        path for outputting the images. If None, uses input_dir. The default is None.
+
+    Returns
+    -------
+    None.
+
+    """
+    
+    plt.style.use(astropy_mpl_style)
+    for path, subdirs, files in os.walk(input_dir):
+        output_dir = path if output_dir is None else output_dir
+        for file in files:
+            if 'centerlist' in file:
+                centerfile = os.path.join(path, file)
+                tab = pd.read_csv(centerfile, header=None, sep="\s+")
+                for index, row in tab.iterrows():
+                    fitsname = row[0]
+                    if os.path.isfile(os.path.join(path, fitsname)):
+                        fitspath = os.path.join(path, fitsname)
+                        radpath = os.path.join(path, 'rad_' + fitsname + '.txt')
+                    elif os.path.isfile(os.path.join(path[:-9],'images', fitsname)):
+                        print('found in the reduced  images folder?')
+                        fitspath = os.path.join(path[:-9],'images', fitsname)
+                        radpath = os.path.join(path[:-9], 'profiles', 'rad_' + fitsname + '.txt')
+                    else:
+                        print('error finding fits file')
+                    
+                    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14,6))
+                    filt = row[5]
+                    ctnmethod = row[10]
+                    
+                    # preparing the centering image
+                    xcent = row[2]
+                    ycent = row[3]
+                    delta = row[8] #distance to the earth
+                    pixsize = row[9]
+                    pixelcropping = 350 #remove border of the image
+                    
+                    image_data = fits.getdata(fitspath, ext=0)
+                    circ5arcsec = Circle((xcent-pixelcropping,ycent-pixelcropping),radius = 5/pixsize, alpha=0.5, fill=False, color='red', label='5arcsec')
+                    arcsec10k = 206265*10000/(delta*1.5*100000000)
+                    circ10k = Circle((xcent-pixelcropping,ycent-pixelcropping),radius = arcsec10k/pixsize, alpha=0.5, fill=False, color='blue', label='10k km')
+                    ax1.add_patch(circ5arcsec)
+                    ax1.add_patch(circ10k)
+                    ax1.axis('off')
+                    ax1.legend()
+                    
+                    # plotting radial profile
+                    df = pd.read_csv(radpath, header=None, sep="\s+")
+                    ax2.plot(df[2-1][:40], df[4-1][:40])
+                    ax2.axvline(x=5/pixsize,color='red', alpha=0.5, linestyle='--')
+                    ax2.axvline(x=arcsec10k/pixsize,color='blue', alpha=0.5, linestyle='--')
+                    ax2.set_ylabel('Median flux (ADU/s)')
+                    ax2.set_xlabel('Distance from the nucleus (pixel)')
+                
+                    # add this because savefig can bug after imshow with lognorm
+                    try:
+                        plt.suptitle(filt + ' ' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ')\n' + fitsname)
+                        ax1.imshow(image_data[pixelcropping:-pixelcropping,pixelcropping:-pixelcropping], cmap='pink', norm=colors.LogNorm(vmin=np.median(image_data), vmax=image_data[int(xcent), int(ycent)]*2))
+                        plt.savefig(os.path.join(output_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
+                    except:
+                        print('ERROR LOGSCALE')
+                        plt.suptitle(filt + ' ' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ') error logscale\n' + fitsname)
+                        ax1.imshow(image_data[pixelcropping:-pixelcropping,pixelcropping:-pixelcropping], cmap='binary')
+                        plt.savefig(os.path.join(output_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
+                    
+                    
+                    plt.tight_layout()
+                    plt.show()
+                    
+# plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/tmpout')
 
 
 def plot_afrho(input_dir, saveplot=''):
@@ -565,9 +647,9 @@ def plot_haser(input_dir, saveplot=''):
 
 # import directory_structure
 # ds = directory_structure.directory_structure()
-# # perihelion = 59406
-# input_path = os.path.join(ds.reduced, "CK17K020")
-# savepath = os.path.join(ds.reduced, "CK17K020",'plots')
+# perihelion = 59406
+# input_path = os.path.join(ds.reduced, "CK21E030")
+# savepath = os.path.join(ds.reduced, "CK21E030",'plots')
 
 # plot_afrho(input_dir=input_path, saveplot=savepath)
 # plot_haser(input_dir=input_path, saveplot=savepath)
