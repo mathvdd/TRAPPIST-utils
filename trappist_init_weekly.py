@@ -135,9 +135,14 @@ for path in list_to_reduce:
         if dark_warning == True:
             input("press enter")
         print('--- generating ephemeris ---')
+        # changing the comet name to make it a good input for Horizons
+        if (len(comet) == 8) and (comet[0:2] + comet[4] + comet[6] == 'CK00'):
+            comet_name = '20' + comet[2:4] + ' ' + comet[5] + comet[7]
+        else:
+            comet_name = comet
         ephemeris = get_ephem.ephemeris()
         ephemeris.retrieve_param_from_fits(ds.tmpout)
-        ephemeris.query_input(unique_target=False, target=comet)
+        ephemeris.query_input(unique_target=False, target=comet_name)
         ephemeris.generate_ephem_files(ds.tmpout)
         
         print('--- generating calib file ---')
