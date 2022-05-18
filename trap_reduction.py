@@ -429,7 +429,7 @@ def check_haser_continuum(tmpout):
     # narrowcontlist = fitslist.loc[(fitslist.type == 'Light Frame') & fitslist.filt.isin(['BC', 'RC', 'GC', 'UC'])]
     narrowcontlist = fitslist.loc[fitslist.type.isin(['Light Frame', 'LIGHT'])
                                   & fitslist.filt.isin(['BC', 'RC', 'GC', 'UC'])
-                                  & ~fitslist.imfile(['coms'])]
+                                  & fitslist.file.str.contains('TRAP')]
     nb_BC = len(narrowcontlist.loc[fitslist.filt == 'BC'])
     if nb_BC == 1:
         print('BC image found')
