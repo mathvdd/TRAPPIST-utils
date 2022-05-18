@@ -118,26 +118,26 @@ def check_calib(fitstable, filt_list=filt_list):
         if row['nb_flat'] == 0:
             print("WARNING: no flat for", row['file'])
             warning_flag = True
-        elif row['nb_flat'] < 3:
-            print("WARNING: less than 3 flats for", row['file'])
+        elif row['nb_flat'] < 5:
+            print("WARNING: less than 5 flats for", row['file'])
             warning_flag = True
         if row['nb_dark'] == 0:
             print("WARNING: no dark (",row['exptime'],") for", row['file'])
             warning_flag = True
-        elif row['nb_dark'] < 3:
-            print("WARNING: less than 3 darks (",row['exptime'],") for", row['file'])
+        elif row['nb_dark'] < 5:
+            print("WARNING: less than 5 darks (",row['exptime'],") for", row['file'])
             warning_flag = True
         if row['nb_bias'] == 0:
             print("WARNING: no bias for", row['file'])
             warning_flag = True
-        elif row['nb_bias'] < 3:
-            print("WARNING: less than 3 bias for", row['file'])
+        elif row['nb_bias'] < 5:
+            print("WARNING: less than 5 bias for", row['file'])
             warning_flag = True
     if nb_flat_dark == 0:
         print("WARNING: no darks (15s) for flats")
         warning_flag = True
-    elif nb_flat_dark < 3:
-        print("WARNING: less than 3 darks (15s) for flats")
+    elif nb_flat_dark < 5:
+        print("WARNING: less than 5 darks (15s) for flats")
         warning_flag = True
         
     # check if there is a BC filter for narrow bands
@@ -427,7 +427,9 @@ def check_haser_continuum(tmpout):
     warning_flag = False
     fitslist = get_fitstable(tmpout)
     # narrowcontlist = fitslist.loc[(fitslist.type == 'Light Frame') & fitslist.filt.isin(['BC', 'RC', 'GC', 'UC'])]
-    narrowcontlist = fitslist.loc[fitslist.type.isin(['Light Frame', 'LIGHT']) & fitslist.filt.isin(['BC', 'RC', 'GC', 'UC'])]
+    narrowcontlist = fitslist.loc[fitslist.type.isin(['Light Frame', 'LIGHT'])
+                                  & fitslist.filt.isin(['BC', 'RC', 'GC', 'UC'])
+                                  & ~fitslist.imfile(['coms'])]
     nb_BC = len(narrowcontlist.loc[fitslist.filt == 'BC'])
     if nb_BC == 1:
         print('BC image found')

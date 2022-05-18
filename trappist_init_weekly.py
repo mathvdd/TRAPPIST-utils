@@ -18,8 +18,9 @@ import get_ephem
 import trap_plot
 
 #started 2022-03-21 TS
-startdate = datetime.datetime.strptime('2022-04-16' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
-enddate = datetime.datetime.strptime('2022-04-27' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
+# 2022 04 28
+startdate = datetime.datetime.strptime('2022-05-05' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
+enddate = datetime.datetime.strptime('2022-05-15' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
 obs = 'TS'
 
 ########################
@@ -147,7 +148,7 @@ for path in list_to_reduce:
         print('--- launching afrhocalcext ---')
         trap_reduction.clafrhocalcext(ds.iraf, pixsize[1], str(0), str(0), str(0), str(0)) #launch a first reduction of all the files by default
         while True:
-            trap_plot.plot_centering(ds.tmpout)
+            trap_plot.plot_centering_profile(ds.tmpout)
             centerlist = pd.read_csv(os.path.join(ds.tmpout, 'centerlist'),header=None, sep=' ',usecols=[0,2,3,5,10], names=['file', 'xcent', 'ycent', 'filt', 'ctnmethod'])
             print(centerlist)
             while True:

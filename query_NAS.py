@@ -92,7 +92,7 @@ def NAS_build(NAS_path, export_path, keyword=''):
 
 # query("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.txt")
 # query("/NASTS/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS1_query.txt")
-# NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202204')
+# NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202205')
 # queryZ("/NASTN/Data_TrappistNord/ACP Astronomy/Images")
     
 def queryZ(NAS_path):
@@ -441,11 +441,11 @@ def lookforcalib_old(copy=True):
     
     ### uncomment line bellow if querying for a light image
     # imtype = ['LIGHT', 'Light Frame']
-    obj = "CK19T040" #target name in the fits header. only for lights and for the output path
+    obj = "CK22E030" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
     imtype = ['DARK', 'Dark Frame']
-    exptime = 1500 #exposure time. only for darks
+    exptime = 240 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
     # imtype = ['FLAT', 'Flat Frame']
@@ -454,7 +454,7 @@ def lookforcalib_old(copy=True):
     ### uncomment line bellow if querying for bias frames
     # imtype = ['BIAS', 'Bias Frame']
     
-    night = (2022,4,26) ### set the observation night
+    night = (2022,5,10) ### set the observation night
     NASfitstable = loadcsvtable("/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.txt") ### path to the indexed database
     # output_fold = "/home/Mathieu/Documents/TRAPPIST/raw_data/2020T2/TS/20210703/Calibration" ### path to the output folder
     subf_year = str(night[0])
@@ -472,7 +472,7 @@ def lookforcalib_old(copy=True):
     ####################################
     
     obsnight = pd.Timestamp(year=night[0], month=night[1], day=night[2], hour=23, minute=59)
-    dayinterval = 0
+    dayinterval = 10
     while True:
         lower_interval = obsnight - datetime.timedelta(days = dayinterval, hours = 12)
         upper_interval = obsnight + datetime.timedelta(days = dayinterval, hours = 12)
@@ -529,4 +529,4 @@ def lookforcalib_old(copy=True):
             break
 
 
-# lookforcalib_old(copy=True)
+lookforcalib_old(copy=True)
