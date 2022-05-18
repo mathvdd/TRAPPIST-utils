@@ -472,7 +472,7 @@ def lookforcalib_old(copy=True):
     ####################################
     
     obsnight = pd.Timestamp(year=night[0], month=night[1], day=night[2], hour=23, minute=59)
-    dayinterval = 10
+    dayinterval = 0
     while True:
         lower_interval = obsnight - datetime.timedelta(days = dayinterval, hours = 12)
         upper_interval = obsnight + datetime.timedelta(days = dayinterval, hours = 12)
@@ -529,4 +529,4 @@ def lookforcalib_old(copy=True):
             break
 
 
-lookforcalib_old(copy=True)
+# lookforcalib_old(copy=True)
