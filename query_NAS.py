@@ -202,7 +202,7 @@ def check_objects_names(startdate, enddate, NASfitstable):
     """
     objects_table = NASfitstable.loc[(NASfitstable['start_night'] >= startdate)
                                 & (NASfitstable['start_night'] <= enddate)
-                                & (NASfitstable['type'] == 'LIGHT')]
+                                & (NASfitstable['type'].isin(['LIGHT', 'Light Frame']))]
     objects_list = objects_table['object'].drop_duplicates().values.tolist()
     return objects_list
     
