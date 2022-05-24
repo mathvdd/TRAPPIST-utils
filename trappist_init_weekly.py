@@ -145,6 +145,8 @@ for path in list_to_reduce:
         # changing the comet name to make it a good input for Horizons
         if (len(comet) == 8) and (comet[0:2] + comet[4] + comet[6] == 'CK00'):
             comet_name = '20' + comet[2:4] + ' ' + comet[5] + comet[7]
+        elif (len(comet) == 5) and (comet[0:2] + comet[-1] == '00P')
+            comet_name = comet[3:]
         else:
             comet_name = comet
         ephemeris = get_ephem.ephemeris()
