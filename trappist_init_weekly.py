@@ -48,6 +48,7 @@ while True:
     inlist = []
     outlist = []
     for obj in objects_names:
+        print(obj)
         if obj in perihelions:
             if (len(comets) == 0):
                 inlist.append(obj)
