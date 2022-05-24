@@ -22,7 +22,7 @@ import trap_plot
 startdate = datetime.datetime.strptime('2022-01-05' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
 enddate = datetime.datetime.strptime('2022-05-15' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
 obs = 'TN'
-comets = ['19P', 'CK19L030'] # list of comets to take into account. set empty to take all 
+comets = ['0019P', 'CK19L030'] # list of comets to take into account. set empty to take all 
 
 ########################
 
@@ -48,7 +48,6 @@ while True:
     inlist = []
     outlist = []
     for obj in objects_names:
-        print(obj)
         if obj in perihelions:
             if (len(comets) == 0):
                 inlist.append(obj)
