@@ -465,8 +465,8 @@ def generate_haserinput(tmpout, fc=fc, fz=0):
     
     #behaviour depending on the number of BC images in the folder
     if len(BCtable) == 1:
-        print('selecting the only BC file: ', BCtable.iloc[0]['file'])
-        cont_file = BCtable.iloc[0]['file']
+        print('selecting the only BC file: ', BCtable.iloc[[0]]['file'])
+        cont_file = BCtable.iloc[[0]]['file']
     elif len(BCtable) == 0:
         print("No BC images found.")
         NBcont = filelist.loc[filelist.filt.isin(['BC', 'RC', 'GC', 'UC'])]
@@ -484,7 +484,7 @@ def generate_haserinput(tmpout, fc=fc, fz=0):
                     warning_flag = True
                     return warning_flag
                 elif isinstance(inp, int) and (inp <= len(NBcont)-1) and (inp >=0):
-                    cont_file = NBcont.iloc[inp]['file']
+                    cont_file = NBcont.iloc[[inp]]['file']
                     break
                 else:
                     print('wrong input')
@@ -506,7 +506,7 @@ Alternatively, select the index of the BC image to use: """)
                 cont_file = "BC_CLOSEST_DATE"
                 break
             elif isinstance(inp, int) and (inp <= len(BCtable)-1) and (inp >=0):
-                cont_file = BCtable.iloc[inp]['file']
+                cont_file = BCtable.iloc[[inp]]['file']
                 break
             else:
                 print('wrong input')

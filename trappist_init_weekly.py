@@ -161,8 +161,8 @@ for path in list_to_reduce:
         pixsize = trap_reduction.set_pixsize_in_clafrhocalcext(fitstable)
         print('--- launching afrhocalcext ---')
         trap_reduction.clafrhocalcext(ds.iraf, pixsize[1], str(0), str(0), str(0), str(0)) #launch a first reduction of all the files by default
+        trap_plot.plot_centering_profile(ds.tmpout)
         while True:
-            trap_plot.plot_centering_profile(ds.tmpout)
             centerlist = pd.read_csv(os.path.join(ds.tmpout, 'centerlist'),header=None, sep=' ',usecols=[0,2,3,5,10], names=['file', 'xcent', 'ycent', 'filt', 'ctnmethod'])
             print(centerlist)
             while True:
@@ -203,10 +203,12 @@ for path in list_to_reduce:
                     print('wrong input')
             if solocomete == True:
                 trap_reduction.clafrhocalcext(ds.iraf, pixsize[1], FILE, str(XCENTER), str(YCENTER), str(BOXSIZE))
+                trap_plot.plot_centering_profile(ds.tmpout, solocomet=True)
                 continue
             if inp == 'r' or inp == 'R':
                 print('relaunching afrhocalcext')
                 trap_reduction.clafrhocalcext(ds.iraf, pixsize[1], str(0), str(0), str(0), str(0))
+                trap_plot.plot_centering_profile(ds.tmpout)
                 continue
             elif inp == 'b' or inp == 'B':
                 print('continuing script')

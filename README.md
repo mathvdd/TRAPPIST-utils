@@ -13,7 +13,7 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 **renameftsfits**(raw_path):
 
     Rename 'fts' into 'fits'
-    
+
     Parameters:
         raw_path (str): path to the folder containing the fits files (subfolders will be affected as well)
 
@@ -21,41 +21,41 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 
 
     Rename fits files to the trappist format and copy them to the tmpdata folder
-    
+
     Parameters:
         raw_path (str): path to the raw file folder
         tmpdata_dir (str): path to the directory where the files are to be copied
 
 
-    
+
 **check_calib**(fitstable, filt_list=filt_list):
 
 
     Check whether all necessary calibration are available in the directory before recduction
     Return False if there is a warning flag
-    
+
     Parameters:
         fitstable: table with fits file parameters (see get_fitstable())
         filt_list, optional: list of filters to take into consideration. Default is ['OH','CN','C2','C3','NH','BC','RC','GC','R','I', 'B', 'V']
 
 
- 
+
 **get_fitstable**(raw_dir):
 
 
     Scan a directory to get a table with relevant infos from the fits headers
     Return the table
-    
+
     Parameters:
         raw_dir (str): path to the directory to scan
 
 
- 
+
 **generate_ZP**(calib_dir, ephemeris, fitstable, ZPparams=ZP):
 
 
     Generate calib.dat file with closest zero points
-    
+
     Parameters:
         calib_dir (str): path to the directory containing zero point files. calib.dat will be copied there
         ephemeris: ephemeris object (see get_ephem.py)
@@ -63,21 +63,21 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
         ZPparams, optional: table containing constant values in the calib.dat file. default should be fine at all time
 
 
- 
+
 **clreduce**(iraf_dir):
 
 
     Wrapper to launch iraf progtrap3 in python
-    
+
     Parameters:
         iraf_dir (str): path to the home iraf directory
 
 
- 
+
 **clafrhocalcext**(iraf_dir, pixsize, solocomete, soloinitx, soloinity, soloinitcboxsize):
 
     Wrapper to launch iraf afrhocalcext in python
-    
+
     Parameters:
         iraf_dir (str): path to the home iraf directory
         pixsize (float): size of the image pixel
@@ -98,22 +98,23 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
         tmpout_dir (str): path to the directory to check
 
 
- 
+
 **check_haser_continuum**(tmpout):
 
 
+    Obscelete
     Check if there is a BC image for duct continuum correction
-    
+
     Parameters:
         tmpout (str): directory to check
 
 
-    
+
 **generate_haserinput**(tmpout, fc=fc, fz=0):
 
 
-    generate the haserinput file for the iraf script.
-    
+    generate the haserinput file for the iraf script. Select the BC image. Gives a warning on error
+
     Parameters:
         tmpout (str): working directory
         fc (dic, optional): dictionnaru containing the fc for each filter. See file for default
@@ -125,7 +126,7 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 
 
     Wrapper to launch iraf hasercalctest in python
-    
+
     Parameters:
         iraf_dir (str): path to the home iraf directory
 
@@ -135,7 +136,7 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 
 
     Clean the afrhotot files to keep only the last computed value for each image
-    
+
     Parameters:
         direc (str): path to the working directory
 
@@ -146,13 +147,13 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
     Initiate an ephemeris class with defaults parameters to query NASA Horizons
 
 
-    
+
 **ephemeris.retrieve_param_from_fits**(self, fits_dir):
 
 
         Open the first fits files in 'fits_dir' starting with TRAP to set the observatory in the ephemeris class
         Open all the fits files in 'fits_dir' to get the dates and set the ephemeris range in the ephemeris class
-        
+
         Parameters:
             fits_dir (str): path to the directory
 
@@ -170,7 +171,7 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 
         Query for the object name and launch query_horizons()
         Loop until a query is successful, otherwise ask for a new input
-        
+
         Parameters:
             unique_target (str, optional, default=False): set to True to remember the name of the target of the first successful query.
                 Useful for reducing different night with the same object.
@@ -184,7 +185,7 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 
         Generates ephem.brol and eph.dat file in 'output_dir'.
         Dates are expressed in MJD at the moment but can be changed in the script (then also need to be changed in afrhocalcext)
-        
+
         Parameters:
             output_dir (str): path to the output directory
 
@@ -196,7 +197,7 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 
     Generate an indexed database of .fits and .fts file in the NAS of binning 2, containing keywords from the fits headers
     An indexed database can be queryed much faster than going through all the files each time
-    
+
     Parameters
     ----------
     NAS_path : str
@@ -217,7 +218,7 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 
     Makes a list of all the objects in a table between given dates
     if the dates are at 12:00, will include the startdate as starting night but not the enddate as starting night
-    
+
     Parameters:
         startdate (datetime): starting time
         enddate (datetime): ending time
@@ -233,7 +234,7 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
     Night by night, look for the calibration files for a given dayinterval.
     Download the lights and found calibs and put them in a date folder.
     Date interval can be given to select data betwenn two starting nights intervals
-    
+
     Parameters:
         obj_name (str): object name in the NASfitstable
         NASfitstable (pandas dataframe): indexed table-style table
@@ -247,7 +248,7 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 
 
     Look for a specific set of file the closest to the observation file in the database and download it. By default look for the files closest to the observation night
-    
+
     Parameters:
         NASfitstable (pandas dataframe): indexed-type database, can be imported with loadcsvtable()
         imtype (str): image type. can take values of 'light', 'dark', 'flat' or 'bias'

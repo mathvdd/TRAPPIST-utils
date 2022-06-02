@@ -389,7 +389,7 @@ def plot_centering(input_dir, output_dir=None):
                     
 # plot_centering('/home/Mathieu/Documents/TRAPPIST/tmpout')
 
-def plot_centering_profile(input_dir, output_dir=None):
+def plot_centering_profile(input_dir, output_dir=None, solocomet=False):
     """
     Same as plot_centering + a plot of the radial profile
     Create a png for each image with the centering given by the pipeline at a radius of 5'' and 10 000 km.
@@ -400,6 +400,8 @@ def plot_centering_profile(input_dir, output_dir=None):
         path of the folder containing the image and centerlist (typicaly tmpout)
     output_dir : str, optional
         path for outputting the images. If None, uses input_dir. The default is None.
+    solocomet: boolean, optional
+        if solocomet = True, only the last reduced image (the last in the centerlist) will be replotted
 
     Returns
     -------
@@ -413,6 +415,8 @@ def plot_centering_profile(input_dir, output_dir=None):
             if 'centerlist' in file:
                 centerfile = os.path.join(path, file)
                 tab = pd.read_csv(centerfile, header=None, sep="\s+")
+                if solocomet == True:
+                    tab = tab.iloc[[-1]]
                 for index, row in tab.iterrows():
                     fitsname = row[0]
                     if os.path.isfile(os.path.join(path, fitsname)):
@@ -424,6 +428,8 @@ def plot_centering_profile(input_dir, output_dir=None):
                         radpath = os.path.join(path[:-9], 'profiles', 'rad_' + fitsname + '.txt')
                     else:
                         print('error finding fits file')
+                        print(fitsname)
+                        input('Acknowledge press enter to continue')
                     
                     
                     save_dir = path if output_dir is None else output_dir
