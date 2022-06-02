@@ -12,6 +12,7 @@ import csv
 import pandas as pd
 from astropy.io import fits
 import shutil
+import datetime
 # Add a rename fts to fits for TS images
 #Add check if all flats are there
 
@@ -417,6 +418,7 @@ def generate_haserinput_from_reduced(rad_dir, haser_dir, copy_rad = False, fc=fc
 
 def check_haser_continuum(tmpout):
     """
+    Obscelete
     Check if there is a BC image for duct continuum correction
     
     Parameters:
@@ -445,34 +447,107 @@ def check_haser_continuum(tmpout):
 
 def generate_haserinput(tmpout, fc=fc, fz=0):
     """
-    generate the haserinput file for the iraf script.
+    generate the haserinput file for the iraf script. Select the BC image. Gives a warning on error
     
     Parameters:
         tmpout (str): working directory
         fc (dic, optional): dictionnaru containing the fc for each filter. See file for default
         fz (int, optional): value of fz. default =0
     """
+    warning_flag = False
+    
     output_list = []
     fitstable = get_fitstable(tmpout)
     filelist = fitstable.loc[fitstable['type'].isin(['LIGHT', 'Light Frame']) &
                              fitstable.file.str.contains('TRAP')]
     BCtable = filelist.loc[(filelist['filt'] == 'BC')]
-
+    BCtable.reset_index(drop=True, inplace=True)
+    
+    #behaviour depending on the number of BC images in the folder
+    if len(BCtable) == 1:
+        print('selecting the only BC file: ', BCtable.iloc[0]['file'])
+        cont_file = BCtable.iloc[0]['file']
+    elif len(BCtable) == 0:
+        print("No BC images found.")
+        NBcont = filelist.loc[filelist.filt.isin(['BC', 'RC', 'GC', 'UC'])]
+        NBcont.reset_index(drop=True, inplace=True)
+        if len(NBcont) > 0:
+            print("other NB continuum images available:")
+            print(NBcont)
+            while True:
+                inp = input('enter the index of the NB continuum image to use for dust subtraction, or b to bypass: ')
+                try:
+                    inp = int(inp)
+                except:
+                    inp = inp
+                if (inp == 'b') or (inp == 'B'):
+                    warning_flag = True
+                    return warning_flag
+                elif isinstance(inp, int) and (inp <= len(NBcont)-1) and (inp >=0):
+                    cont_file = NBcont.iloc[inp]['file']
+                    break
+                else:
+                    print('wrong input')
+                    continue
+        else:
+            print('No other NB images found')
+            warning_flag = True
+            return warning_flag
+    elif len(BCtable) > 1:
+        print('More than one BC image found')
+        while True:
+            inp = input("""Input "c" to use the closest BC image in time for each image.
+Alternatively, select the index of the BC image to use: """)
+            try:
+                inp = int(inp)
+            except:
+                inp = inp
+            if (inp == 'c') or (inp == 'C'):
+                cont_file = "BC_CLOSEST_DATE"
+                break
+            elif isinstance(inp, int) and (inp <= len(BCtable)-1) and (inp >=0):
+                cont_file = BCtable.iloc[inp]['file']
+                break
+            else:
+                print('wrong input')
+                continue
+                           
     for index, row in filelist.iterrows():
         if row['filt'] in fc:
-            output_list.append(row['file'] + '.txt'
-                + ' '
-                + 'rad_' + BCtable.iloc[0]['file'] + '.txt'
-                + ' ' +
-                str(fc.get(row['filt']))
-                + ' ' +
-                str(fz))
+            if cont_file != "BC_CLOSEST_DATE":
+                output_list.append(row['file'] + '.txt'
+                    + ' '
+                    + 'rad_' + cont_file + '.txt'
+                    + ' ' +
+                    str(fc.get(row['filt']))
+                    + ' ' +
+                    str(fz))
+            else:
+                delta = datetime.timedelta(days=9999)
+                date_NB = datetime.datetime.strptime(row['file'], 'TRAP.%Y-%m-%dT%H:%M:%S.fits')
+                for indexb, rowb in BCtable.iterrows():
+                    date_BC = datetime.datetime.strptime(rowb['file'], 'TRAP.%Y-%m-%dT%H:%M:%S.fits')
+                    if abs(date_NB - date_BC) < delta:
+                        delta = abs(date_NB - date_BC)
+                        BC_file = rowb['file']
+                output_list.append(row['file'] + '.txt'
+                    + ' '
+                    + 'rad_' + BC_file + '.txt'
+                    + ' ' +
+                    str(fc.get(row['filt']))
+                    + ' ' +
+                    str(fz))
+                
     if len(output_list) > 0:
         file_path = os.path.join(tmpout, 'inputhaser-BC')
         print("creating " + file_path)
         with open(file_path, 'w') as f:
             f.write('\n'.join(output_list))
-            f.write('\n') #need a blank end line for hasercalcext to work
+            f.write('\n') #need a blank end line for hasercalcext to work    
+    else:
+        print('No content to put in inputhaser file')
+        warning_flag = True
+        return warning_flag
 
     
     

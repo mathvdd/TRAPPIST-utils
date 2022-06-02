@@ -131,24 +131,24 @@ for path, subdirs, files in os.walk(ds.raw):
             
         print('--- initiating haserinput ---')
         while True:
-            haserinput_warning, narrowcontlist = trap_reduction.check_haser_continuum(ds.tmpout)
+            haserinput_warning = trap_reduction.generate_haserinput(ds.tmpout)
             if haserinput_warning == True:
-                print("no BC filter")
-                print("narrowband continuum filters:")
-                print(str(narrowcontlist))
-                # with open(os.path.join(ds.tmpout, 'nohaser'),'w') as nohaserfile:
-                #     nohaserfile.write("no BC filter\n")
-                #     nohaserfile.write("narrowband continuum filters:\n")
-                #     nohaserfile.write(str(narrowcontlist))
-                # while True:
-                #     skip_haser = input('Skip hasercalcext? [y/n]')
-                #     if skip_haser in ['y','Y']:
-                #         print('skipping hasercalctest')
-                #         break
+                while True:
+                    inp = input('regenerating haserinput (r) or bypass (b)? [r/b]')
+                    if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B':
+                        break
+                if inp == 'r' or inp == 'R':
+                    print('relaunching hasercalctest')
+                    continue
+                elif inp == 'b' or inp == 'B':
+                    print('continuing script')
+                    break
             else:
-                trap_reduction.generate_haserinput(ds.tmpout)
-                print('--- launching hasercalctest ---')
-                trap_reduction.clhasercalctest(ds.iraf, 'yes')
+                break
+            
+        print('--- launching hasercalctest ---')
+        while True:
+            trap_reduction.clhasercalctest(ds.iraf, 'yes')
             while True:
                 inp = input('relaunch hasercalctext (r) or bypass (b)? [r/b]')
                 if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B':
@@ -159,6 +159,7 @@ for path, subdirs, files in os.walk(ds.raw):
             elif inp == 'b' or inp == 'B':
                 print('continuing script')
                 break
+            
             
         # save the files in the reduced folder
         print('--- initiating reduced directory structure ---')

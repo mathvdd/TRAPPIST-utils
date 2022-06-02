@@ -19,10 +19,10 @@ import trap_plot
 
 #started 2022-03-21 TS
 # 2022 04 28
-startdate = datetime.datetime.strptime('2022-02-12' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
-enddate = datetime.datetime.strptime('2022-05-15' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
+startdate = datetime.datetime.strptime('2022-02-01' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
+enddate = datetime.datetime.strptime('2022-02-02' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
 obs = 'TN'
-comets = ['0019P', 'CK19L030'] # list of comets to take into account. set empty to take all 
+comets = ['0019P'] # list of comets to take into account. set empty to take all 
 
 ########################
 
@@ -215,24 +215,24 @@ for path in list_to_reduce:
             
         print('--- initiating haserinput ---')
         while True:
-            haserinput_warning, narrowcontlist = trap_reduction.check_haser_continuum(ds.tmpout)
+            haserinput_warning = trap_reduction.generate_haserinput(ds.tmpout)
             if haserinput_warning == True:
-                print("no or more than one BC filter")
-                print("narrowband continuum filters:")
-                print(str(narrowcontlist))
-                # with open(os.path.join(ds.tmpout, 'nohaser'),'w') as nohaserfile:
-                #     nohaserfile.write("no BC filter\n")
-                #     nohaserfile.write("narrowband continuum filters:\n")
-                #     nohaserfile.write(str(narrowcontlist))
-                # while True:
-                #     skip_haser = input('Skip hasercalcext? [y/n]')
-                #     if skip_haser in ['y','Y']:
-                #         print('skipping hasercalctest')
-                #         break
+                while True:
+                    inp = input('regenerating haserinput (r) or bypass (b)? [r/b]')
+                    if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B':
+                        break
+                if inp == 'r' or inp == 'R':
+                    print('relaunching hasercalctest')
+                    continue
+                elif inp == 'b' or inp == 'B':
+                    print('continuing script')
+                    break
             else:
-                trap_reduction.generate_haserinput(ds.tmpout)
-                print('--- launching hasercalctest ---')
-                trap_reduction.clhasercalctest(ds.iraf, 'yes')
+                break
+            
+        print('--- launching hasercalctest ---')
+        while True:
+            trap_reduction.clhasercalctest(ds.iraf, 'yes')
             while True:
                 inp = input('relaunch hasercalctext (r) or bypass (b)? [r/b]')
                 if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B':
