@@ -681,27 +681,27 @@ def plot_haser(input_dir, saveplot=''):
 # plot_radprof(input_dir=input_path, saveplot=savepath)
 # plot_mag(input_dir=input_path, saveplot='')
 
-# =============================================================================
+# fold = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK19L030/20220201TN/probably_garbage'
 # # fold = '/home/Mathieu/Documents/TRAPPIST/reduced_data/0019P/20220221TN/probably_garbage'
-# fold = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK17K020/20220502TS/probably_garbage'
+# # fold = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK17K020/20220502TS/probably_garbage'
 # tot = pd.read_csv(os.path.join(fold, 'tmpobserv.dat'), header=None, sep="\s+")
 # cont = pd.read_csv(os.path.join(fold, 'tmpobservcont.dat'), header=None, sep="\s+")
 # # model = pd.read_csv(os.path.join(fold, 'tmpmodel.dat'), header=None, sep="\s+")
 # modelA = pd.read_csv(os.path.join(fold, 'tmpmodelA.dat'), header=None, sep="\s+")
 # # plt.plot(np.log10(tot[0][:50]),np.log10(tot[1][:50]))
-# 
+
 # if (tot[0][0] != cont[0][0]) or (tot[0][100] != cont[0][100]):
 #     print('WARNING: x scale may be different for NB and continuum spectrum')
 #     print('difference ratio:')
 #     print((cont[0]- tot[0])/tot[0])
-# 
-# fig = plt.figure(figsize=(12,9))
+
+# fig = plt.figure(figsize=(14,10))
 # ax = fig.gca()
-# 
+
 # xlim1 = 0
 # xlim2 = len(cont)-100
 # ax.set_xlim([np.log10(cont[0][xlim1]), np.log10(cont[0][xlim2])])
-# 
+
 # # need to redefine the limit otherwise the plot does not rescale du to high continuum values outside the plotting limits
 # plt.plot(np.log10(cont[0][:xlim2]),np.log10(cont[1][:xlim2]),label='tmpobservcont.dat')
 # plt.plot(np.log10(tot[0][:xlim2]),np.log10(tot[1][:xlim2]), label='tmpobserv.dat')
@@ -710,8 +710,9 @@ def plot_haser(input_dir, saveplot=''):
 # plt.plot(np.log10(modelA[0]),np.log10(modelA[1]),label='tmpmodelA.dat')
 # plt.axvline(x=3.6,color='black', alpha=0.5, linestyle='--')
 # plt.axvline(x=4.1,color='black', alpha=0.5, linestyle='--')
-# 
+# ax.set_ylabel('Log Flux')
+# ax.set_xlabel('Log rho (km)')
+
 # plt.legend(loc='lower left')
-# =============================================================================
 
 
