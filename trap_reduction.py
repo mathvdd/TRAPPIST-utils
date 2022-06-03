@@ -480,7 +480,7 @@ def generate_haserinput(tmpout, fc=fc, fz=0):
     #behaviour depending on the number of BC images in the folder
     if len(BCtable) == 1:
         print(BCtable.iloc[0])
-        # print('selecting the only BC file: ', BCtable.iloc[[0]]['file'].values[0])
+        print('selecting the only BC file: ', BCtable.iloc[[0]]['file'])
         cont_file = BCtable.iloc[0]['file']
     elif len(BCtable) == 0:
         print("No BC images found.")
