@@ -16,6 +16,8 @@ import datetime
 # Add a rename fts to fits for TS images
 #Add check if all flats are there
 
+conda = True #change this if iraf is not installed in conda
+
 fc = {'OH':5,
       'NH':20,
       'CN':25,
@@ -81,9 +83,13 @@ def clrename(iraf_dir, raw_path):
     with open(os.path.join(iraf_dir, 'wrapper_rename.cl'), 'w') as f:
         f.write('\n'.join(['renamefits ' + raw_path + ' yes',
                       'logout']))
-    os.system('\n'.join(['cd ' + iraf_dir,
-                      'source activate iraf27', #conda activate not working
-                      'cl < wrapper_rename.cl']))
+    if conda == True:
+        os.system('\n'.join(['cd ' + iraf_dir,
+                          'source activate iraf27', #conda activate not working
+                          'cl < wrapper_rename.cl']))
+    else:
+        os.system('\n'.join(['cd ' + iraf_dir,
+                          'cl < wrapper_rename.cl']))
 
 def check_calib(fitstable, filt_list=filt_list):
     """
@@ -267,9 +273,13 @@ def clreduce(iraf_dir):
     with open(os.path.join(iraf_dir, 'wrapper_reduce.cl'), 'w') as f:
         f.write('\n'.join(['progtrap3',
                       'logout']))
-    os.system('\n'.join(['cd ' + iraf_dir,
-                      'source activate iraf27', #conda activate not working
-                      'cl < wrapper_reduce.cl']))
+    if conda == True:
+        os.system('\n'.join(['cd ' + iraf_dir,
+                          'source activate iraf27', #conda activate not working
+                          'cl < wrapper_reduce.cl']))
+    else:
+        os.system('\n'.join(['cd ' + iraf_dir,
+                          'cl < wrapper_reduce.cl']))
     
 def set_pixsize_in_clafrhocalcext(fitstable):
     obs = fitstable.loc[fitstable['type'].isin(['LIGHT','Light Frame']), 'observatory'][0]
@@ -299,9 +309,13 @@ def clafrhocalcext(iraf_dir, pixsize, solocomete, soloinitx, soloinity, soloinit
     with open(os.path.join(iraf_dir, 'wrapper_afrhocalcext.cl'), 'w') as f:
         f.write('\n'.join(['afrhocalcext ' + pixsize + ' ' + solocomete + ' ' + soloinitx + ' ' + soloinity + ' ' + soloinitcboxsize,
                       'logout']))
-    os.system('\n'.join(['cd ' + iraf_dir,
-                      'source activate iraf27', #conda activate not working
-                      'cl < wrapper_afrhocalcext.cl']))
+    if conda == True:
+        os.system('\n'.join(['cd ' + iraf_dir,
+                          'source activate iraf27', #conda activate not working
+                          'cl < wrapper_afrhocalcext.cl']))
+    else:
+        os.system('\n'.join(['cd ' + iraf_dir,
+                          'cl < wrapper_afrhocalcext.cl']))
 
 def check_darks(iraf_dir,tmpout_dir):
     """
@@ -495,6 +509,7 @@ def generate_haserinput(tmpout, fc=fc, fz=0):
             return warning_flag
     elif len(BCtable) > 1:
         print('More than one BC image found')
+        print(BCtable)
         while True:
             inp = input("""Input "c" to use the closest BC image in time for each image.
 Alternatively, select the index of the BC image to use: """)
@@ -645,9 +660,13 @@ def clhasercalctest(iraf_dir, arg='no'):
         elif arg=='no':
             f.write('\n'.join(['hasercalctest no',
                           'logout']))
-    os.system('\n'.join(['cd ' + iraf_dir,
-                      'source activate iraf27', #conda activate not working
-                      'cl < wrapper_hasercalctest.cl']))
+    if conda == True:
+        os.system('\n'.join(['cd ' + iraf_dir,
+                          'source activate iraf27', #conda activate not working
+                          'cl < wrapper_hasercalctest.cl']))
+    else:
+        os.system('\n'.join(['cd ' + iraf_dir,
+                          'cl < wrapper_hasercalctest.cl']))
     
 def clean_afrhotot(direc):
     """

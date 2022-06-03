@@ -292,6 +292,8 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
         path of the folder containing the image and centerlist (typicaly tmpout)
     output_dir : str, optional
         path for outputting the images. If None, uses input_dir. The default is None.
+    solocomet: boolean, optional
+        if solocomet = True, only the last reduced image (the last in the centerlist) will be replotted
 
     Returns
     -------
