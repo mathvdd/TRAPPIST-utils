@@ -298,3 +298,19 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
     Returns
     -------
     None.
+
+**plot_haserprofile**(input_dir, output_dir=None):
+
+    Plot the flux profile for the NB images, the continuum, their difference and the Haser model.
+    Create a png for each NB image.
+
+    Parameters
+    ----------
+    input_dir : str
+        path of the folder containing the image and outputhaser-BC (typicaly tmpout)
+    output_dir : str, optional
+        path for outputting the images. If None, uses input_dir. The default is None.
+
+    Returns
+    -------
+    None.

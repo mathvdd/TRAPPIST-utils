@@ -681,38 +681,85 @@ def plot_haser(input_dir, saveplot=''):
 # plot_radprof(input_dir=input_path, saveplot=savepath)
 # plot_mag(input_dir=input_path, saveplot='')
 
-# fold = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK19L030/20220201TN/probably_garbage'
-# # fold = '/home/Mathieu/Documents/TRAPPIST/reduced_data/0019P/20220221TN/probably_garbage'
-# # fold = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK17K020/20220502TS/probably_garbage'
-# tot = pd.read_csv(os.path.join(fold, 'tmpobserv.dat'), header=None, sep="\s+")
-# cont = pd.read_csv(os.path.join(fold, 'tmpobservcont.dat'), header=None, sep="\s+")
-# # model = pd.read_csv(os.path.join(fold, 'tmpmodel.dat'), header=None, sep="\s+")
-# modelA = pd.read_csv(os.path.join(fold, 'tmpmodelA.dat'), header=None, sep="\s+")
-# # plt.plot(np.log10(tot[0][:50]),np.log10(tot[1][:50]))
+def plot_haserprofile(input_dir, output_dir=None):
+    """
+    Plot the flux profile for the NB images, the continuum, their difference and the Haser model.
+    Create a png for each NB image.
 
-# if (tot[0][0] != cont[0][0]) or (tot[0][100] != cont[0][100]):
-#     print('WARNING: x scale may be different for NB and continuum spectrum')
-#     print('difference ratio:')
-#     print((cont[0]- tot[0])/tot[0])
+    Parameters
+    ----------
+    input_dir : str
+        path of the folder containing the image and outputhaser-BC (typicaly tmpout)
+    output_dir : str, optional
+        path for outputting the images. If None, uses input_dir. The default is None.
+    
+    Returns
+    -------
+    None.
 
-# fig = plt.figure(figsize=(14,10))
-# ax = fig.gca()
-
-# xlim1 = 0
-# xlim2 = len(cont)-100
-# ax.set_xlim([np.log10(cont[0][xlim1]), np.log10(cont[0][xlim2])])
-
-# # need to redefine the limit otherwise the plot does not rescale du to high continuum values outside the plotting limits
-# plt.plot(np.log10(cont[0][:xlim2]),np.log10(cont[1][:xlim2]),label='tmpobservcont.dat')
-# plt.plot(np.log10(tot[0][:xlim2]),np.log10(tot[1][:xlim2]), label='tmpobserv.dat')
-# plt.plot(np.log10(cont[0][:xlim2]),np.log10(tot[1][:xlim2]-cont[1][:xlim2]), label='tot-cont')
-# # plt.plot(np.log10(cont[0][:lim]),np.log10(model[1][:lim]),label='tmpmodel.dat')
-# plt.plot(np.log10(modelA[0]),np.log10(modelA[1]),label='tmpmodelA.dat')
-# plt.axvline(x=3.6,color='black', alpha=0.5, linestyle='--')
-# plt.axvline(x=4.1,color='black', alpha=0.5, linestyle='--')
-# ax.set_ylabel('Log Flux')
-# ax.set_xlabel('Log rho (km)')
-
-# plt.legend(loc='lower left')
-
+    """
+    
+    plt.style.use(astropy_mpl_style)
+    for path, subdirs, files in os.walk(input_dir):
+        for file in files:
+            if 'outputhaser-BC' in file:
+                centerfile = os.path.join(path, file)
+                tab = pd.read_csv(centerfile, header=None, sep="\s+")
+                for index, row in tab.iterrows():
+                    imname = row[0]
+                    filt = row[14]
+                    haserprofile_path = os.path.join(path, 'haserprofile_' + imname)
+                    print(haserprofile_path)
+                    haserprofilecont_path = os.path.join(path, 'haserprofilecont_' + imname)
+                    hasermodel_path = os.path.join(path, 'hasermodel_' + imname)
+                    if os.path.isfile(haserprofile_path) and os.path.isfile(haserprofilecont_path) and os.path.isfile(hasermodel_path):
+                        obs = pd.read_csv(haserprofile_path, header=None, sep="\s+")
+                        cont = pd.read_csv(haserprofilecont_path, header=None, sep="\s+")
+                        model = pd.read_csv(hasermodel_path, header=None, sep="\s+")
+                    else:
+                        print(path)
+                        print(imname)
+                        print('error finding haser profile paths')
+                        input('Acknowledge press enter to quit')
+                        return
+                    
+                    
+                    save_dir = path if output_dir is None else output_dir
+                    
+                    # little warning if scale is not the same but should not be a problem
+                    if (obs[0][0] != cont[0][0]) or (obs[0][2] != cont[0][2]):
+                        print('WARNING: x scale may be different for NB and continuum spectrum')
+                        print('difference ratio:')
+                        print((cont[0]- obs[0])/obs[0])
+                    
+                    # define the plot
+                    fig = plt.figure(figsize=(14,6))
+                    ax = fig.gca()
+                    
+                    # added this so don't see the extreme right of the continuum which is very noisy and mess the scale
+                    xlim1 = 0
+                    xlim2 = len(cont)-100
+                    ax.set_xlim([np.log10(cont[0][xlim1]), np.log10(cont[0][xlim2])])
+                    
+                    # need to redefine the limit otherwise the plot does not rescale du to high continuum values outside the plotting limits
+                    plt.plot(np.log10(obs[0][:xlim2]),np.log10(obs[1][:xlim2]),label='Observed profile')
+                    plt.plot(np.log10(cont[0][:xlim2]),np.log10(cont[1][:xlim2]), label='Continuum profile (scaled)')
+                    plt.plot(np.log10(cont[0][:xlim2]),np.log10(obs[1][:xlim2]-cont[1][:xlim2]), label='Observed-Continuum')
+                    # plt.plot(np.log10(cont[0][:lim]),np.log10(model[1][:lim]),label='tmpmodel.dat')
+                    plt.plot(np.log10(model[0]),np.log10(model[1]),label='Haser model')
+                    plt.axvline(x=3.6,color='black', alpha=0.5, linestyle='--', label='limits for the fit')
+                    plt.axvline(x=4.1,color='black', alpha=0.5, linestyle='--')
+                    ax.set_ylabel('Log Flux (erg cm−2 s−1 arcsec−2)')
+                    ax.set_xlabel('Log rho (km)')
+                    
+                    plt.legend(loc='lower left')
+                    plt.suptitle(imname + ' ' + filt)
+                    
+                    plt.tight_layout()
+                    plt.savefig(os.path.join(save_dir, imname[:-9] + '_haserprofile.png'), bbox_inches='tight')
+                    
+                    plt.show()
+                    plt.close()
+    
+# plot_haserprofile('/home/Mathieu/Documents/TRAPPIST/tmpout', output_dir=None)
 

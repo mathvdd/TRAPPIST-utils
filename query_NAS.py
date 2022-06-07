@@ -444,18 +444,23 @@ def lookforcalib_old(copy=True):
     obj = "0019P" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
-    imtype = ['DARK', 'Dark Frame']
-    exptime = 90 #exposure time. only for darks
+    # imtype = ['DARK', 'Dark Frame']
+    exptime = 45 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
-    # imtype = ['FLAT', 'Flat Frame']
-    filt = 'B' #filter. only for flats
+    imtype = ['FLAT', 'Flat Frame']
+    filt = 'OH' #filter. only for flats
     
     ### uncomment line bellow if querying for bias frames
     # imtype = ['BIAS', 'Bias Frame']
     
     telescope = 'TN'
-    night = (2022,2,1) ### set the observation night
+    night = (2022,2,10) ### set the observation night
+    
+    dayinterval = 0 # starting point for the search
+    
+    ####################################
+    
     NASfitstable = loadcsvtable("/home/Mathieu/Documents/TRAPPIST/raw_data/" + telescope + "_query.txt") ### path to the indexed database
     # output_fold = "/home/Mathieu/Documents/TRAPPIST/raw_data/2020T2/TS/20210703/Calibration" ### path to the output folder
     subf_year = str(night[0])
@@ -470,10 +475,8 @@ def lookforcalib_old(copy=True):
     subfold_name = subf_year + subf_month + subf_day
     output_fold = "/home/Mathieu/Documents/TRAPPIST/raw_data/" + obj + "/" + telescope + "/" +  subfold_name + "/Calibration"
     
-    ####################################
-    
     obsnight = pd.Timestamp(year=night[0], month=night[1], day=night[2], hour=23, minute=59)
-    dayinterval = 5
+    
     while True:
         lower_interval = obsnight - datetime.timedelta(days = dayinterval, hours = 12)
         upper_interval = obsnight + datetime.timedelta(days = dayinterval, hours = 12)

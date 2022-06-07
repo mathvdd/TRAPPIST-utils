@@ -19,8 +19,8 @@ import trap_plot
 
 #started 2022-03-21 TS
 # 2022 04 28
-startdate = datetime.datetime.strptime('2022-02-01' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
-enddate = datetime.datetime.strptime('2022-02-02' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
+startdate = datetime.datetime.strptime('2022-02-10' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
+enddate = datetime.datetime.strptime('2022-02-11' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
 obs = 'TN'
 comets = ['0019P'] # list of comets to take into account. set empty to take all 
 
@@ -94,6 +94,7 @@ for path in list_to_reduce:
     comet = path.split('/')[-3]
     reduced_dir = os.path.join(ds.reduced, comet, raw_dir.split('/')[-1] + obs)
     print("working with", raw_dir)
+    print("reduced dir set as", reduced_dir)
     
     #check if data already reduced
     while True:
@@ -235,6 +236,7 @@ for path in list_to_reduce:
         print('--- launching hasercalctest ---')
         while True:
             trap_reduction.clhasercalctest(ds.iraf, 'yes')
+            trap_plot.plot_haserprofile(ds.tmpout)
             while True:
                 inp = input('relaunch hasercalctext (r) or bypass (b)? [r/b]')
                 if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B':
