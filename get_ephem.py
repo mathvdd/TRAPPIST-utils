@@ -121,7 +121,7 @@ class ephemeris:
         # fetch the data
         self.query_result = requests.get(self.query_url).text.split('\n')
         
-    def query_input(self, unique_target=False, target=None):
+    def query_input(self, unique_target=False, target=None, convert_MPC_Horizon = False):
         """
         Query for the object name and launch query_horizons()
         Loop until a query is successful, otherwise ask for a new input
@@ -131,6 +131,7 @@ class ephemeris:
                 Useful for reducing different night with the same object.
                 Set to False if using nights from different objects.
             target (str, optional, default=None): if different from None, use as initial object name input for query_horizons()
+            convert_MPC_Horizon (boolean, optional, default=False): if is True and target different than None, covert target_name from MPC to NASA Horizon format
         """
         while True:
             if len(sys.argv) > 1 and self.parameters['COMMAND'] == None:
@@ -138,7 +139,17 @@ class ephemeris:
             elif (self.good_query == True) and (unique_target == True):
                 print('Target already defined as ' + self.obj_fullname)
             elif (self.already_quered == False) and (target != None):
-                self.parameters['COMMAND'] = target
+                if convert_MPC_Horizon == True:
+                    if (len(target) == 8) and (target[0:2] + target[5] + target[7] == 'CK00'):
+                        self.parameters['COMMAND'] = '20' + target[2:4] + ' ' + target[4] + target[6]
+                    elif (len(target) == 5) and (target[0:2] + target[-1] == '00P'):
+                        self.parameters['COMMAND'] = target[2:]
+                    elif (len(target) == 5) and (target[0:1] + target[-1] == '0P'):
+                        self.parameters['COMMAND'] = target[1:]
+                    else:
+                        self.parameters['COMMAND'] = target
+                else:
+                    self.parameters['COMMAND'] = target
             else:
                 self.parameters['COMMAND'] = input('Object name: ')
             

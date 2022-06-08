@@ -19,8 +19,8 @@ import trap_plot
 
 #started 2022-03-21 TS
 # 2022 04 28
-startdate = datetime.datetime.strptime('2022-02-02' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
-enddate = datetime.datetime.strptime('2022-02-03' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
+startdate = datetime.datetime.strptime('2022-01-06' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
+enddate = datetime.datetime.strptime('2022-03-05' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
 obs = 'TN'
 comets = ['0019P'] # list of comets to take into account. set empty to take all 
 
@@ -143,16 +143,9 @@ for path in list_to_reduce:
         if dark_warning == True:
             input("press enter")
         print('--- generating ephemeris ---')
-        # changing the comet name to make it a good input for Horizons
-        if (len(comet) == 8) and (comet[0:2] + comet[4] + comet[6] == 'CK00'):
-            comet_name = '20' + comet[2:4] + ' ' + comet[5] + comet[7]
-        elif (len(comet) == 5) and (comet[0:2] + comet[-1] == '00P'):
-            comet_name = comet[2:]
-        else:
-            comet_name = comet
         ephemeris = get_ephem.ephemeris()
         ephemeris.retrieve_param_from_fits(ds.tmpout)
-        ephemeris.query_input(unique_target=False, target=comet_name)
+        ephemeris.query_input(unique_target=False, target=comet, convert_MPC_Horizon=True)
         ephemeris.generate_ephem_files(ds.tmpout)
         
         print('--- generating calib file ---')
