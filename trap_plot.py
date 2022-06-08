@@ -709,13 +709,13 @@ def plot_haserprofile(input_dir, output_dir=None):
                     imname = row[0]
                     filt = row[14]
                     haserprofile_path = os.path.join(path, 'haserprofile_' + imname)
-                    print(haserprofile_path)
                     haserprofilecont_path = os.path.join(path, 'haserprofilecont_' + imname)
                     hasermodel_path = os.path.join(path, 'hasermodel_' + imname)
                     if os.path.isfile(haserprofile_path) and os.path.isfile(haserprofilecont_path) and os.path.isfile(hasermodel_path):
                         obs = pd.read_csv(haserprofile_path, header=None, sep="\s+")
                         cont = pd.read_csv(haserprofilecont_path, header=None, sep="\s+")
                         model = pd.read_csv(hasermodel_path, header=None, sep="\s+")
+                        obscont = obs-cont
                     else:
                         print(path)
                         print(imname)
@@ -723,14 +723,19 @@ def plot_haserprofile(input_dir, output_dir=None):
                         input('Acknowledge press enter to quit')
                         return
                     
+                    # replace negative values by np.nan for the log scale
+                    obscont[obscont < 0] = np.nan
+                    obs[obs < 0] = np.nan
+                    cont[cont < 0] = np.nan
+                    # print(cont.loc[cont[1]<0])
                     
                     save_dir = path if output_dir is None else output_dir
                     
                     # little warning if scale is not the same but should not be a problem
                     if (obs[0][0] != cont[0][0]) or (obs[0][2] != cont[0][2]):
+                        print(imname)
                         print('WARNING: x scale may be different for NB and continuum spectrum')
-                        print('difference ratio:')
-                        print(((cont[0]- obs[0])/obs[0])[0])
+                        print('difference ratio:', ((cont[0]- obs[0])/obs[0])[0])
                     
                     # define the plot
                     fig = plt.figure(figsize=(12,9))
@@ -744,7 +749,7 @@ def plot_haserprofile(input_dir, output_dir=None):
                     # need to redefine the limit otherwise the plot does not rescale du to high continuum values outside the plotting limits
                     plt.plot(np.log10(obs[0][:xlim2]),np.log10(obs[1][:xlim2]),label='Observed profile')
                     plt.plot(np.log10(cont[0][:xlim2]),np.log10(cont[1][:xlim2]), label='Continuum profile (scaled)')
-                    plt.plot(np.log10(cont[0][:xlim2]),np.log10(obs[1][:xlim2]-cont[1][:xlim2]), label='Observed-Continuum')
+                    plt.plot(np.log10(cont[0][:xlim2]),np.log10(obscont[1][:xlim2]), label='Observed-Continuum')
                     # plt.plot(np.log10(cont[0][:lim]),np.log10(model[1][:lim]),label='tmpmodel.dat')
                     plt.plot(np.log10(model[0]),np.log10(model[1]),label='Haser model')
                     plt.axvline(x=3.6,color='black', alpha=0.5, linestyle='--', label='limits for the fit')
@@ -761,5 +766,5 @@ def plot_haserprofile(input_dir, output_dir=None):
                     plt.show()
                     plt.close()
     
-plot_haserprofile('/home/Mathieu/Documents/TRAPPIST/tmpout', output_dir=None)
+# plot_haserprofile('/home/Mathieu/Documents/TRAPPIST/tmpout', output_dir=None)
 
