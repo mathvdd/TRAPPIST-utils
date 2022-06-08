@@ -151,6 +151,8 @@ def check_calib(fitstable, filt_list=filt_list):
     if lighttable['filt'].isin(['OH', 'C2', 'C3', 'CN', 'NH']).any() and (lighttable['filt'].isin(['BC']).any() == False):
         print("WARNING: Narrow band images while no continuum BC image")
         warning_flag = True
+        
+    print('If no right exposure time dark is found, a linear extrapolation of the 15s master dark will be used')
     
     return warning_flag #can be used to stop the script only if there is a warning
 
