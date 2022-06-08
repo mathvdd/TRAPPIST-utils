@@ -218,6 +218,7 @@ for path in list_to_reduce:
         while True:
             haserinput_warning = trap_reduction.generate_haserinput(ds.tmpout)
             if haserinput_warning == True:
+                print('Problem generatin haserinput')
                 while True:
                     inp = input('regenerating haserinput (r) or bypass (b)? [r/b]')
                     if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B':

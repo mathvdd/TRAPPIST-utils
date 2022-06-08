@@ -152,7 +152,7 @@ def check_calib(fitstable, filt_list=filt_list):
         print("WARNING: Narrow band images while no continuum BC image")
         warning_flag = True
         
-    print('If no right exposure time dark is found, a linear extrapolation of the 15s master dark will be used')
+    print('\nIf no right exposure time dark is found, a linear extrapolation of the 15s master dark will be used')
     
     return warning_flag #can be used to stop the script only if there is a warning
 

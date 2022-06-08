@@ -12,7 +12,6 @@ from astropy.io import fits
 import os
 import datetime
 import pandas as pd
-import sys
 
 # home_dir = os.path.expanduser('~')
 # fits_dir = os.path.join(home_dir, "Documents/TRAPPIST/tmpout/")
@@ -134,14 +133,14 @@ class ephemeris:
             convert_MPC_Horizon (boolean, optional, default=False): if is True and target different than None, covert target_name from MPC to NASA Horizon format
         """
         while True:
-            if len(sys.argv) > 1 and self.parameters['COMMAND'] == None:
-                self.parameters['COMMAND'] = ' '.join(sys.argv[1:])
-            elif (self.good_query == True) and (unique_target == True):
+            if (self.good_query == True) and (unique_target == True):
                 print('Target already defined as ' + self.obj_fullname)
             elif (self.already_quered == False) and (target != None):
                 if convert_MPC_Horizon == True:
                     if (len(target) == 8) and (target[0:2] + target[5] + target[7] == 'CK00'):
                         self.parameters['COMMAND'] = '20' + target[2:4] + ' ' + target[4] + target[6]
+                    elif (len(target) == 5) and (target[0:3] + target[-1] == '000P'):
+                        self.parameters['COMMAND'] = target[3:]
                     elif (len(target) == 5) and (target[0:2] + target[-1] == '00P'):
                         self.parameters['COMMAND'] = target[2:]
                     elif (len(target) == 5) and (target[0:1] + target[-1] == '0P'):
@@ -162,6 +161,20 @@ class ephemeris:
                 self.already_quered = True
                 self.good_query = True
                 break
+            # elif "To SELECT, enter record # (integer), followed by semi-colon.)" in self.query_result[-3]:
+            #     last_line = self.query_result[-5]
+            #     # record = last_line.split(" ")
+            #     record = [ elem for elem in last_line.split(" ") if elem != ''][0]
+            #     #check if the record is the last epoch
+            #     year_record = [ elem for elem in last_line.split(" ") if elem != ''][1]
+            #     previous_year = [ elem for elem in self.query_result[-6].split(" ") if elem != ''][1]
+            #     if int(previous_year) > int(year_record):
+            #         print('selected record: ', record)
+            #         input('WARNING: check the epoch selected is the las one')
+                
+            #     print('Making a second query with the record #', record)
+            #     self.parameters['COMMAND'] = record
+            #     input()
             else:
                 self.already_quered = True
                 print('previous attempt: ', self.parameters['COMMAND'])
