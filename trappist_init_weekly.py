@@ -143,7 +143,8 @@ for path in list_to_reduce:
         if dark_warning == True:
             input("press enter")
         print('--- generating ephemeris ---')
-        ephemeris = get_ephem.ephemeris()
+        if ephemeris == None:
+            ephemeris = get_ephem.ephemeris()
         ephemeris.retrieve_param_from_fits(ds.tmpout)
         if len(comets) == 1:
             unique_target = True
