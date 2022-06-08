@@ -52,6 +52,7 @@ class ephemeris:
             }
         self.already_quered = False #Control not to ask for target name every time if query for multiple obs
         self.good_query = False
+        self.record = None
         
     def retrieve_param_from_fits(self, fits_dir):
         """
@@ -120,7 +121,7 @@ class ephemeris:
         # fetch the data
         self.query_result = requests.get(self.query_url).text.split('\n')
         
-    def query_input(self, unique_target=False, target=None, convert_MPC_Horizon = False):
+    def query_input(self, unique_target=False, target=None, convert_MPC_Horizon = False, last_epoch = True):
         """
         Query for the object name and launch query_horizons()
         Loop until a query is successful, otherwise ask for a new input
@@ -131,9 +132,14 @@ class ephemeris:
                 Set to False if using nights from different objects.
             target (str, optional, default=None): if different from None, use as initial object name input for query_horizons()
             convert_MPC_Horizon (boolean, optional, default=False): if is True and target different than None, covert target_name from MPC to NASA Horizon format
+            last_epoch (boolean, optional, default=True): if True relauch a query with the last epoch if there is multiple epochs returned after a successful query'
         """
         while True:
-            if (self.good_query == True) and (unique_target == True):
+            if (self.record != None) and (last_epoch == True):
+                print('Making a second query with the record #', self.record)
+                self.parameters['COMMAND'] = self.record
+                self.record = None
+            elif (self.good_query == True) and (unique_target == True):
                 print('Target already defined as ' + self.obj_fullname)
             elif (self.already_quered == False) and (target != None):
                 if convert_MPC_Horizon == True:
@@ -161,20 +167,16 @@ class ephemeris:
                 self.already_quered = True
                 self.good_query = True
                 break
-            # elif "To SELECT, enter record # (integer), followed by semi-colon.)" in self.query_result[-3]:
-            #     last_line = self.query_result[-5]
-            #     # record = last_line.split(" ")
-            #     record = [ elem for elem in last_line.split(" ") if elem != ''][0]
-            #     #check if the record is the last epoch
-            #     year_record = [ elem for elem in last_line.split(" ") if elem != ''][1]
-            #     previous_year = [ elem for elem in self.query_result[-6].split(" ") if elem != ''][1]
-            #     if int(previous_year) > int(year_record):
-            #         print('selected record: ', record)
-            #         input('WARNING: check the epoch selected is the las one')
-                
-            #     print('Making a second query with the record #', record)
-            #     self.parameters['COMMAND'] = record
-            #     input()
+            elif (last_epoch == True) and ("To SELECT, enter record # (integer), followed by semi-colon.)" in self.query_result[-3]):
+                last_line = self.query_result[-5]
+                # record = last_line.split(" ")
+                self.record = [ elem for elem in last_line.split(" ") if elem != ''][0]
+                #check if the record is the last epoch
+                year_record = [ elem for elem in last_line.split(" ") if elem != ''][1]
+                previous_year = [ elem for elem in self.query_result[-6].split(" ") if elem != ''][1]
+                if int(previous_year) > int(year_record):
+                    print('selected record: ', self.record)
+                    input('WARNING: check the epoch selected is the las one')
             else:
                 self.already_quered = True
                 print('previous attempt: ', self.parameters['COMMAND'])

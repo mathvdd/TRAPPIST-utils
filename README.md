@@ -178,6 +178,7 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
                 Set to False if using nights from different objects.
             target (str, optional, default=None): if different from None, use as initial object name input for query_horizons()
             convert_MPC_Horizon (boolean, optional, default=False): if is True and target different than None, covert target_name from MPC to NASA Horizon format
+            last_epoch (boolean, optional, default=True): if True relauch a query with the last epoch if there is multiple epochs returned after a successful query'
 
 
 
