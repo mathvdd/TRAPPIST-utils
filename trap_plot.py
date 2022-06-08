@@ -730,10 +730,10 @@ def plot_haserprofile(input_dir, output_dir=None):
                     if (obs[0][0] != cont[0][0]) or (obs[0][2] != cont[0][2]):
                         print('WARNING: x scale may be different for NB and continuum spectrum')
                         print('difference ratio:')
-                        print((cont[0]- obs[0])/obs[0])
+                        print(((cont[0]- obs[0])/obs[0])[0])
                     
                     # define the plot
-                    fig = plt.figure(figsize=(14,6))
+                    fig = plt.figure(figsize=(12,9))
                     ax = fig.gca()
                     
                     # added this so don't see the extreme right of the continuum which is very noisy and mess the scale
@@ -761,5 +761,5 @@ def plot_haserprofile(input_dir, output_dir=None):
                     plt.show()
                     plt.close()
     
-# plot_haserprofile('/home/Mathieu/Documents/TRAPPIST/tmpout', output_dir=None)
+plot_haserprofile('/home/Mathieu/Documents/TRAPPIST/tmpout', output_dir=None)
 
