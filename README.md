@@ -244,6 +244,8 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
         dayinterval (int): day interval to look for calib files before and after the observation night
         date_interval (list [datetime, datetime], optional, default=['','']): of 2 terms: the starting date for the search and second the ending date, in datetime format
             if '' given for one of the argument, consider no date limit on that end
+        skip_existing(boolean, default = False): if set to True, will skip download if output_path already exists
+                if False will ask if delete old dir and download or skip.
 
 
 **lookforcalib**(NASfitstable, imtype, output_fold, night, obj='', exptime=0, filt='R', dayinterval=0, copy=True):

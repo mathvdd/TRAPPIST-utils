@@ -206,7 +206,7 @@ def check_objects_names(startdate, enddate, NASfitstable):
     objects_list = objects_table['object'].drop_duplicates().values.tolist()
     return objects_list
     
-def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=['','']):
+def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=['',''], skip_existing=False):
     '''Look for and prompt for downloading files in the NAS
     It is advised to not mix TN and TS queries
     look on the TN or TS NAS for all the nights containing the object (obj_name).
@@ -221,6 +221,8 @@ def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=[''
         dayinterval (int): day interval to look for calib files before and after the observation night
         date_interval (list [datetime, datetime], optional, default=['','']): of 2 terms: the starting date for the search and second the ending date, in datetime format
             if '' given for one of the argument, consider no date limit on that end
+        skip_existing(boolean, default = False): if set to True, will skip download if output_path already exists
+            if False will ask if delete old dir and download or skip.
     '''
     
     # starting and ending date for the query
@@ -264,7 +266,7 @@ def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=[''
         # check if the directory already exists and ask if erase if already exists
         output_dir = os.path.join(output_path, str(night.strftime('%Y%m%d')))
         while True:
-            if os.path.exists(output_dir):
+            if os.path.exists(output_dir) and skip_existing == False:
                 inp = input(output_dir + ' already existing. Download data anyway and delete old dir (d) or skip dir (s)?')
                 if inp == 'd' or inp =="D":
                     shutil.rmtree(output_dir)
@@ -285,6 +287,9 @@ def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=[''
                     break
                 else:
                     continue
+            elif os.path.exists(output_dir) and skip_existing == True:
+                print(output_dir + ' already existing. skip_existing = True, skipping download')
+                break
             else:
                 os.makedirs(output_dir)
                 print("created", output_dir)

@@ -17,12 +17,15 @@ import shutil
 import get_ephem
 import trap_plot
 
-#started 2022-03-21 TS
+#started 2022-03-05 TS
 # 2022 04 28
-startdate = datetime.datetime.strptime('2022-02-02' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
-enddate = datetime.datetime.strptime('2022-02-03' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
-obs = 'TN'
-comets = ['0019P'] # list of comets to take into account. set empty to take all 
+startdate = datetime.datetime.strptime('2022-03-05' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
+enddate = datetime.datetime.strptime('2022-04-28' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
+obs = 'TS'
+comets = [] # list of comets to take into account. set empty to take all 
+skip = True # skip raw data directory donwload if data already in raw_data.
+# skip reduction if there is already a set of reduced data
+# If set to False, will ask what to do in both cases
 
 ########################
 
@@ -72,7 +75,7 @@ while True:
 for comet in inlist:
     print('Downloading ' + comet)
     output_path = os.path.join(ds.raw, comet, obs)
-    query_NAS.get_files(comet, NASfitstable, output_path, dayinterval=7, dateinterval=(startdate, enddate))
+    query_NAS.get_files(comet, NASfitstable, output_path, dayinterval=7, dateinterval=(startdate, enddate), skip_existing=skip)
 
         
 # makes list of folders to reduce
@@ -99,7 +102,7 @@ for path in list_to_reduce:
     
     #check if data already reduced
     while True:
-        if os.path.exists(reduced_dir):
+        if os.path.exists(reduced_dir) and skip == False:
             inp = input('reduced data detected in ' + reduced_dir + '. Delete old and reduce (d) or skip night (s)?')
             if inp == 'd' or inp =="D":
                 shutil.rmtree(reduced_dir)
@@ -111,6 +114,10 @@ for path in list_to_reduce:
                 break
             else:
                 continue
+        elif os.path.exists(reduced_dir) and skip == True:
+            print('reduced data detected in ' + reduced_dir + '. skip = True, skipping dataset')
+            reduce_flag = False
+            break
         else:
             reduce_flag = True
             break
