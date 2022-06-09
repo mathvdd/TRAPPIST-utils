@@ -38,13 +38,13 @@ def import_perihelions(file_path):
     return perihelions
 
 if obs == 'TS':
-    NASfitstable = query_NAS.loadcsvtable("/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.txt")
+    NASfitstable = query_NAS.loadcsvtable(ds.TS_qNAS)
 elif obs == 'TN':
-    NASfitstable = query_NAS.loadcsvtable("/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.txt")
+    NASfitstable = query_NAS.loadcsvtable(ds.TN_qNAS)
 
 objects_names = query_NAS.check_objects_names(startdate,enddate,NASfitstable)
 while True:
-    perihelions = import_perihelions('/home/Mathieu/Documents/TRAPPIST/reduced_data/perihelions')
+    perihelions = import_perihelions(ds.perihelion)
     inlist = []
     outlist = []
     for obj in objects_names:

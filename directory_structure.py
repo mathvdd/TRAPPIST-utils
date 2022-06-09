@@ -29,6 +29,9 @@ class directory_structure:
         self.iraf = os.path.join(self.home, 'iraf')
         self.calib = os.path.join(self.TRAPDIR, 'calib')
         self.hasercalc = os.path.join(self.TRAPDIR, 'hasercalc')
+        self.perihelion = os.path.join(self.reduced, 'perihelions')
+        self.TS_qNAS = os.path.join(self.raw_data, "TS_query.txt")
+        self.TN_qNAS = os.path.join(self.raw_data, "TN_query.txt")
         
     def set_dir_input(self, dir_name='new_directory', path='', create_new=True, complete_path=False):
         """Sets a directory path with user input.
