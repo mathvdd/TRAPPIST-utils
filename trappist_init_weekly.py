@@ -31,7 +31,6 @@ skip = True # skip raw data directory donwload if data already in raw_data.
 
 dt = datetime.datetime.now()
 ds = directory_structure.directory_structure()
-ephemeris = None
 
 def import_perihelions(file_path):
     file = pd.read_csv(file_path)
@@ -173,14 +172,9 @@ for path in list_to_reduce:
         if dark_warning == True:
             input("press enter")
         print('--- generating ephemeris ---')
-        if ephemeris == None:
-            ephemeris = get_ephem.ephemeris()
+        ephemeris = get_ephem.ephemeris()
         ephemeris.retrieve_param_from_fits(ds.tmpout)
-        if len(comets) == 1:
-            unique_target = True
-        else:
-            unique_target = False
-        ephemeris.query_input(unique_target=unique_target, target=comet, convert_MPC_Horizon=True)
+        ephemeris.query_input(unique_target=False, target=comet, convert_MPC_Horizon=True)
         ephemeris.generate_ephem_files(ds.tmpout)
         
         print('--- generating calib file ---')
