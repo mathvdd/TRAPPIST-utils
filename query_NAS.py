@@ -327,7 +327,7 @@ def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=[''
 #     print(item)
 
 ###look for specific calib files around a given date
-def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=0, filt='R', dayinterval=0, copy=True):
+def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, filt='R', dayinterval=0, copy=True):
     """
     Look for a specific set of file the closest to the observation file in the database and download it. By default look for the files closest to the observation night
     
@@ -338,7 +338,7 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=0, fi
             Inside this directory needs a subfolder with the observation night in YYYYMMDD format and a subsubfolder Calibration
         night ((int,int,int)): night of observation in a tuple of int (YYYY,MM,DD), to be changed
         obj (str, semi-optional, defaut=''): name of the object if imtype='light'
-        exptime (int, semi-optional, defaut=0): exposure time if imtype='dark'
+        exptime (int, semi-optional, defaut=15): exposure time if imtype='dark'
         filt (str, semi-optional, default='R'): name of the filter if imtype='flat'
         dayinterval (int, optional, default=0): the starting point in time to look for image from the observation night
         copy (boolean, optional, default=True): wheter to prompt for copying the files or not
