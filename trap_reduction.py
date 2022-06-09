@@ -103,7 +103,7 @@ def check_calib(fitstable, filt_list=filt_list):
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
-    print("filter list set to", filt_list)
+    # print("filter list set to", filt_list)
     
     # light_filters = fitstable.loc[fitstable['type'].isin(['LIGHT', 'Light Frame']), 'filter'].drop_duplicates().values.tolist()
     lighttable = fitstable.loc[(fitstable['type'].isin(['LIGHT', 'Light Frame'])) & (fitstable['filt'].isin(filt_list)), ['file', 'filt', 'exptime']]
@@ -152,9 +152,9 @@ def check_calib(fitstable, filt_list=filt_list):
         print("WARNING: Narrow band images while no continuum BC image")
         warning_flag = True
         
-    print('\nIf no right exposure time dark is found, a linear extrapolation of the 15s master dark will be used')
+    print('\nNOTE: If no right exposure time dark is found, a linear extrapolation of the 15s master dark will be used')
     
-    return warning_flag #can be used to stop the script only if there is a warning
+    return warning_flag, lighttable #can be used to stop the script only if there is a warning
 
 def get_fitstable(raw_dir):
     """

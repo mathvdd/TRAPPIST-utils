@@ -336,7 +336,7 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, f
         imtype (str): image type. can take values of 'light', 'dark', 'flat' or 'bias'
         output_fold (str): path to the output directory.
             Inside this directory needs a subfolder with the observation night in YYYYMMDD format and a subsubfolder Calibration
-        night ((int,int,int)): night of observation in a tuple of int (YYYY,MM,DD), to be changed
+        night (str YYYYMMDD): night of observation in an int (YYYYMMDD)
         obj (str, semi-optional, defaut=''): name of the object if imtype='light'
         exptime (int, semi-optional, defaut=15): exposure time if imtype='dark'
         filt (str, semi-optional, default='R'): name of the filter if imtype='flat'
@@ -359,6 +359,8 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, f
         return
     
     ####################################
+    
+    night = (int(night[0:4]), int(night[4:6]), int(night[6:8]))
     
     obsnight = pd.Timestamp(year=night[0], month=night[1], day=night[2], hour=23, minute=59)
 

@@ -92,7 +92,8 @@ for comet in inlist:
 for path in list_to_reduce:
     raw_dir = path
     comet = path.split('/')[-3]
-    reduced_dir = os.path.join(ds.reduced, comet, raw_dir.split('/')[-1] + obs)
+    night = raw_dir.split('/')[-1]
+    reduced_dir = os.path.join(ds.reduced, comet, night + obs)
     print("working with", raw_dir)
     print("reduced dir set as", reduced_dir)
     
@@ -118,13 +119,35 @@ for path in list_to_reduce:
         while True: 
             print('--- Renaming .fts to .fits ---')
             trap_reduction.renameftsfits(raw_dir)
-            print('--- checking for calib files ---')
+            print('--- checking for calib files ---')            
+            print('\n----------------------------------------------------------------')
             fitstable = trap_reduction.get_fitstable(raw_dir)
-            check_calib_warning = trap_reduction.check_calib(fitstable)
+            check_calib_warning, lighttable = trap_reduction.check_calib(fitstable)
             if check_calib_warning == True:
-                inp = input("add calib files and press enter (b for bypass)")
-                if inp == 'b' or inp =="B":
+                inp = input('''Some calibration files are missing!
+                            - Press enter to reload table
+                            - Query for calibration files older than a week (give line index)
+                            - bypass (b)
+                            :''')
+                            
+                if inp == 'b' or inp == 'B':
                     break
+                else:
+                    try:
+                        ind = int(inp)
+                    except:
+                        continue
+                    if ind >= 0 and ind <= (len(lighttable) -1):
+                        imline = lighttable.iloc[ind]
+                        if imline['nb_bias'] == 0:
+                            query_NAS.lookforcalib(NASfitstable, 'bias', raw_dir[:-8], night)
+                        if imline['nb_flat'] == 0:
+                            query_NAS.lookforcalib(NASfitstable, 'flat', raw_dir[:-8], night, filt=imline['filt'])
+                        if imline['nb_dark'] == 0:
+                            query_NAS.lookforcalib(NASfitstable, 'dark', raw_dir[:-8], night, exptime=int(imline['exptime']))
+                        # query_NAS.lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, filt='R', dayinterval=0, copy=True)
+                    else:
+                        print('wrong index')
             else:
                 break
         # continue
