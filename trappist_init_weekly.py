@@ -10,14 +10,14 @@ mathieu.vanderdonckt@uliege.be
 import query_NAS
 import datetime
 import pandas as pd
-import directory_structure
+from trapconfig import param
 import os
 import trap_reduction
 import shutil
 import get_ephem
 import trap_plot
 
-#started 2022-03-05 TS
+#started mid-March? TS
 # 2022 04 28
 startdate = datetime.datetime.strptime('2022-03-05' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
 enddate = datetime.datetime.strptime('2022-04-28' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
@@ -30,7 +30,7 @@ skip = True # skip raw data directory donwload if data already in raw_data.
 ########################
 
 dt = datetime.datetime.now()
-ds = directory_structure.directory_structure()
+print(param)
 
 def import_perihelions(file_path):
     file = pd.read_csv(file_path)
@@ -40,13 +40,13 @@ def import_perihelions(file_path):
     return perihelions
 
 if obs == 'TS':
-    NASfitstable = query_NAS.loadcsvtable(ds.TS_qNAS)
+    NASfitstable = query_NAS.loadcsvtable(param['TS_qNAS'])
 elif obs == 'TN':
-    NASfitstable = query_NAS.loadcsvtable(ds.TN_qNAS)
+    NASfitstable = query_NAS.loadcsvtable(param['TN_qNAS'])
 
 objects_names = query_NAS.check_objects_names(startdate,enddate,NASfitstable)
 while True:
-    perihelions = import_perihelions(ds.perihelion)
+    perihelions = import_perihelions(param['perihelion'])
     inlist = []
     outlist = []
     for obj in objects_names:
@@ -73,14 +73,14 @@ while True:
 # download the raw files
 for comet in inlist:
     print('Downloading ' + comet)
-    output_path = os.path.join(ds.raw, comet, obs)
+    output_path = os.path.join(param['raw'], comet, obs)
     query_NAS.get_files(comet, NASfitstable, output_path, dayinterval=7, dateinterval=(startdate, enddate), skip_existing=skip)
 
         
 # makes list of folders to reduce
 list_to_reduce = []
 for comet in inlist:
-    output_path = os.path.join(ds.raw, comet, obs)
+    output_path = os.path.join(param['raw'], comet, obs)
     for path, subdirs, files in os.walk(output_path):
         try:
             subdir = path.split('/')[-1]
@@ -95,7 +95,7 @@ for path in list_to_reduce:
     raw_dir = path
     comet = path.split('/')[-3]
     night = raw_dir.split('/')[-1]
-    reduced_dir = os.path.join(ds.reduced, comet, night + obs)
+    reduced_dir = os.path.join(param['reduced'], comet, night + obs)
     print("working with", raw_dir)
     print("reduced dir set as", reduced_dir)
     
@@ -158,35 +158,35 @@ for path in list_to_reduce:
                 break
         # continue
         print('--- Initating tmpdata and tmpout dirs ---')
-        if os.path.exists(ds.tmpdata):
-            shutil.rmtree(ds.tmpdata)
-        os.mkdir(ds.tmpdata)
+        if os.path.exists(param['tmpdata']):
+            shutil.rmtree(param['tmpdata'])
+        os.mkdir(param['tmpdata'])
         print('--- Renaming files to Trappist format and copying to tmpdata ---')
-        trap_reduction.pythrename(raw_dir, ds.tmpdata)
-        if os.path.exists(ds.tmpout):
-            shutil.rmtree(ds.tmpout)
-        os.mkdir(ds.tmpout)
+        trap_reduction.pythrename(raw_dir, param['tmpdata'])
+        if os.path.exists(param['tmpout']):
+            shutil.rmtree(param['tmpout'])
+        os.mkdir(param['tmpout'])
         print('--- Image reduction ---')
-        trap_reduction.clreduce(ds.iraf)
-        dark_warning = trap_reduction.check_darks(ds.iraf, ds.tmpout)
+        trap_reduction.clreduce(param['iraf'])
+        dark_warning = trap_reduction.check_darks(param['iraf'], param['tmpout'])
         if dark_warning == True:
             input("press enter")
         print('--- generating ephemeris ---')
         ephemeris = get_ephem.ephemeris()
-        ephemeris.retrieve_param_from_fits(ds.tmpout)
+        ephemeris.retrieve_param_from_fits(param['tmpout'])
         ephemeris.query_input(unique_target=False, target=comet, convert_MPC_Horizon=True)
-        ephemeris.generate_ephem_files(ds.tmpout)
+        ephemeris.generate_ephem_files(param['tmpout'])
         
         print('--- generating calib file ---')
-        ZP_warning = trap_reduction.generate_ZP(ds.calib, ephemeris, fitstable)
+        ZP_warning = trap_reduction.generate_ZP(param['calib'], ephemeris, fitstable)
         if ZP_warning == True:
             input("press enter")
         pixsize = trap_reduction.set_pixsize_in_clafrhocalcext(fitstable)
         print('--- launching afrhocalcext ---')
-        trap_reduction.clafrhocalcext(ds.iraf, pixsize[1], str(0), str(0), str(0), str(0)) #launch a first reduction of all the files by default
-        trap_plot.plot_centering_profile(ds.tmpout)
+        trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], str(0), str(0), str(0), str(0)) #launch a first reduction of all the files by default
+        trap_plot.plot_centering_profile(param['tmpout'])
         while True:
-            centerlist = pd.read_csv(os.path.join(ds.tmpout, 'centerlist'),header=None, sep=' ',usecols=[0,2,3,5,10], names=['file', 'xcent', 'ycent', 'filt', 'ctnmethod'])
+            centerlist = pd.read_csv(os.path.join(param['tmpout'], 'centerlist'),header=None, sep=' ',usecols=[0,2,3,5,10], names=['file', 'xcent', 'ycent', 'filt', 'ctnmethod'])
             print(centerlist)
             while True:
                 print(comet)
@@ -225,22 +225,22 @@ for path in list_to_reduce:
                 else:
                     print('wrong input')
             if solocomete == True:
-                trap_reduction.clafrhocalcext(ds.iraf, pixsize[1], FILE, str(XCENTER), str(YCENTER), str(BOXSIZE))
-                trap_plot.plot_centering_profile(ds.tmpout, solocomet=True)
+                trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], FILE, str(XCENTER), str(YCENTER), str(BOXSIZE))
+                trap_plot.plot_centering_profile(param['tmpout'], solocomet=True)
                 continue
             if inp == 'r' or inp == 'R':
                 print('relaunching afrhocalcext')
-                trap_reduction.clafrhocalcext(ds.iraf, pixsize[1], str(0), str(0), str(0), str(0))
-                trap_plot.plot_centering_profile(ds.tmpout)
+                trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], str(0), str(0), str(0), str(0))
+                trap_plot.plot_centering_profile(param['tmpout'])
                 continue
             elif inp == 'b' or inp == 'B':
                 print('continuing script')
                 break
-        trap_reduction.clean_afrhotot(ds.tmpout)
+        trap_reduction.clean_afrhotot(param['tmpout'])
             
         print('--- initiating haserinput ---')
         while True:
-            haserinput_warning = trap_reduction.generate_haserinput(ds.tmpout)
+            haserinput_warning = trap_reduction.generate_haserinput(param['tmpout'])
             if haserinput_warning == True:
                 print('Problem generatin haserinput')
                 while True:
@@ -258,8 +258,8 @@ for path in list_to_reduce:
             
         print('--- launching hasercalctest ---')
         while True:
-            trap_reduction.clhasercalctest(ds.iraf, 'yes')
-            trap_plot.plot_haserprofile(ds.tmpout)
+            trap_reduction.clhasercalctest(param['iraf'], 'yes')
+            trap_plot.plot_haserprofile(param['tmpout'])
             while True:
                 inp = input('relaunch hasercalctext (r) or bypass (b)? [r/b]')
                 if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B':
@@ -303,7 +303,7 @@ for path in list_to_reduce:
             print("created", centering_dir)
         
         print('--- copying files in reduced directory ---')
-        for path2, subdirs2, files2 in os.walk(ds.tmpout):
+        for path2, subdirs2, files2 in os.walk(param['tmpout']):
             for file in files2:
                 if file.endswith('.fits') and 'tmp' not in file and 'coms' not in file:
                     shutil.copy(os.path.join(path2, file), os.path.join(images_dir, file))
