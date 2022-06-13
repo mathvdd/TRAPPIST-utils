@@ -26,6 +26,7 @@ comets = [] # list of comets to take into account. set empty to take all
 skip = True # skip raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
+conda = True if param['conda'] == 'True' else False #wether to use 'source activate to launch cl or not'
 
 ########################
 
@@ -167,7 +168,7 @@ for path in list_to_reduce:
             shutil.rmtree(param['tmpout'])
         os.mkdir(param['tmpout'])
         print('--- Image reduction ---')
-        trap_reduction.clreduce(param['iraf'])
+        trap_reduction.clreduce(param['iraf'], conda=conda)
         dark_warning = trap_reduction.check_darks(param['iraf'], param['tmpout'])
         if dark_warning == True:
             input("press enter")
@@ -183,7 +184,7 @@ for path in list_to_reduce:
             input("press enter")
         pixsize = trap_reduction.set_pixsize_in_clafrhocalcext(fitstable)
         print('--- launching afrhocalcext ---')
-        trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], str(0), str(0), str(0), str(0)) #launch a first reduction of all the files by default
+        trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], str(0), str(0), str(0), str(0), conda=conda) #launch a first reduction of all the files by default
         trap_plot.plot_centering_profile(param['tmpout'])
         while True:
             centerlist = pd.read_csv(os.path.join(param['tmpout'], 'centerlist'),header=None, sep=' ',usecols=[0,2,3,5,10], names=['file', 'xcent', 'ycent', 'filt', 'ctnmethod'])
@@ -225,12 +226,12 @@ for path in list_to_reduce:
                 else:
                     print('wrong input')
             if solocomete == True:
-                trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], FILE, str(XCENTER), str(YCENTER), str(BOXSIZE))
+                trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], FILE, str(XCENTER), str(YCENTER), str(BOXSIZE), conda=conda)
                 trap_plot.plot_centering_profile(param['tmpout'], solocomet=True)
                 continue
             if inp == 'r' or inp == 'R':
                 print('relaunching afrhocalcext')
-                trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], str(0), str(0), str(0), str(0))
+                trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], str(0), str(0), str(0), str(0), conda=conda)
                 trap_plot.plot_centering_profile(param['tmpout'])
                 continue
             elif inp == 'b' or inp == 'B':
@@ -258,7 +259,7 @@ for path in list_to_reduce:
             
         print('--- launching hasercalctest ---')
         while True:
-            trap_reduction.clhasercalctest(param['iraf'], 'yes')
+            trap_reduction.clhasercalctest(param['iraf'], 'yes', conda=conda)
             trap_plot.plot_haserprofile(param['tmpout'])
             while True:
                 inp = input('relaunch hasercalctext (r) or bypass (b)? [r/b]')

@@ -16,8 +16,6 @@ import datetime
 # Add a rename fts to fits for TS images
 #Add check if all flats are there
 
-conda = True #change this if iraf is not installed in conda
-
 fc = {'OH':5,
       'NH':20,
       'CN':25,
@@ -78,7 +76,7 @@ def pythrename(raw_path, tmpdata_dir):
                 print("WARNING: convert fts to fits")
     print("renamed and copied", count, "files in", tmpdata_dir)
     
-def clrename(iraf_dir, raw_path):
+def clrename(iraf_dir, raw_path, conda=False):
     print('rename and set the data in tmpdata')
     with open(os.path.join(iraf_dir, 'wrapper_rename.cl'), 'w') as f:
         f.write('\n'.join(['renamefits ' + raw_path + ' yes',
@@ -264,7 +262,7 @@ def generate_ZP(calib_dir, ephemeris, fitstable, ZPparams=ZP):
 # generate_ZP(ds.calib, eph, fitslist)
 
 
-def clreduce(iraf_dir):
+def clreduce(iraf_dir, conda=False):
     """
     Wrapper to launch iraf progtrap3 in python
     
@@ -295,7 +293,7 @@ def set_pixsize_in_clafrhocalcext(fitstable):
         print('problem defining observatory and pixsize')
     return pixsize
     
-def clafrhocalcext(iraf_dir, pixsize, solocomete, soloinitx, soloinity, soloinitcboxsize):
+def clafrhocalcext(iraf_dir, pixsize, solocomete, soloinitx, soloinity, soloinitcboxsize, conda=False):
     """
     Wrapper to launch iraf afrhocalcext in python
     
@@ -648,7 +646,7 @@ Alternatively, select the index of the BC image to use: """)
 #         print("no radial profile with associated filter found. Please check fc or files. No haserinput written")
 # 
 # =============================================================================
-def clhasercalctest(iraf_dir, arg='no'):
+def clhasercalctest(iraf_dir, arg='no', conda=False):
     """
     Wrapper to launch iraf hasercalctest in python
     
