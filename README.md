@@ -9,6 +9,8 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 
 [trap_plot](#trap_plotpy)
 
+Path configuration is in traputils.conf. If the file is copied in the home directory that version will be read (prefered because not corrupted by updates in trappist-utils)
+
 ## trap_reduction.py
 **renameftsfits**(raw_path):
 
@@ -64,17 +66,18 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 
 
 
-**clreduce**(iraf_dir):
+**clreduce**(iraf_dir, conda=True):
 
 
     Wrapper to launch iraf progtrap3 in python
 
     Parameters:
         iraf_dir (str): path to the home iraf directory
+        conda (boolean, default=True): if False, will not use the source activate line when launching cl
 
 
 
-**clafrhocalcext**(iraf_dir, pixsize, solocomete, soloinitx, soloinity, soloinitcboxsize):
+**clafrhocalcext**(iraf_dir, pixsize, solocomete, soloinitx, soloinity, soloinitcboxsize, conda=True):
 
     Wrapper to launch iraf afrhocalcext in python
 
@@ -85,6 +88,8 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
         soloinitx
         soloinity
         soloinitcboxsize
+        conda (boolean, default=True): if False, will not use the source activate line when launching cl
+
 
 
 **check_darks**(iraf_dir,tmpout_dir):
@@ -122,13 +127,14 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 
 
 
-**clhasercalctest**(iraf_dir, arg='no'):
+**clhasercalctest**(iraf_dir, arg='no', conda=True):
 
 
     Wrapper to launch iraf hasercalctest in python
 
     Parameters:
         iraf_dir (str): path to the home iraf directory
+        conda (boolean, default=True): if False, will not use the source activate line when launching cl
 
 
 
