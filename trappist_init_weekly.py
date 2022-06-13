@@ -17,21 +17,27 @@ import shutil
 import get_ephem
 import trap_plot
 
-#started mid-March? TS
-# 2022 04 28
-startdate = datetime.datetime.strptime('2022-03-05' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
-enddate = datetime.datetime.strptime('2022-04-28' + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
+
+########################
+# INPUT PARAMETERS
+startdate = '2022-03-05' #the night starting
+enddate = '2022-04-28' #starting that night not included
 obs = 'TS'
 comets = [] # list of comets to take into account. set empty to take all 
 skip = True # skip raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
-conda = True if param['conda'] == 'True' else False #wether to use 'source activate to launch cl or not'
 
 ########################
 
+#started mid-March? TS
+# 2022 04 28
+startdate = datetime.datetime.strptime(startdate + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
+enddate = datetime.datetime.strptime(enddate + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
+
 dt = datetime.datetime.now()
-print(param)
+
+conda = True if param['conda'] == 'True' else False #wether to use 'source activate to launch cl or not'
 
 def import_perihelions(file_path):
     file = pd.read_csv(file_path)
