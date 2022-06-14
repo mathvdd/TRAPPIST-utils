@@ -20,8 +20,8 @@ import trap_plot
 
 ########################
 # INPUT PARAMETERS
-startdate = '2022-03-05' #the night starting
-enddate = '2022-04-28' #starting that night not included
+startdate = '2022-04-01' #the night starting
+enddate = '2022-06-13' #starting that night not included
 obs = 'TS'
 comets = [] # list of comets to take into account. set empty to take all 
 skip = True # skip raw data directory donwload if data already in raw_data.

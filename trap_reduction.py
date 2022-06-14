@@ -268,6 +268,7 @@ def clreduce(iraf_dir, conda=True):
     
     Parameters:
         iraf_dir (str): path to the home iraf directory
+        conda (boolean, default=True): if False, will not use the source activate line when launching cl
     """
     print('reduceand calibrate images from the tmpdata into the tmpout folder')
     with open(os.path.join(iraf_dir, 'wrapper_reduce.cl'), 'w') as f:
@@ -304,6 +305,7 @@ def clafrhocalcext(iraf_dir, pixsize, solocomete, soloinitx, soloinity, soloinit
         soloinitx
         soloinity
         soloinitcboxsize
+        conda (boolean, default=True): if False, will not use the source activate line when launching cl
     """
     print('launch afrhocalext.cl')
     with open(os.path.join(iraf_dir, 'wrapper_afrhocalcext.cl'), 'w') as f:
@@ -652,6 +654,7 @@ def clhasercalctest(iraf_dir, arg='no', conda=True):
     
     Parameters:
         iraf_dir (str): path to the home iraf directory
+        conda (boolean, default=True): if False, will not use the source activate line when launching cl
     """
     print('launch hasercalctest.cl')
     with open(os.path.join(iraf_dir, 'wrapper_hasercalctest.cl'), 'w') as f:

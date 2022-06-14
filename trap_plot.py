@@ -708,6 +708,10 @@ def plot_haserprofile(input_dir, output_dir=None):
                 for index, row in tab.iterrows():
                     imname = row[0]
                     filt = row[14]
+                    Q = row[11]
+                    Qproflow = row[15]
+                    Qprofhigh = row[16]
+                    error = (row[12] + row [13])/2
                     haserprofile_path = os.path.join(path, 'haserprofile_' + imname)
                     haserprofilecont_path = os.path.join(path, 'haserprofilecont_' + imname)
                     hasermodel_path = os.path.join(path, 'hasermodel_' + imname)
@@ -752,13 +756,13 @@ def plot_haserprofile(input_dir, output_dir=None):
                     plt.plot(np.log10(cont[0][:xlim2]),np.log10(obscont[1][:xlim2]), label='Observed-Continuum')
                     # plt.plot(np.log10(cont[0][:lim]),np.log10(model[1][:lim]),label='tmpmodel.dat')
                     plt.plot(np.log10(model[0]),np.log10(model[1]),label='Haser model')
-                    plt.axvline(x=3.6,color='black', alpha=0.5, linestyle='--', label='limits for the fit')
-                    plt.axvline(x=4.1,color='black', alpha=0.5, linestyle='--')
+                    plt.axvline(x=Qproflow,color='black', alpha=0.5, linestyle='--', label='limits for the fit')
+                    plt.axvline(x=Qprofhigh,color='black', alpha=0.5, linestyle='--')
                     ax.set_ylabel('Log Flux (erg cm−2 s−1 arcsec−2)')
                     ax.set_xlabel('Log rho (km)')
                     
                     plt.legend(loc='lower left')
-                    plt.suptitle(imname + ' ' + filt)
+                    plt.suptitle(imname + ' ' + filt + '\nQ = ' + str(Q) +' molec/s (uncertainty ' + str(error) + ')')
                     
                     plt.tight_layout()
                     plt.savefig(os.path.join(save_dir, imname[:-9] + '_haserprofile.png'), bbox_inches='tight')
@@ -766,5 +770,5 @@ def plot_haserprofile(input_dir, output_dir=None):
                     plt.show()
                     plt.close()
     
-# plot_haserprofile('/home/Mathieu/Documents/TRAPPIST/tmpout', output_dir=None)
+plot_haserprofile('/home/Mathieu/Documents/TRAPPIST/tmpout', output_dir=None)
 

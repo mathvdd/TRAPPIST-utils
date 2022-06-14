@@ -92,7 +92,7 @@ def NAS_build(NAS_path, export_path, keyword=''):
 
 #NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", "202202")
 # query("/NASTS/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS1_query.txt")
-# NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202205')
+# NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update2.txt", '202206')
 # queryZ("/NASTN/Data_TrappistNord/ACP Astronomy/Images")
     
 def queryZ(NAS_path):
