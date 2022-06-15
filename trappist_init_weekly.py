@@ -244,14 +244,32 @@ for path in list_to_reduce:
                 print('continuing script')
                 break
         trap_reduction.clean_afrhotot(param['tmpout'])
+        print(len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]))
+        if len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]) > 0:            
+       	    print('--- initiating haserinput ---')
+       	    while True:
+                haserinput_warning = trap_reduction.generate_haserinput(param['tmpout'])
+                if haserinput_warning == True:
+               	    print('Problem generatin haserinput')
+                    while True:
+                        inp = input('regenerating haserinput (r) or bypass (b)? [r/b]')
+                        if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B':
+                            break
+                    if inp == 'r' or inp == 'R':
+                        print('relaunching hasercalctest')
+                        continue
+                    elif inp == 'b' or inp == 'B':
+                        print('continuing script')
+                        break
+                else:
+                    break
             
-        print('--- initiating haserinput ---')
-        while True:
-            haserinput_warning = trap_reduction.generate_haserinput(param['tmpout'])
-            if haserinput_warning == True:
-                print('Problem generatin haserinput')
+            print('--- launching hasercalctest ---')
+            while True:
+                trap_reduction.clhasercalctest(param['iraf'], 'yes', conda=conda)
+                trap_plot.plot_haserprofile(param['tmpout'])
                 while True:
-                    inp = input('regenerating haserinput (r) or bypass (b)? [r/b]')
+                    inp = input('relaunch hasercalctext (r) or bypass (b)? [r/b]')
                     if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B':
                         break
                 if inp == 'r' or inp == 'R':
@@ -260,24 +278,8 @@ for path in list_to_reduce:
                 elif inp == 'b' or inp == 'B':
                     print('continuing script')
                     break
-            else:
-                break
-            
-        print('--- launching hasercalctest ---')
-        while True:
-            trap_reduction.clhasercalctest(param['iraf'], 'yes', conda=conda)
-            trap_plot.plot_haserprofile(param['tmpout'])
-            while True:
-                inp = input('relaunch hasercalctext (r) or bypass (b)? [r/b]')
-                if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B':
-                    break
-            if inp == 'r' or inp == 'R':
-                print('relaunching hasercalctest')
-                continue
-            elif inp == 'b' or inp == 'B':
-                print('continuing script')
-                break
-            
+        else:
+            print('No NB filters found, skipping Haser')
         # save the files in the reduced folder
         print('--- initiating reduced directory structure ---')
         images_dir = os.path.join(reduced_dir, "images")

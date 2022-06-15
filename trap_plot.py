@@ -770,5 +770,5 @@ def plot_haserprofile(input_dir, output_dir=None):
                     plt.show()
                     plt.close()
     
-plot_haserprofile('/home/Mathieu/Documents/TRAPPIST/tmpout', output_dir=None)
+# plot_haserprofile('/home/Mathieu/Documents/TRAPPIST/tmpout', output_dir=None)
 
