@@ -389,7 +389,7 @@ def plot_centering(input_dir, output_dir=None):
                     
 # plot_centering('/home/Mathieu/Documents/TRAPPIST/tmpout')
 
-def plot_centering_profile(input_dir, output_dir=None, solocomet=False):
+def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_name=''):
     """
     Same as plot_centering + a plot of the radial profile
     Create a png for each image with the centering given by the pipeline at a radius of 5'' and 10 000 km.
@@ -402,7 +402,9 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False):
         path for outputting the images. If None, uses input_dir. The default is None.
     solocomet: boolean, optional
         if solocomet = True, only the last reduced image (the last in the centerlist) will be replotted
-
+    comet_name : str, optional
+        name of the comet for the plot tile. default is ''  
+        
     Returns
     -------
     None.
@@ -477,7 +479,7 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False):
                     try:
                         fig,ax1=plot_this_thing()
                         
-                        plt.suptitle(filt + ' ' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ')\n' + fitsname)
+                        plt.suptitle(fitsname + ' ' + comet_name + ' ' + filt + '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ')')
                         ax1.imshow(image_data[pixelcropping:-pixelcropping,pixelcropping:-pixelcropping], cmap='pink', norm=colors.LogNorm(vmin=np.median(image_data), vmax=image_data[int(xcent), int(ycent)]*2))
                         fig.savefig(os.path.join(save_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
                     except:
@@ -485,7 +487,7 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False):
                         plt.close()
                         fig,ax1=plot_this_thing()
                        
-                        plt.suptitle(filt + ' ' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ') error logscale\n' + fitsname)
+                        plt.suptitle(fitsname + ' ' + comet_name + ' ' + filt + '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ') error logscale')
                         ax1.imshow(image_data[pixelcropping:-pixelcropping,pixelcropping:-pixelcropping], cmap='binary')
                         plt.savefig(os.path.join(save_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
                     
@@ -681,7 +683,7 @@ def plot_haser(input_dir, saveplot=''):
 # plot_radprof(input_dir=input_path, saveplot=savepath)
 # plot_mag(input_dir=input_path, saveplot='')
 
-def plot_haserprofile(input_dir, output_dir=None):
+def plot_haserprofile(input_dir, output_dir=None, comet_name=''):
     """
     Plot the flux profile for the NB images, the continuum, their difference and the Haser model.
     Create a png for each NB image.
@@ -692,6 +694,8 @@ def plot_haserprofile(input_dir, output_dir=None):
         path of the folder containing the image and outputhaser-BC (typicaly tmpout)
     output_dir : str, optional
         path for outputting the images. If None, uses input_dir. The default is None.
+    comet_name : str, optional
+        name of the comet for the plot tile. default is ''
     
     Returns
     -------
@@ -762,7 +766,7 @@ def plot_haserprofile(input_dir, output_dir=None):
                     ax.set_xlabel('Log rho (km)')
                     
                     plt.legend(loc='lower left')
-                    plt.suptitle(imname + ' ' + filt + '\nQ = ' + str(Q) +' molec/s (uncertainty ' + str(error) + ')')
+                    plt.suptitle(imname + ' ' + comet_name + ' ' + filt + '\nQ = ' + str(Q) +' molec/s (uncertainty ' + str(error) + ')')
                     
                     plt.tight_layout()
                     plt.savefig(os.path.join(save_dir, imname[:-9] + '_haserprofile.png'), bbox_inches='tight')

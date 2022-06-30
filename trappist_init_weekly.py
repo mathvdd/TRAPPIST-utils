@@ -20,11 +20,11 @@ import trap_plot
 
 ########################
 # INPUT PARAMETERS
-startdate = '2022-04-01' #the night starting
-enddate = '2022-06-13' #starting that night not included
+startdate = '2022-06-20' #the night starting
+enddate = '2022-06-30' #starting that night not included
 obs = 'TS'
 comets = [] # list of comets to take into account. set empty to take all 
-skip = True # skip raw data directory donwload if data already in raw_data.
+skip = False # skip raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
 
@@ -191,7 +191,7 @@ for path in list_to_reduce:
         pixsize = trap_reduction.set_pixsize_in_clafrhocalcext(fitstable)
         print('--- launching afrhocalcext ---')
         trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], str(0), str(0), str(0), str(0), conda=conda) #launch a first reduction of all the files by default
-        trap_plot.plot_centering_profile(param['tmpout'])
+        trap_plot.plot_centering_profile(param['tmpout'], comet_name=comet)
         while True:
             centerlist = pd.read_csv(os.path.join(param['tmpout'], 'centerlist'),header=None, sep=' ',usecols=[0,2,3,5,10], names=['file', 'xcent', 'ycent', 'filt', 'ctnmethod'])
             print(centerlist)
@@ -233,12 +233,12 @@ for path in list_to_reduce:
                     print('wrong input')
             if solocomete == True:
                 trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], FILE, str(XCENTER), str(YCENTER), str(BOXSIZE), conda=conda)
-                trap_plot.plot_centering_profile(param['tmpout'], solocomet=True)
+                trap_plot.plot_centering_profile(param['tmpout'], solocomet=True, comet_name=comet)
                 continue
             if inp == 'r' or inp == 'R':
                 print('relaunching afrhocalcext')
                 trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], str(0), str(0), str(0), str(0), conda=conda)
-                trap_plot.plot_centering_profile(param['tmpout'])
+                trap_plot.plot_centering_profile(param['tmpout'], comet_name=comet)
                 continue
             elif inp == 'b' or inp == 'B':
                 print('continuing script')
@@ -267,7 +267,7 @@ for path in list_to_reduce:
             print('--- launching hasercalctest ---')
             while True:
                 trap_reduction.clhasercalctest(param['iraf'], 'yes', conda=conda)
-                trap_plot.plot_haserprofile(param['tmpout'])
+                trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
                 while True:
                     inp = input('relaunch hasercalctext (r) or bypass (b)? [r/b]')
                     if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B':

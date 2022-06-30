@@ -309,17 +309,21 @@ Path configuration is in traputils.conf. If the file is copied in the home direc
     -------
     None.
 
-**plot_haserprofile**(input_dir, output_dir=None):
-
-    Plot the flux profile for the NB images, the continuum, their difference and the Haser model.
-    Create a png for each NB image.
+**plot_haserprofile**(input_dir, output_dir=None, solocomet=False, comet_name=''):
+    """
+    Same as plot_centering + a plot of the radial profile
+    Create a png for each image with the centering given by the pipeline at a radius of 5'' and 10 000 km.
 
     Parameters
     ----------
     input_dir : str
-        path of the folder containing the image and outputhaser-BC (typicaly tmpout)
+        path of the folder containing the image and centerlist (typicaly tmpout)
     output_dir : str, optional
         path for outputting the images. If None, uses input_dir. The default is None.
+    solocomet: boolean, optional
+        if solocomet = True, only the last reduced image (the last in the centerlist) will be replotted
+    comet_name : str, optional
+        name of the comet for the plot tile. default is '' 
 
     Returns
     -------
