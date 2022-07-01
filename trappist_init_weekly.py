@@ -20,11 +20,11 @@ import trap_plot
 
 ########################
 # INPUT PARAMETERS
-startdate = '2022-06-20' #the night starting
+startdate = '2010-06-20' #the night starting
 enddate = '2022-06-30' #starting that night not included
 obs = 'TS'
-comets = [] # list of comets to take into account. set empty to take all 
-skip = False # skip raw data directory donwload if data already in raw_data.
+comets = ['CK19L030'] # list of comets to take into account. set empty to take all 
+skip = True # skip raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
 
@@ -96,6 +96,7 @@ for comet in inlist:
                 list_to_reduce.append(path)
         except:
             continue
+list_to_reduce.sort()
 
 # starting the reduction
 for path in list_to_reduce:
@@ -213,12 +214,12 @@ for path in list_to_reduce:
                         solocomete = False
                         print('IMINDEX wrong format')
                     try:
-                        XCENTER = int(inp.split(' ')[1])
+                        XCENTER = float(inp.split(' ')[1])
                     except:
                         solocomete = False
                         print('XCENTER wrong format')
                     try:
-                        YCENTER = int(inp.split(' ')[2])
+                        YCENTER = float(inp.split(' ')[2])
                     except:
                         solocomete = False
                         print('YCENTER wrong format')
