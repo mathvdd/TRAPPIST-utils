@@ -18,6 +18,7 @@ from astropy.io import fits
 from matplotlib import colors
 from matplotlib.patches import Circle
 import numpy as np
+import math 
 
 def list_radprof(input_dir, output_dir):
     radtable = pd.DataFrame()
@@ -711,12 +712,13 @@ def plot_haserprofile(input_dir, output_dir=None, comet_name=''):
                 tab = pd.read_csv(centerfile, header=None, sep="\s+")
                 for index, row in tab.iterrows():
                     imname = row[0]
-                    filt = row[14]
                     Q = row[11]
                     if len(tab.columns) == 17: #old version
+                        filt = row[14]
                         Qproflow = row[15]
                         Qprofhigh = row[16]
                     elif len(tab.columns) == 18: #new version avec error details and only uperror
+                        filt = row[15]    
                         Qproflow = row[16]
                         Qprofhigh = row[17]
                     error = row[12]
@@ -770,7 +772,10 @@ def plot_haserprofile(input_dir, output_dir=None, comet_name=''):
                     ax.set_xlabel('Log rho (km)')
                     
                     plt.legend(loc='lower left')
-                    plt.suptitle(imname + ' ' + comet_name + ' ' + filt + '\nQ = ' + str(Q) +' molec/s (uncertainty ' + str(error) + ')')
+                    haser_magorder = int(math.modf(math.log10(Q))[1])
+                    haser_str = "{:.2f}".format(Q/10**haser_magorder)
+                    error_str = "{:.2f}".format(error/10**haser_magorder)
+                    plt.suptitle(f"{imname} {comet_name} {filt}\nQ = {haser_str} ± {error_str} E{haser_magorder} s-1")
                     
                     plt.tight_layout()
                     plt.savefig(os.path.join(save_dir, imname[:-9] + '_haserprofile.png'), bbox_inches='tight')
