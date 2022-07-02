@@ -197,7 +197,6 @@ for path in list_to_reduce:
             centerlist = pd.read_csv(os.path.join(param['tmpout'], 'centerlist'),header=None, sep=' ',usecols=[0,2,3,5,10], names=['file', 'xcent', 'ycent', 'filt', 'ctnmethod'])
             print(centerlist)
             while True:
-                print(comet)
                 solocomete = False
                 inp = input('''check individual images for centering.
                             - Relaunch afrhocalcext for all images (r)
@@ -225,6 +224,9 @@ for path in list_to_reduce:
                         print('YCENTER wrong format')
                     try:
                         BOXSIZE = int(inp.split(' ')[3])
+                        if BOXSIZE !=0 and BOXSIZE < 3:
+                            print('Use a BOXSIZE value <= 3 or 0 to use the exact values of XCENTER and YCENTER')
+                            continue
                     except:
                         solocomete = False
                         print('BOXSIZE wrong format')
