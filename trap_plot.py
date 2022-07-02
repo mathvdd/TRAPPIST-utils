@@ -713,9 +713,13 @@ def plot_haserprofile(input_dir, output_dir=None, comet_name=''):
                     imname = row[0]
                     filt = row[14]
                     Q = row[11]
-                    Qproflow = row[15]
-                    Qprofhigh = row[16]
-                    error = (row[12] + row [13])/2
+                    if len(tab.columns) == 17: #old version
+                        Qproflow = row[15]
+                        Qprofhigh = row[16]
+                    elif len(tab.columns) == 18: #new version avec error details and only uperror
+                        Qproflow = row[16]
+                        Qprofhigh = row[17]
+                    error = row[12]
                     haserprofile_path = os.path.join(path, 'haserprofile_' + imname)
                     haserprofilecont_path = os.path.join(path, 'haserprofilecont_' + imname)
                     hasermodel_path = os.path.join(path, 'hasermodel_' + imname)

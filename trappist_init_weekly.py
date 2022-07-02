@@ -22,7 +22,7 @@ import trap_plot
 # INPUT PARAMETERS
 startdate = '2010-06-20' #the night starting
 enddate = '2022-06-30' #starting that night not included
-obs = 'TS'
+obs = 'TN'
 comets = ['CK19L030'] # list of comets to take into account. set empty to take all 
 skip = True # skip raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
