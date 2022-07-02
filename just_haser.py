@@ -11,9 +11,9 @@ from trapconfig import param
 import os
 import shutil
 
-comet = 'CK17K020'
-night = '2022-06-29'
-obs = 'TS'
+comet = 'CK19L030'
+night = '2022-01-08'
+obs = 'TN'
 
 reduced_dir = os.path.join(param['reduced'], comet, night.replace('-','') + obs)
 profiles_dir = os.path.join(reduced_dir, "profiles")

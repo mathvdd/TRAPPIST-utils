@@ -480,7 +480,7 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     try:
                         fig,ax1=plot_this_thing()
                         
-                        plt.suptitle(fitsname + ' ' + comet_name + ' ' + filt + '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ')')
+                        plt.suptitle(comet_name + ' ' + filt + ' ' + fitsname +  '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ')')
                         ax1.imshow(image_data[pixelcropping:-pixelcropping,pixelcropping:-pixelcropping], cmap='pink', norm=colors.LogNorm(vmin=np.median(image_data), vmax=image_data[int(xcent), int(ycent)]*2))
                         fig.savefig(os.path.join(save_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
                     except:
@@ -488,7 +488,7 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         plt.close()
                         fig,ax1=plot_this_thing()
                        
-                        plt.suptitle(fitsname + ' ' + comet_name + ' ' + filt + '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ') error logscale')
+                        plt.suptitle(comet_name + ' ' + filt + ' ' + fitsname + '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ') error logscale')
                         ax1.imshow(image_data[pixelcropping:-pixelcropping,pixelcropping:-pixelcropping], cmap='binary')
                         plt.savefig(os.path.join(save_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
                     
@@ -775,7 +775,7 @@ def plot_haserprofile(input_dir, output_dir=None, comet_name=''):
                     haser_magorder = int(math.modf(math.log10(Q))[1])
                     haser_str = "{:.2f}".format(Q/10**haser_magorder)
                     error_str = "{:.2f}".format(error/10**haser_magorder)
-                    plt.suptitle(f"{imname} {comet_name} {filt}\nQ = {haser_str} ± {error_str} E{haser_magorder} s-1")
+                    plt.suptitle(f"{comet_name} {filt} {imname}\nQ({filt}) = {haser_str} ± {error_str} E{haser_magorder} s-1")
                     
                     plt.tight_layout()
                     plt.savefig(os.path.join(save_dir, imname[:-9] + '_haserprofile.png'), bbox_inches='tight')
