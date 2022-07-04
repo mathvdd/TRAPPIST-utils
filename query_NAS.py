@@ -91,8 +91,8 @@ def NAS_build(NAS_path, export_path, keyword=''):
     
 
 #NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", "202202")
-if __name__ == "__main__":
-    NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202206')
+# if __name__ == "__main__":
+#     NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202206')
     
 def queryZ(NAS_path):
 
@@ -237,10 +237,6 @@ def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=[''
     LIGHTS = NASfitstable.loc[NASfitstable['object'].isin([obj_name])
                               & (NASfitstable['start_night'] >= startdate)
                               & (NASfitstable['start_night'] <= enddate)]
-        
-    filtlist = LIGHTS['filter'].drop_duplicates().values.tolist()
-    exptimelist = LIGHTS['exptime'].drop_duplicates().values.tolist()
-    exptimelist.append(15)
     nightslist = LIGHTS['start_night'].drop_duplicates().tolist()
 
     for night in nightslist:
@@ -248,6 +244,11 @@ def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=[''
         upper_interval = night + datetime.timedelta(days = dayinterval)
         
         LIGHTtable = LIGHTS.loc[(LIGHTS['start_night'] == night)]
+        
+        filtlist = LIGHTtable['filter'].drop_duplicates().values.tolist()
+        exptimelist = LIGHTtable['exptime'].drop_duplicates().values.tolist()
+        exptimelist.append(15)
+        
         FLATtable = NASfitstable.loc[NASfitstable['type'].isin(['FLAT', 'Flat Frame'])
                                      & (NASfitstable['start_night'] > lower_interval)
                                      & (NASfitstable['start_night'] <= upper_interval)
@@ -446,22 +447,22 @@ def lookforcalib_old(copy=True):
     ### PARAMETERS
     
     ### uncomment line bellow if querying for a light image
-    # imtype = ['LIGHT', 'Light Frame']
-    obj = "0019P" #target name in the fits header. only for lights and for the output path
+    imtype = ['LIGHT', 'Light Frame']
+    obj = "CK19L030" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
-    imtype = ['DARK', 'Dark Frame']
-    exptime = 45 #exposure time. only for darks
+    # imtype = ['DARK', 'Dark Frame']
+    exptime = 1500 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
     # imtype = ['FLAT', 'Flat Frame']
-    filt = 'OH' #filter. only for flats
+    filt = 'BC' #filter. only for flats
     
     ### uncomment line bellow if querying for bias frames
     # imtype = ['BIAS', 'Bias Frame']
     
-    telescope = 'TN'
-    night = (2022,2,2) ### set the observation night
+    telescope = 'TS'
+    night = (2022,5,23) ### set the observation night
     
     dayinterval = 0 # starting point for the search
     
@@ -504,7 +505,7 @@ def lookforcalib_old(copy=True):
                                           & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)
                                           & (NASfitstable['object'] == obj)
-                                           # & (NASfitstable['filter'] == filt)
+                                            & (NASfitstable['filter'] == filt)
                                           ]
         elif 'BIAS' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
@@ -535,8 +536,10 @@ def lookforcalib_old(copy=True):
                             shutil.copy(item, os.path.join(output_fold, 'extra' + filt + item.split('/')[-1]))
                         elif 'BIAS' in imtype:
                             shutil.copy(item, os.path.join(output_fold, 'extra' + '0' + item.split('/')[-1]))
+                        elif 'LIGHT' in imtype:
+                            shutil.copy(item, os.path.join(output_fold[:-12], item.split('/')[-1]))
                         print("copied", item.split('/')[-1])
             break
 
-
-# lookforcalib_old(copy=True)
+# if __name__ == "__main__":
+#     lookforcalib_old(copy=True)

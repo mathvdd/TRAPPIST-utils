@@ -117,7 +117,7 @@ def check_calib(fitstable, filt_list=filt_list):
     
     nb_flat_dark = ((fitstable['type'].isin(['DARK', 'Dark Frame'])) & (fitstable.exptime == 15)).sum()
     print("\nNumber of dark frames for flat correction (exptime = 15s):", nb_flat_dark, "\n")
-    print('\nNOTE: If no right exposure time dark is found, a linear extrapolation of another master dark will be used\n(45->15;60->15;90->15;900->1200;1200->1500;1500->1200; see progtrap3.cl)\n')
+    print('\nNOTE: If no right exposure time dark is found, a linear extrapolation of another master dark will be used\n(30->15;45->15;60->15;90->15;900->1200;1200->1500;1500->1200; see progtrap3.cl)\n')
     warning_flag = False
     for index, row in lighttable.iterrows() :
         if row['nb_flat'] == 0:
