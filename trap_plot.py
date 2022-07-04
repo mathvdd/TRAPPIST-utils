@@ -475,6 +475,8 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         ax2.axvline(x=arcsec10k/pixsize,color='blue', alpha=0.5, linestyle='--')
                         ax2.set_ylabel('Median flux (ADU/s)')
                         ax2.set_xlabel('Distance from the nucleus (pixel)')
+                        # add a point in 0,0 to visualize wider profile for gaz filter
+                        ax2.plot(0,0, alpha = 0)
                         return fig, ax1
                           
                     try:

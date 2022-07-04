@@ -22,7 +22,7 @@ import trap_plot
 # INPUT PARAMETERS
 startdate = '2010-05-08' #the night starting
 enddate = '2022-06-30' #starting that night not included
-obs = 'TN'
+obs = 'TS'
 comets = ['CK17K020'] # list of comets to take into account. set empty to take all 
 skip = True # skip raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
@@ -82,7 +82,6 @@ for comet in inlist:
     print('Downloading ' + comet)
     output_path = os.path.join(param['raw'], comet, obs)
     query_NAS.get_files(comet, NASfitstable, output_path, dayinterval=7, dateinterval=(startdate, enddate), skip_existing=skip)
-
         
 # makes list of folders to reduce
 list_to_reduce = []
@@ -136,6 +135,14 @@ for path in list_to_reduce:
             print('--- checking for calib files ---')            
             print('\n----------------------------------------------------------------')
             fitstable = trap_reduction.get_fitstable(raw_dir)
+            no_file = False
+            if len(fitstable) == 0:
+                inp = input('no fits file detected. press (s) for skip this night or enter to continue [s/enter]')
+                if inp == 's' or inp == 'S':
+                    no_file = True
+                    break
+                else:
+                    no_file = False
             check_calib_warning, lighttable = trap_reduction.check_calib(fitstable)
             if check_calib_warning == True:
                 inp = input('''Some calibration files are missing!
@@ -164,6 +171,8 @@ for path in list_to_reduce:
                         print('wrong index')
             else:
                 break
+        if no_file == True:
+            continue
         # continue
         print('--- Initating tmpdata and tmpout dirs ---')
         if os.path.exists(param['tmpdata']):
