@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Jul  4 11:34:56 2022
+
+@author: Mathieu
+"""
+
+import os
+import pandas as pd
+
+dir_path = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK19L030/20220201TN'
+radfile_GC = os.path.join(dir_path, 'profiles', 'rad_TRAP.2022-02-01T22:46:18.fits.txt')
+radfile_BC = os.path.join(dir_path, 'profiles', 'rad_TRAP.2022-02-01T22:49:53.fits.txt')
+radfile_C2 = os.path.join(dir_path, 'profiles', 'rad_TRAP.2022-02-01T22:53:15.fits.txt')
+# centerfile = os.path.join(dir_path, 'centering', 'centerlist')
+
+df_GC = pd.read_csv(radfile_GC, header=None, sep="\s+")
+df_BC = pd.read_csv(radfile_GC, header=None, sep="\s+")
+# df_centerfile = pd.read_csv(centerfile, header=None, sep="\s+")
+
+if 'TN' in dir_path:
+    pixsize = 1.2
+elif 'TS' in dir_path:
+    pixsize = 1.3
+
+print(df_BC)

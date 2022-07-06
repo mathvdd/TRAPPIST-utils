@@ -92,7 +92,7 @@ def NAS_build(NAS_path, export_path, keyword=''):
 
 #NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", "202202")
 # if __name__ == "__main__":
-#     NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202206')
+#     NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202207')
     
 def queryZ(NAS_path):
 
@@ -448,7 +448,7 @@ def lookforcalib_old(copy=True):
     
     ### uncomment line bellow if querying for a light image
     imtype = ['LIGHT', 'Light Frame']
-    obj = "CK19L030" #target name in the fits header. only for lights and for the output path
+    obj = "CK20R070" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
     # imtype = ['DARK', 'Dark Frame']
@@ -456,13 +456,13 @@ def lookforcalib_old(copy=True):
         
     ### uncomment line bellow if querying for flat frames
     # imtype = ['FLAT', 'Flat Frame']
-    filt = 'BC' #filter. only for flats
+    filt = 'R' #filter. only for flats
     
     ### uncomment line bellow if querying for bias frames
     # imtype = ['BIAS', 'Bias Frame']
     
     telescope = 'TS'
-    night = (2022,5,23) ### set the observation night
+    night = (2022,7,3) ### set the observation night
     
     dayinterval = 0 # starting point for the search
     
@@ -541,5 +541,5 @@ def lookforcalib_old(copy=True):
                         print("copied", item.split('/')[-1])
             break
 
-# if __name__ == "__main__":
-#     lookforcalib_old(copy=True)
+if __name__ == "__main__":
+    lookforcalib_old(copy=True)
