@@ -248,3 +248,138 @@ class ephemeris:
 # ephemeris.retrieve_param_from_fits(fits_dir)
 # ephemeris.query_input()
 # ephemeris.generate_ephem_files(output_dir)
+
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
+    from trapconfig import param
+    
+    ### PARAMETERS ###
+    comets = ['2017 K2', '2022 E3', '2021 F1',
+               '2021 E3','2020 R7', '2021 G2', '2020 K1', '2021 C5', '2022 A2',
+               '2019 E3', '2020 V2', '2021 P4', '2021 T2',
+               '22P', '29P',
+               '408P', '117P', '61P', '81P', '118P', '116P', '100P', '327P', '71P', '73P',
+               '107P', '169P']
+    observatory = 'TS'
+    night = '2022-07-07'
+    ##################
+    
+    def import_eph(target): #function to import and format the ephemeris
+        print(target)
+        eph.parameters['STEP_SIZE'] = '1 m'
+        eph.parameters['COMMAND'] = target
+        eph.query_horizons()
+        if eph.query_result[-4][:10] == '    Author':
+            pass
+        elif "To SELECT, enter record # (integer), followed by semi-colon.)" in eph.query_result[-3]:
+            last_line = eph.query_result[-5]
+            eph.record = [ elem for elem in last_line.split(" ") if elem != ''][0]
+            #check if the record is the last epoch
+            year_record = [ elem for elem in last_line.split(" ") if elem != ''][1]
+            previous_year = [ elem for elem in eph.query_result[-6].split(" ") if elem != ''][1]
+            if int(previous_year) > int(year_record):
+                print('selected record: ', eph.record)
+                input('WARNING: check the epoch selected is the las one')
+            eph.parameters['COMMAND'] = eph.record
+            eph.query_horizons()
+        else:
+            input('debug this')
+        data = []
+        for line in eph.query_result[eph.query_result.index('$$SOE')+1:eph.query_result.index('$$EOE')]:
+            data.append(line[:-1].split(','))
+        df = pd.DataFrame(data, columns=('date','dateJD', 'sol_marq', 'lun_marq', 'azi', 'elev', 'airmass', 'magex', 'lun_ang', 'lun_ill'))
+        df['date'] =  pd.to_datetime(df['date'], format=' %Y-%b-%d %H:%M')
+        df = df.astype({'elev':'float'})
+        df.reset_index(drop=True, inplace=True)
+        return df
+    
+    #initiate ephemeris
+    eph = ephemeris()
+    eph.parameters['QUANTITIES'] = '4,8,25'
+    if observatory == 'TN':
+        eph.parameters['CENTER'] = 'Z53@399'
+    elif observatory == 'TS':
+        eph.parameters['CENTER'] = 'I40@399'
+    # datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%f')
+    # - datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:%M')
+    eph.parameters['START_TIME'] = datetime.datetime.strptime(night + 'T12:00', '%Y-%m-%dT%H:%M')
+    eph.parameters['STOP_TIME'] = datetime.datetime.strptime(night + 'T12:00', '%Y-%m-%dT%H:%M') + datetime.timedelta(days=1)
+    
+    #initiate the plot
+    fig = plt.figure(figsize=(24,18))
+    ax = fig.gca()
+    
+    # for the moon
+     
+    df_moon = import_eph('301')
+    
+    naut_start = df_moon.loc[df_moon['sol_marq'] == "A"][:1].index[0]
+    naut_end = df_moon.loc[df_moon['sol_marq'] == "A"][-1:].index[0]
+    if len(df_moon.loc[df_moon['elev']>0]):
+        plt.plot(df_moon['date'], df_moon['elev'], ls='dashed', color='black')
+        ax.text(df_moon['date'].iloc[df_moon['elev'].idxmax()],
+                df_moon['elev'].iloc[df_moon['elev'].idxmax()] + 1,
+                'Moon', ha='center')
+    
+    #get and plot the comets
+    for comet in comets:
+        
+        df = import_eph(comet)
+        
+        if len(df.loc[df['elev']>0]):
+            plt.plot(df['date'][naut_start:naut_end], df['elev'][naut_start:naut_end])
+            lunang_start = int(float(df['lun_ang'][naut_start]))
+            lunang_end = int(float(df['lun_ang'][naut_end]))
+            ax.text(df['date'].iloc[df['elev'][naut_start:naut_end].idxmax()],
+                    df['elev'].iloc[df['elev'][naut_start:naut_end].idxmax()] + 1,
+                    f"{comet}\n({str(lunang_start)}-{str(lunang_end)}°)", ha='center')
+    
+    
+    
+    #pretty plot
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+    plt.xlim(df_moon.loc[df_moon['sol_marq'] == "A"][:1]['date'],
+             df_moon.loc[df_moon['sol_marq'] == "A"][-1:]['date'])
+    plt.ylim(0,90)
+    plt.axvline(x=df_moon.loc[df_moon['sol_marq'] == " "][:1]['date'],
+                color='black', ls='dotted', alpha=0.5)
+    plt.axvline(x=df_moon.loc[df_moon['sol_marq'] == " "][-1:]['date'],
+                color='black', ls='dotted', alpha=0.5)
+    plt.axhline(y=20, color='black', ls='dotted')
+    moon_illu_min = int(float(df_moon['lun_ill'][naut_start]))
+    moon_illu_max = int(float(df_moon['lun_ill'][naut_end]))
+    title = f'{night}\nMoon illumination {str(moon_illu_min)}-{str(moon_illu_max)}%'
+    xmiddle = df_moon.loc[df_moon['sol_marq'] == "A"][:1]['date']+ (df_moon.loc[df_moon['sol_marq'] == "A"][-1:]['date'].values[0] - df_moon.loc[df_moon['sol_marq'] == "A"][:1]['date'].values[0])/2
+    ax.text(xmiddle, 80, title, ha='center', backgroundcolor='white', fontsize='large')
+    ax.set_xlabel('Time UT')
+    ax.set_ylabel('Elevation (°)')
+    # airmass from “Revised Optical Air Mass Tables and Approximation Formula”, Kasten F., Young A., Applied Optics, vol 28, no. 22, p. 4735-4738, Nov. 15, 1989.
+    ax2 = ax.twinx()
+    ax2.set_ylim(0,90)
+    plt.yticks(ticks=[10,20,30,40,50,60], labels=[5.6, 2.9, 2.0, 1.6, 1.6, 1.1])
+    ax2.set_ylabel('Airmass')
+    # ax2.set_xticks([10,20,30,40,50])
+    # ax2.set_ylabels([38, 5.6, 2.9, 2, 1.6, 1.6, 1.1])
+    plt.tight_layout()
+    plt.savefig(os.path.join(param['home'],'visibility_plot.png'), bbox_inches='tight')
+    
+
+    
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    
+        

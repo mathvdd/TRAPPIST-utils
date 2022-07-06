@@ -19,9 +19,11 @@ df_GC = pd.read_csv(radfile_GC, header=None, sep="\s+")
 df_BC = pd.read_csv(radfile_GC, header=None, sep="\s+")
 # df_centerfile = pd.read_csv(centerfile, header=None, sep="\s+")
 
+
 if 'TN' in dir_path:
     pixsize = 1.2
 elif 'TS' in dir_path:
     pixsize = 1.3
 
-print(df_BC)
+# 11 44
+

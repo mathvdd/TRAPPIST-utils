@@ -448,7 +448,7 @@ def lookforcalib_old(copy=True):
     
     ### uncomment line bellow if querying for a light image
     imtype = ['LIGHT', 'Light Frame']
-    obj = "CK20R070" #target name in the fits header. only for lights and for the output path
+    obj = "CK21T020" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
     # imtype = ['DARK', 'Dark Frame']
@@ -505,7 +505,7 @@ def lookforcalib_old(copy=True):
                                           & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)
                                           & (NASfitstable['object'] == obj)
-                                            & (NASfitstable['filter'] == filt)
+                                            # & (NASfitstable['filter'] == filt)
                                           ]
         elif 'BIAS' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
