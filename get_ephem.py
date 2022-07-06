@@ -250,10 +250,13 @@ class ephemeris:
 # ephemeris.generate_ephem_files(output_dir)
 
 if __name__ == "__main__":
+    import datetime
     import matplotlib.pyplot as plt
     import matplotlib.dates as mdates
     from trapconfig import param
     
+    dt = datetime.datetime.now()
+
     ### PARAMETERS ###
     comets = ['2017 K2', '2022 E3', '2021 F1',
                 '2021 E3','2020 R7', '2021 G2', '2020 K1', '2021 C5', '2022 A2',
@@ -267,7 +270,7 @@ if __name__ == "__main__":
     
     def import_eph(target): #function to import and format the ephemeris
         print(target)
-        eph.parameters['STEP_SIZE'] = '1 m'
+        eph.parameters['STEP_SIZE'] = '10 m'
         eph.parameters['COMMAND'] = target
         eph.query_horizons()
         if eph.query_result[-4][:10] == '    Author':
@@ -362,9 +365,9 @@ if __name__ == "__main__":
     # ax2.set_xticks([10,20,30,40,50])
     # ax2.set_ylabels([38, 5.6, 2.9, 2, 1.6, 1.6, 1.1])
     plt.tight_layout()
-    plt.show()
+    #plt.show()
     plt.savefig(os.path.join(param['home'],'visibility_plot.png'), bbox_inches='tight')
-    
+    print('Executed in ', datetime.datetime.now() - dt)
 
     
         
