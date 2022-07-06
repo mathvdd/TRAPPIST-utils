@@ -252,10 +252,7 @@ class ephemeris:
 if __name__ == "__main__":
     import datetime
     import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
-    from trapconfig import param
-    
-    dt = datetime.datetime.now()
+    import matplotlib.dates as mdates)
 
     ### PARAMETERS ###
     comets = ['2017 K2', '2022 E3', '2021 F1',
@@ -266,8 +263,10 @@ if __name__ == "__main__":
                 '107P', '169P']
     observatory = 'TS'
     night = '2022-07-07'
+    save_path = '/home/Mathieu/visibility_plot.png'
     ##################
     
+    dt = datetime.datetime.now()
     def import_eph(target): #function to import and format the ephemeris
         print(target)
         eph.parameters['STEP_SIZE'] = '10 m'
@@ -319,6 +318,7 @@ if __name__ == "__main__":
     
     naut_start = df_moon.loc[df_moon['sol_marq'] == "A"][:1].index[0]
     naut_end = df_moon.loc[df_moon['sol_marq'] == "A"][-1:].index[0]
+    
     if len(df_moon.loc[df_moon['elev']>0]):
         plt.plot(df_moon['date'], df_moon['elev'], ls='dashed', color='black')
         ax.text(df_moon['date'].iloc[df_moon['elev'].idxmax()],
@@ -364,10 +364,10 @@ if __name__ == "__main__":
     ax2.set_ylabel('Airmass')
     # ax2.set_xticks([10,20,30,40,50])
     # ax2.set_ylabels([38, 5.6, 2.9, 2, 1.6, 1.6, 1.1])
+    print('Executed in', datetime.datetime.now() - dt)
     plt.tight_layout()
-    #plt.show()
-    plt.savefig(os.path.join(param['home'],'visibility_plot.png'), bbox_inches='tight')
-    print('Executed in ', datetime.datetime.now() - dt)
+    plt.show()
+    plt.savefig(save_path), bbox_inches='tight')
 
     
         
