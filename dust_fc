@@ -9,6 +9,7 @@ Created on Mon Jul  4 11:34:56 2022
 import os
 import pandas as pd
 import math
+import numpy as np
 
 ### PARAMETERS ###
 calrange = (11,40) # range over which to calculates in the radfile
@@ -42,13 +43,20 @@ def calculate_correction(dir_path, calrange):
         df_GC = pd.read_csv(radfile_GC, header=None, sep="\s+")
         F_GC = df_GC.iloc[calrange[1]][13] - df_GC.iloc[calrange[0]][13]
         f_GC = F_GC / F0['GC'] * gamma['GC']
+        corr_GC = True
         if len(df_cf.loc[df_cf[5] == 'C2']) > 0:
             # C2 is used for GC decontamination
             radfile_C2 = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf[5] == 'C2'].iloc[-1][0] + '.txt')
             df_C2 = pd.read_csv(radfile_C2, header=None, sep="\s+")
             F_C2 = df_C2.iloc[calrange[1]][13] - df_C2.iloc[calrange[0]][13]
             f_C2 = F_C2 / F0['C2'] * gamma['C2']
+            corr_C2 = True
+        else:
+            corr_C2 = False
+    else:
+        corr_GC = False
     if len(df_cf.loc[df_cf[5] == 'C3']) > 0 and len(df_cf.loc[df_cf[5] == 'CN']) > 0:
+        corr_CN = True
         # C3 is used for CN decontamination
         radfile_C3 = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf[5] == 'C3'].iloc[-1][0] + '.txt')
         df_C3 = pd.read_csv(radfile_C3, header=None, sep="\s+")
@@ -58,44 +66,94 @@ def calculate_correction(dir_path, calrange):
         radfile_CN = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf[5] == 'CN'].iloc[-1][0] + '.txt')
         df_CN = pd.read_csv(radfile_CN, header=None, sep="\s+")
         F_CN = df_CN.iloc[calrange[1]][13] - df_CN.iloc[calrange[0]][13]
+    else:
+        corr_CN = False
     
     fp_BC = f_BC
-    print('--- Decontamination of the GC filter ---')
-    fp_GC_init = f_GC
-    new_value = 1
-    previous_value = 10
-    print('GC contaminated:', f_GC)
-    while abs(new_value/previous_value) < 1-10e-20:
-        new_value = f_GC - KGC1*f_C2 + KGC3*f_BC**0.1469*fp_GC_init
-        previous_value = fp_GC_init
-        fp_GC_init = new_value
-        print('new_value:', new_value, '\n convergence:', abs(new_value/previous_value))
-    fp_GC = new_value
-    print('correction factor:', fp_GC/f_GC )
+    
+    if corr_GC == True:
+        print('--- Compute BC-GC continuum color ---')
+        if corr_C2 == True:
+            # Decontamination of the GC filter
+            fp_GC_init = f_GC
+            new_value = 1 # random parameters to start the loop
+            previous_value = 10
+            while abs(new_value/previous_value) < 1-10e-20:
+                new_value = f_GC - KGC1*f_C2 + KGC3*fp_BC**0.1469*fp_GC_init**0.8531
+                previous_value = fp_GC_init
+                fp_GC_init = new_value
+                print('new_value:', new_value, '\n convergence:', abs(new_value/previous_value))
+            fp_GC = new_value
+            GC_factor = fp_GC/f_GC
+            print('correction factor:', GC_factor)
 
-    print('--- Compute BC-GC continuum color ---')
-    R_BCGC = 1.235* (2.5*math.log10(fp_GC/fp_BC) - (ms['BC']-ms['GC']) )
+            R_BCGCcC2 = 1.235* (2.5*math.log10(fp_GC/fp_BC) - (ms['BC']-ms['GC']) )
+        else:
+            GC_factor = 1
+        R_BCGC = 1.235* (2.5*math.log10(f_GC/fp_BC) - (ms['BC']-ms['GC']) )
+    else:
+        GC_factor = 0
+        R_BCGC = 0
     print('BC-GC color:', R_BCGC)
-
-    print('--- Correction on C2 ---')
-    fc_C2 = fp_BC*10**(-0.4* (ms['C2']-ms['BC'])) * 10**(0.2764*R_BCGC)
+    
+    # correction for the narrow bands, with and without the GC and the C2 GC correction
+    
+    if corr_GC == True:
+        if corr_C2 == True:
+            fc_C2 = fp_BC*10**(-0.4* (ms['C2']-ms['BC'])) * 10**(0.2764*R_BCGCcC2)
+            corr_iraf_C2cGCC2 = fc_C2*F0['C2']/gamma['C2']/F_BC
+            fc_C3 = fp_BC*10**(-0.4* (ms['C3']-ms['BC'])) * 10**(-0.1552*R_BCGCcC2)
+            corr_iraf_C3cGCC2 = fc_C3*F0['C3']/gamma['C3']/F_BC
+            fc_OH = fp_BC*10**(-0.4* (ms['OH']-ms['BC'])) * 10**(-0.5440*R_BCGCcC2)
+            corr_iraf_OHcGCC2 = fc_OH*F0['OH']/gamma['OH']/F_BC
+            fc_CN = fp_BC*10**(-0.4* (ms['CN']-ms['BC'])) * 10**(-0.2320*R_BCGCcC2)
+            corr_iraf_CNcGCC2 = fc_CN*F0['CN']/gamma['CN']/F_BC
+            if corr_CN == True:
+                corr_iraf_CNC3cGCC2 = (fc_CN*F0['CN'] + (F_C3- corr_iraf_C3cGCC2*F_BC)*1.427e-3 )/gamma['CN']/F_BC
+            else:
+                corr_iraf_CNC3cGCC2 = np.nan
+        else:
+            corr_iraf_C2cGCC2 = np.nan
+            corr_iraf_C3cGCC2 = np.nan
+            corr_iraf_OHcGCC2 = np.nan
+            corr_iraf_CNcGCC2 = np.nan
+        fc_C2 = fp_BC*10**(-0.4* (ms['C2']-ms['BC'])) * 10**(0.2764*R_BCGC)
+        corr_iraf_C2cGC = fc_C2*F0['C2']/gamma['C2']/F_BC
+        fc_C3 = fp_BC*10**(-0.4* (ms['C3']-ms['BC'])) * 10**(-0.1552*R_BCGC)
+        corr_iraf_C3cGC = fc_C3*F0['C3']/gamma['C3']/F_BC
+        fc_OH = fp_BC*10**(-0.4* (ms['OH']-ms['BC'])) * 10**(-0.5440*R_BCGC)
+        corr_iraf_OHcGC = fc_OH*F0['OH']/gamma['OH']/F_BC
+        fc_CN = fp_BC*10**(-0.4* (ms['CN']-ms['BC'])) * 10**(-0.2320*R_BCGC)
+        corr_iraf_CNcGC = fc_CN*F0['CN']/gamma['CN']/F_BC
+        if corr_CN == True:
+            corr_iraf_CNC3cGC = (fc_CN*F0['CN'] + (F_C3- corr_iraf_C3cGC*F_BC)*1.427e-3 )/gamma['CN']/F_BC
+        else:
+            corr_iraf_CNC3cGC = np.nan
+    else:
+        corr_iraf_C2cGC = np.nan
+        corr_iraf_C3cGC = np.nan
+        corr_iraf_OHcGC = np.nan
+        corr_iraf_CNcGC = np.nan
+    fc_C2 = fp_BC*10**(-0.4* (ms['C2']-ms['BC'])) * 10**(0.2764*0)
     corr_iraf_C2 = fc_C2*F0['C2']/gamma['C2']/F_BC
-    print('correction factor C2:', corr_iraf_C2)
-    print('--- Correction on C3 ---')
-    fc_C3 = fp_BC*10**(-0.4* (ms['C3']-ms['BC'])) * 10**(-0.1552*R_BCGC)
+    fc_C3 = fp_BC*10**(-0.4* (ms['C3']-ms['BC'])) * 10**(-0.1552*0)
     corr_iraf_C3 = fc_C3*F0['C3']/gamma['C3']/F_BC
-    print('correction factor C3:', corr_iraf_C3)
-    print('--- Correction on OH ---')
-    fc_OH = fp_BC*10**(-0.4* (ms['OH']-ms['BC'])) * 10**(-0.5440*R_BCGC)
+    fc_OH = fp_BC*10**(-0.4* (ms['OH']-ms['BC'])) * 10**(-0.5440*0)
     corr_iraf_OH = fc_OH*F0['OH']/gamma['OH']/F_BC
-    print('correction factor OH:', corr_iraf_OH)
-    print('--- Correction on CN ---')
-    fc_CN = fp_BC*10**(-0.4* (ms['CN']-ms['BC'])) * 10**(-0.2320*R_BCGC)
+    fc_CN = fp_BC*10**(-0.4* (ms['CN']-ms['BC'])) * 10**(-0.2320*0)
     corr_iraf_CN = fc_CN*F0['CN']/gamma['CN']/F_BC
-    print('correction factor CN:', corr_iraf_CN)
-
-    print()
-    print(((F_CN - corr_iraf_CN*F_BC) - (F_C3- corr_iraf_C3*F_BC) * 7.875e-2) / (F_CN - corr_iraf_CN*F_BC))
+    if corr_CN == True:
+        corr_iraf_CNC3 = (fc_CN*F0['CN'] + (F_C3- corr_iraf_C3*F_BC)*1.427e-3 )/gamma['CN']/F_BC
+    else:
+        corr_iraf_CNC3 = np.nan
+    # contamination of C3 in CN
+    
+        
+    
+    print(corr_iraf_CN, corr_iraf_CNcGC, corr_iraf_CNcGCC2)
+    print(corr_iraf_CNC3, corr_iraf_CNC3cGC, corr_iraf_CNC3cGCC2)
+        # print()
+        # print(((F_CN - corr_iraf_CN*F_BC) - (F_C3- corr_iraf_C3*F_BC) * 7.875e-2) / (F_CN - corr_iraf_CN*F_BC))
 
 
 
