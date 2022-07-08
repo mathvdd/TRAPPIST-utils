@@ -8,22 +8,125 @@ Created on Mon Jul  4 11:34:56 2022
 
 import os
 import pandas as pd
+import math
 
-dir_path = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK19L030/20220201TN'
-radfile_GC = os.path.join(dir_path, 'profiles', 'rad_TRAP.2022-02-01T22:46:18.fits.txt')
-radfile_BC = os.path.join(dir_path, 'profiles', 'rad_TRAP.2022-02-01T22:49:53.fits.txt')
-radfile_C2 = os.path.join(dir_path, 'profiles', 'rad_TRAP.2022-02-01T22:53:15.fits.txt')
-# centerfile = os.path.join(dir_path, 'centering', 'centerlist')
+### PARAMETERS ###
+calrange = (11,40) # range over which to calculates in the radfile
 
-df_GC = pd.read_csv(radfile_GC, header=None, sep="\s+")
-df_BC = pd.read_csv(radfile_GC, header=None, sep="\s+")
-# df_centerfile = pd.read_csv(centerfile, header=None, sep="\s+")
+dir_path = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK17K020/20220628TS'
+
+gamma = {'BC':1,'GC':1,'C2':5.433e-3, 'C3':3.352e-3, 'OH':1.698e-2, 'CN':1.812e-2}
+F0 = {'BC':6.21e-9,'GC':3.616e-9,'C2':3.887e-9, 'C3': 8.16e-9, 'OH':10.56e-9, 'CN':8.6e-9}
+ms = {'BC':0,'GC':-0.507,'C2':-0.423, 'C3':0.497, 'OH':1.791, 'CN':1.031}
+KGC1 = 0.0404
+KGC3 = 0.0373
+
+def calculate_correction(dir_path, calrange):
+    # open centerfile to have a filelist
+    centerfile = os.path.join(dir_path, 'centering', 'centerlist')
+    df_cf = pd.read_csv(centerfile, header=None, sep="\s+")
+    if len(df_cf.loc[df_cf[5] == 'BC']) > 0:
+        radfile_BC = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf[5] == 'BC'].iloc[-1][0] + '.txt')
+        df_BC = pd.read_csv(radfile_BC, header=None, sep="\s+")
+        # fluxes as we use them for calibration
+        # in iraf, we use a coefficient in front of the BC flux, unlike how it is done in A'Hearn 2000...
+        F_BC = df_BC.iloc[calrange[1]][13] - df_BC.iloc[calrange[0]][13]
+        # ... so need to convert them and work with those fluxes and calculate the coefficient for iraf later
+        f_BC = F_BC / F0['BC'] * gamma['BC']
+    else:
+        print('No BC file found for', dir_path)
+        return
+    if len(df_cf.loc[df_cf[5] == 'GC']) > 0:
+        # GC is used to calculate the continuum color
+        radfile_GC = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf[5] == 'GC'].iloc[-1][0] + '.txt')
+        df_GC = pd.read_csv(radfile_GC, header=None, sep="\s+")
+        F_GC = df_GC.iloc[calrange[1]][13] - df_GC.iloc[calrange[0]][13]
+        f_GC = F_GC / F0['GC'] * gamma['GC']
+        if len(df_cf.loc[df_cf[5] == 'C2']) > 0:
+            # C2 is used for GC decontamination
+            radfile_C2 = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf[5] == 'C2'].iloc[-1][0] + '.txt')
+            df_C2 = pd.read_csv(radfile_C2, header=None, sep="\s+")
+            F_C2 = df_C2.iloc[calrange[1]][13] - df_C2.iloc[calrange[0]][13]
+            f_C2 = F_C2 / F0['C2'] * gamma['C2']
+    if len(df_cf.loc[df_cf[5] == 'C3']) > 0 and len(df_cf.loc[df_cf[5] == 'CN']) > 0:
+        # C3 is used for CN decontamination
+        radfile_C3 = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf[5] == 'C3'].iloc[-1][0] + '.txt')
+        df_C3 = pd.read_csv(radfile_C3, header=None, sep="\s+")
+        F_C3 = df_C3.iloc[calrange[1]][13] - df_C3.iloc[calrange[0]][13]
+        f_C3 = F_C3 / F0['C3'] * gamma['C3']
+
+        radfile_CN = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf[5] == 'CN'].iloc[-1][0] + '.txt')
+        df_CN = pd.read_csv(radfile_CN, header=None, sep="\s+")
+        F_CN = df_CN.iloc[calrange[1]][13] - df_CN.iloc[calrange[0]][13]
+    
+    fp_BC = f_BC
+    print('--- Decontamination of the GC filter ---')
+    fp_GC_init = f_GC
+    new_value = 1
+    previous_value = 10
+    print('GC contaminated:', f_GC)
+    while abs(new_value/previous_value) < 1-10e-20:
+        new_value = f_GC - KGC1*f_C2 + KGC3*f_BC**0.1469*fp_GC_init
+        previous_value = fp_GC_init
+        fp_GC_init = new_value
+        print('new_value:', new_value, '\n convergence:', abs(new_value/previous_value))
+    fp_GC = new_value
+    print('correction factor:', fp_GC/f_GC )
+
+    print('--- Compute BC-GC continuum color ---')
+    R_BCGC = 1.235* (2.5*math.log10(fp_GC/fp_BC) - (ms['BC']-ms['GC']) )
+    print('BC-GC color:', R_BCGC)
+
+    print('--- Correction on C2 ---')
+    fc_C2 = fp_BC*10**(-0.4* (ms['C2']-ms['BC'])) * 10**(0.2764*R_BCGC)
+    corr_iraf_C2 = fc_C2*F0['C2']/gamma['C2']/F_BC
+    print('correction factor C2:', corr_iraf_C2)
+    print('--- Correction on C3 ---')
+    fc_C3 = fp_BC*10**(-0.4* (ms['C3']-ms['BC'])) * 10**(-0.1552*R_BCGC)
+    corr_iraf_C3 = fc_C3*F0['C3']/gamma['C3']/F_BC
+    print('correction factor C3:', corr_iraf_C3)
+    print('--- Correction on OH ---')
+    fc_OH = fp_BC*10**(-0.4* (ms['OH']-ms['BC'])) * 10**(-0.5440*R_BCGC)
+    corr_iraf_OH = fc_OH*F0['OH']/gamma['OH']/F_BC
+    print('correction factor OH:', corr_iraf_OH)
+    print('--- Correction on CN ---')
+    fc_CN = fp_BC*10**(-0.4* (ms['CN']-ms['BC'])) * 10**(-0.2320*R_BCGC)
+    corr_iraf_CN = fc_CN*F0['CN']/gamma['CN']/F_BC
+    print('correction factor CN:', corr_iraf_CN)
+
+    print()
+    print(((F_CN - corr_iraf_CN*F_BC) - (F_C3- corr_iraf_C3*F_BC) * 7.875e-2) / (F_CN - corr_iraf_CN*F_BC))
 
 
-if 'TN' in dir_path:
-    pixsize = 1.2
-elif 'TS' in dir_path:
-    pixsize = 1.3
+
+    
+    return
+
+calculate_correction(dir_path, calrange)
+
+
+# if 'TN' in dir_path:
+#     pixsize = 1.2
+# elif 'TS' in dir_path:
+#     pixsize = 1.3
 
 # 11 44
+
+# fluxes as we use them for calibration
+# in iraf, we use a coefficient in front of the BC flux, unlike how it is done in A'Hearn 2000...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

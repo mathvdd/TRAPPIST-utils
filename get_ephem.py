@@ -250,17 +250,18 @@ class ephemeris:
 # ephemeris.generate_ephem_files(output_dir)
 
 if __name__ == "__main__":
-    import datetime
     import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates)
+    import matplotlib.dates as mdates
 
     ### PARAMETERS ###
-    comets = ['2017 K2', '2022 E3', '2021 F1',
-                '2021 E3','2020 R7', '2021 G2', '2020 K1', '2021 C5', '2022 A2',
-                '2019 E3', '2020 V2', '2021 P4', '2021 T2',
-                '22P', '29P',
-                '408P', '117P', '61P', '81P', '118P', '116P', '100P', '327P', '71P', '73P',
-                '107P', '169P']
+    comets = ['2017 K2', '2022 E3', '2021 F1'
+              # ,
+              #   '2021 E3','2020 R7', '2021 G2', '2020 K1', '2021 C5', '2022 A2',
+              #   '2019 E3', '2020 V2', '2021 P4', '2021 T2',
+              #   '22P', '29P',
+              #   '408P', '117P', '61P', '81P', '118P', '116P', '100P', '327P', '71P', '73P',
+              #   '107P', '169P'
+              ]
     observatory = 'TS'
     night = '2022-07-07'
     save_path = '/home/Mathieu/visibility_plot.png'
@@ -269,7 +270,7 @@ if __name__ == "__main__":
     dt = datetime.datetime.now()
     def import_eph(target): #function to import and format the ephemeris
         print(target)
-        eph.parameters['STEP_SIZE'] = '10 m'
+        eph.parameters['STEP_SIZE'] = '1 m'
         eph.parameters['COMMAND'] = target
         eph.query_horizons()
         if eph.query_result[-4][:10] == '    Author':
@@ -367,7 +368,7 @@ if __name__ == "__main__":
     print('Executed in', datetime.datetime.now() - dt)
     plt.tight_layout()
     plt.show()
-    plt.savefig(save_path), bbox_inches='tight')
+    plt.savefig(save_path, bbox_inches='tight')
 
     
         
