@@ -63,7 +63,7 @@ Path configuration is in traputils.conf. If the file is copied in the home direc
         ephemeris: ephemeris object (see get_ephem.py)
         fitstable: table containing the fits files info (see get_fitstable())
         ZPparams, optional: table containing constant values in the calib.dat file. default should be fine at all time
-
+        output_dir (str), optional, default=None: if not given, output in calib dir 
 
 
 **clreduce**(iraf_dir, conda=True):

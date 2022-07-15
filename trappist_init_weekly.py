@@ -20,11 +20,11 @@ import trap_plot
 
 ########################
 # INPUT PARAMETERS
-startdate = '2022-06-25' #the night starting
-enddate = '2022-07-05' #starting that night not included
+startdate = '2021-07-07' #the night starting
+enddate = '2021-07-08' #starting that night not included
 obs = 'TS'
-comets = ['CK17K020'] # list of comets to take into account. set empty to take all 
-skip = True # skip raw data directory donwload if data already in raw_data.
+comets = ['0007P'] # list of comets to take into account. set empty to take all 
+skip = False # skip raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
 
@@ -111,7 +111,7 @@ for path in list_to_reduce:
         if os.path.exists(reduced_dir) and skip == False:
             inp = input('reduced data detected in ' + reduced_dir + '. Delete old and reduce (d) or skip night (s)?')
             if inp == 'd' or inp =="D":
-                shutil.rmtree(reduced_dir)
+                # shutil.rmtree(reduced_dir)
                 reduce_flag = True
                 break
             elif inp == 's' or inp =="S":
@@ -195,7 +195,7 @@ for path in list_to_reduce:
         ephemeris.generate_ephem_files(param['tmpout'])
         
         print('--- generating calib file ---')
-        ZP_warning = trap_reduction.generate_ZP(param['calib'], ephemeris, fitstable)
+        ZP_warning = trap_reduction.generate_ZP(param['calib'], ephemeris, fitstable, output_dir=param['tmpout'])
         if ZP_warning == True:
             input("press enter")
         pixsize = trap_reduction.set_pixsize_in_clafrhocalcext(fitstable)

@@ -186,7 +186,7 @@ def get_fitstable(raw_dir):
                         fitstable.loc[fitstable.shape[0]] = [imfile, imtype, imfilter, imexptime, imobservatory]
     return fitstable
 
-def generate_ZP(calib_dir, ephemeris, fitstable, ZPparams=ZP):
+def generate_ZP(calib_dir, ephemeris, fitstable, ZPparams=ZP, output_dir=None):
     """
     Generate calib.dat file with closest zero points
     
@@ -195,6 +195,7 @@ def generate_ZP(calib_dir, ephemeris, fitstable, ZPparams=ZP):
         ephemeris: ephemeris object (see get_ephem.py)
         fitstable: table containing the fits files info (see get_fitstable())
         ZPparams, optional: table containing constant values in the calib.dat file. default should be fine at all time
+        output_dir (str), optional, default=None: if not given, output in calib dir 
     """
     import datetime
     import jdcal
@@ -233,7 +234,11 @@ def generate_ZP(calib_dir, ephemeris, fitstable, ZPparams=ZP):
     # get the list of matching filters and print the calib file
     filtlist = fitstable.loc[fitstable['type'].isin(['LIGHT', 'Light Frame']), 'filt'].drop_duplicates().values.tolist()
 
-    with open(os.path.join(calib_dir, "calib.dat"), 'w') as f:
+    if output_dir == None:
+        output_path = os.path.join(calib_dir, "calib.dat")
+    else:
+        output_path = os.path.join(output_dir, "calib.dat")
+    with open(output_path, 'w') as f:
         # the Rc filter is refered as R in the fits headers and the calib.dat file
         ZPtable_closest['filt'] = ZPtable_closest['filt'].replace(['Rc'],'R')
         ZPtable_closest['filt'] = ZPtable_closest['filt'].replace(['Ic'],'I')
