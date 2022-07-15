@@ -464,7 +464,7 @@ def lookforcalib_old(copy=True):
     telescope = 'TS'
     night = (2021,7,7) ### set the observation night
     
-    dayinterval = 0 # starting point for the search
+    dayinterval = 11 # starting point for the search
     
     ####################################
     

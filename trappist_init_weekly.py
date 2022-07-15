@@ -16,7 +16,7 @@ import trap_reduction
 import shutil
 import get_ephem
 import trap_plot
-
+import phase_angle
 
 ########################
 # INPUT PARAMETERS
@@ -111,7 +111,7 @@ for path in list_to_reduce:
         if os.path.exists(reduced_dir) and skip == False:
             inp = input('reduced data detected in ' + reduced_dir + '. Delete old and reduce (d) or skip night (s)?')
             if inp == 'd' or inp =="D":
-                shutil.rmtree(reduced_dir)
+                # shutil.rmtree(reduced_dir)
                 reduce_flag = True
                 break
             elif inp == 's' or inp =="S":
@@ -256,6 +256,7 @@ for path in list_to_reduce:
                 print('continuing script')
                 break
         trap_reduction.clean_afrhotot(param['tmpout'])
+        phase_angle.generate_palist_tmpout(comet, obs, param['tmpout'])
         print(len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]))
         if len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]) > 0:            
        	    print('--- initiating haserinput ---')
@@ -339,6 +340,9 @@ for path in list_to_reduce:
                     shutil.copy(os.path.join(path2, file), os.path.join(haser_dir, file))
                     print('copied', file, "in reduced dir")
                 elif 'center' in file and 'tmp' not in file:
+                    shutil.copy(os.path.join(path2, file), os.path.join(centering_dir, file))
+                    print('copied', file, "in reduced dir")
+                elif 'palist' in file and 'tmp' not in file:
                     shutil.copy(os.path.join(path2, file), os.path.join(centering_dir, file))
                     print('copied', file, "in reduced dir")
                 # elif 'tmp' not in file:
