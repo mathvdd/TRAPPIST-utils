@@ -111,7 +111,7 @@ for path in list_to_reduce:
         if os.path.exists(reduced_dir) and skip == False:
             inp = input('reduced data detected in ' + reduced_dir + '. Delete old and reduce (d) or skip night (s)?')
             if inp == 'd' or inp =="D":
-                # shutil.rmtree(reduced_dir)
+                shutil.rmtree(reduced_dir)
                 reduce_flag = True
                 break
             elif inp == 's' or inp =="S":
