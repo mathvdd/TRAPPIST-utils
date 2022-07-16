@@ -93,3 +93,15 @@ def generate_palist_tmpout(comet, observatory, working_folder=param['tmpout']):
                 pa_table = pd.concat([pa_table, pa])
         path = os.path.join(working_folder, 'palist')
         pa_table.sort_values(by=['imname']).to_csv(path, index=False)
+
+def schleicher_0deg(afrho, pa):
+    u_pa = pf_schleicher.loc[pf_schleicher['pa'] > pa][:1]['pa'].values[0]
+    l_pa = pf_schleicher.loc[pf_schleicher['pa'] <= pa][-1:]['pa'].values[0]
+    u_pf = pf_schleicher.loc[pf_schleicher['pa'] > pa][:1]['0deg'].values[0]
+    l_pf = pf_schleicher.loc[pf_schleicher['pa'] <= pa][-1:]['0deg'].values[0]
+    pf =  l_pf + (u_pf-l_pf)*((pa-l_pa)/(u_pa-l_pa))
+    
+    afrho_corr = afrho / pf
+    return afrho_corr
+    
+schleicher_0deg(10, 5.9)
