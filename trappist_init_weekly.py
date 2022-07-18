@@ -20,11 +20,11 @@ import phase_angle
 
 ########################
 # INPUT PARAMETERS
-startdate = '2021-07-07' #the night starting
-enddate = '2021-07-08' #starting that night not included
+startdate = '2022-06-25' #the night starting
+enddate = '2022-07-15' #starting that night not included
 obs = 'TS'
-comets = ['0007P'] # list of comets to take into account. set empty to take all 
-skip = False # skip raw data directory donwload if data already in raw_data.
+comets = [] # list of comets to take into account. set empty to take all 
+skip = True # skip raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
 
