@@ -10,54 +10,105 @@ import os
 import pandas as pd
 import math
 import numpy as np
+from trapconfig import param
+import query_NAS
 
 ### PARAMETERS ###
-calrange = (0,10) # range over which to calculates in the radfile
+calrange = (0,6) # range over which to sample the flux in the radfile in log(rho)
 
 # dir_path = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK19L030/20220427TS'
-dir_path = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK17K020/20220629TS'
+dir_path = os.path.join(param['reduced'], 'CK17K020', '20220506TS')
 
 gamma = {'BC':1,'GC':1,'RC':1,'C2':5.433e-3, 'C3':3.352e-3, 'OH':1.698e-2, 'CN':1.812e-2}
 F0 = {'BC':6.21e-9,'GC':3.616e-9,'RC':1.316e-9,'C2':3.887e-9, 'C3': 8.16e-9, 'OH':10.56e-9, 'CN':8.6e-9}
 ms = {'BC':0,'GC':-0.507,'RC':-1.276,'C2':-0.423, 'C3':0.497, 'OH':1.791, 'CN':1.031}
 KGC1 = 0.0404
 KGC3 = 0.0373
+pixsize = {'TN':2*0.6,'TS':2*0.65}
+
+def look_for_badnight(images, result_path):
+    """
+
+    Parameters
+    ----------
+    images : list or pd serie
+        List of images to check
+    result_path : str
+        path to the file containing the results and comments on the nights
+
+    Returns
+    -------
+    A list of boolean the same size as nights. will return False if the imaged is flagged #d or #m
+
+    """
+    def import_database(path):
+        db = pd.read_csv(path)
+        db['start_night'] =  pd.to_datetime(db['start_night'], format='%Y-%m-%dT%H:%M:%S.%f')
+        db = db.astype({"comment": str}, errors='raise')
+        return db
+    db = import_database(result_path)
+    # images.to_list()
+    db_cleaned = pd.merge(images, db, how='inner', left_on='imname', right_on='image')
+    bn_d = ~db_cleaned['comment'].str.contains(pat = '#d')
+    bn_m = ~db_cleaned['comment'].str.contains(pat = '#m')
+    return bn_d & bn_m
+
+def read_radfile(radfile_path):
+    df = pd.read_csv(radfile_path, header=None, sep="\s+",
+                     names=(['imname','rpix','npixcirc','medfluxradu','rarcsec','npixrad',
+                             'totfluxradadu','medfluxsrufadu','medmag','F','Fband','totmag',
+                             'intF','intFband','filter','JD','rh','rgeo']))
+    return df
 
 def calculate_correction(dir_path, calrange):
+    date = dir_path.split('/')[-1][:8]
+    comet = dir_path.split('/')[-2]
+    obs = dir_path.split('/')[-1][-2:]
     # open centerfile to have a filelist
     centerfile = os.path.join(dir_path, 'centering', 'centerlist')
-    df_cf = pd.read_csv(centerfile, header=None, sep="\s+")
-    if len(df_cf.loc[df_cf[5] == 'BC']) > 0:
-        radfile_BC = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf[5] == 'BC'].iloc[-1][0] + '.txt')
-        df_BC = pd.read_csv(radfile_BC, header=None, sep="\s+")
+    df_cf = pd.read_csv(centerfile, sep="\s+",
+                        names=(['imname','MJD','xcent','ycent','xbin','filter','airmass','rh','delta','pixsize','ctnmethod']))
+    # df_cf = df_cf.loc[~df_cf['filter'].isin(['B','V','R','I'])] # remove BVRI filters, not used
+    df_cf.drop_duplicates(subset='imname', keep='last', inplace=True, ignore_index=True) # keep the last line of a filter
+    # check if it is not a bad night
+    bn_result = look_for_badnight(df_cf['imname'],os.path.join(os.path.expanduser('~'), 'Documents/TRAPPIST/reduced_data/results.db'))
+    # correct for badnights
+    df_cf = df_cf[bn_result.values]
+    print(df_cf[['imname','filter']])
+
+    if len(df_cf.loc[df_cf['filter'] == 'BC']) > 0:
+        radfile_BC = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf['filter'] == 'BC'].iloc[-1][0] + '.txt')
+        df_BC = read_radfile(radfile_BC)
+        # calculates the range given in log(rho) in pixels radius
+        
         # fluxes as we use them for calibration
         # in iraf, we use a coefficient in front of the BC flux, unlike how it is done in A'Hearn 2000...
-        F_BC = df_BC.iloc[calrange[1]][13] - df_BC.iloc[calrange[0]][13]
+        F_BC = df_BC.iloc[calrange[1]]['intFband'] - df_BC.iloc[calrange[0]]['intFband']
         # ... so need to convert them and work with those fluxes and calculate the coefficient for iraf later
         f_BC = F_BC / F0['BC'] * gamma['BC']
     else:
         print('No BC file found for', dir_path)
         return
-    if len(df_cf.loc[df_cf[5] == 'GC']) > 0:
+    if len(df_cf.loc[df_cf['filter'] == 'GC']) > 0:
         # GC is used to calculate the continuum color
-        radfile_GC = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf[5] == 'GC'].iloc[-1][0] + '.txt')
-        df_GC = pd.read_csv(radfile_GC, header=None, sep="\s+")
-        F_GC = df_GC.iloc[calrange[1]][13] - df_GC.iloc[calrange[0]][13]
+        radfile_GC = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf['filter'] == 'GC'].iloc[-1][0] + '.txt')
+        df_GC = read_radfile(radfile_GC)
+        F_GC = df_GC.iloc[calrange[1]]['intFband'] - df_GC.iloc[calrange[0]]['intFband']
         f_GC = F_GC / F0['GC'] * gamma['GC']
         corr_GC = True
-        if len(df_cf.loc[df_cf[5] == 'C2']) > 0:
+        if len(df_cf.loc[df_cf['filter'] == 'C2']) > 0:
             # C2 is used for GC decontamination
-            radfile_C2 = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf[5] == 'C2'].iloc[-1][0] + '.txt')
-            df_C2 = pd.read_csv(radfile_C2, header=None, sep="\s+")
-            F_C2 = df_C2.iloc[calrange[1]][13] - df_C2.iloc[calrange[0]][13]
+            radfile_C2 = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf['filter'] == 'C2'].iloc[-1][0] + '.txt')
+            df_C2 = read_radfile(radfile_C2)
+            F_C2 = df_C2.iloc[calrange[1]]['intFband'] - df_C2.iloc[calrange[0]]['intFband']
             f_C2 = F_C2 / F0['C2'] * gamma['C2']
             corr_C2 = True
         else:
             corr_C2 = False
-        if len(df_cf.loc[df_cf[5] == 'RC']) > 0: #just to have the GC-RC color, but not really used in calculations
-            radfile_RC = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf[5] == 'RC'].iloc[-1][0] + '.txt')
-            df_RC = pd.read_csv(radfile_RC, header=None, sep="\s+")
-            F_RC = df_RC.iloc[calrange[1]][13] - df_RC.iloc[calrange[0]][13]
+        if len(df_cf.loc[df_cf['filter'] == 'RC']) > 0: #just to have the GC-RC color, but not really used in calculations
+            radfile_RC = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf['filter'] == 'RC'].iloc[-1][0] + '.txt')
+            df_RC = read_radfile(radfile_RC)
+            F_RC = df_RC.iloc[calrange[1]]['intFband'] - df_RC.iloc[calrange[0]]['intFband']
             f_RC = F_RC / F0['RC'] * gamma['RC']
             color_RC = True
             fp_RC = f_RC
@@ -66,17 +117,17 @@ def calculate_correction(dir_path, calrange):
     else:
         corr_GC = False
         color_RC = False
-    if len(df_cf.loc[df_cf[5] == 'C3']) > 0 and len(df_cf.loc[df_cf[5] == 'CN']) > 0:
+    if len(df_cf.loc[df_cf['filter'] == 'C3']) > 0 and len(df_cf.loc[df_cf['filter'] == 'CN']) > 0:
         corr_CN = True
         # C3 is used for CN decontamination
-        radfile_C3 = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf[5] == 'C3'].iloc[-1][0] + '.txt')
-        df_C3 = pd.read_csv(radfile_C3, header=None, sep="\s+")
-        F_C3 = df_C3.iloc[calrange[1]][13] - df_C3.iloc[calrange[0]][13]
+        radfile_C3 = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf['filter'] == 'C3'].iloc[-1][0] + '.txt')
+        df_C3 = read_radfile(radfile_C3)
+        F_C3 = df_C3.iloc[calrange[1]]['intFband'] - df_C3.iloc[calrange[0]]['intFband']
         # f_C3 = F_C3 / F0['C3'] * gamma['C3']
 
-        radfile_CN = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf[5] == 'CN'].iloc[-1][0] + '.txt')
-        df_CN = pd.read_csv(radfile_CN, header=None, sep="\s+")
-        F_CN = df_CN.iloc[calrange[1]][13] - df_CN.iloc[calrange[0]][13]
+        radfile_CN = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf['filter'] == 'CN'].iloc[-1][0] + '.txt')
+        df_CN = read_radfile(radfile_CN)
+        F_CN = df_CN.iloc[calrange[1]]['intFband'] - df_CN.iloc[calrange[0]]['intFband']
     else:
         corr_CN = False
     
@@ -214,13 +265,9 @@ def calculate_correction(dir_path, calrange):
     
     return result
 
-coeffs = calculate_correction(dir_path, calrange)
-
-
-# if 'TN' in dir_path:
-#     pixsize = 1.2
-# elif 'TS' in dir_path:
-#     pixsize = 1.3
+if __name__ == "__main__":
+    coeffs = calculate_correction(dir_path, calrange)
+    print(coeffs)
 
 
 
