@@ -20,7 +20,7 @@ import phase_angle
 
 ########################
 # INPUT PARAMETERS
-startdate = '2010-06-25' #the night starting
+startdate = '2010-05-25' #the night starting
 enddate = '2022-07-15' #starting that night not included
 obs = 'TN'
 comets = ['0398P'] # list of comets to take into account. set empty to take all 
@@ -42,9 +42,10 @@ conda = True if param['conda'] == 'True' else False #wether to use 'source activ
 def import_perihelions(file_path):
     file = pd.read_csv(file_path)
     perihelions = {}
+    peri_serie = file['comet']
     for index, row in file.iterrows():
         perihelions[row['comet']] = pd.Timestamp(year=row['year'], month=row['month'], day=row['day'])
-    return perihelions
+    return perihelions, peri_serie
 
 if obs == 'TS':
     NASfitstable = query_NAS.loadcsvtable(param['TS_qNAS'])
@@ -53,26 +54,30 @@ elif obs == 'TN':
 
 objects_names = query_NAS.check_objects_names(startdate,enddate,NASfitstable)
 while True:
-    perihelions = import_perihelions(param['perihelion'])
-    inlist = []
-    outlist = []
-    for obj in objects_names:
-        if obj in perihelions:
-            if (len(comets) == 0):
-                inlist.append(obj)
-            elif obj in comets:
-                inlist.append(obj)
-            else:
-                print(obj + ' in perihelion but not in the comets list')
-                outlist.append(obj) 
-        else:
-            outlist.append(obj)
-    # show number of nights and number of images
-    print('already in the perihelions file:')
-    print(inlist)
-    print('out of the perihelions file:')
-    print(outlist)
-    inp = input('break and download (d) or recheck (r)?')
+    perihelions, peri_serie = import_perihelions(param['perihelion'])
+    # inobj = pd.merge(objects_names, peri_serie, how='inner', left_on='object', right_on='comet').drop(['comet'],axis=1)
+    inperi_obj = objects_names.loc[objects_names['object'].isin(peri_serie)]
+    outperi_obj = objects_names.loc[~objects_names['object'].isin(peri_serie)]
+    if (len(comets) == 0):
+        selected_obj = inperi_obj
+        unselected_obj = []
+    else:
+        selected_obj = inperi_obj.loc[inperi_obj['object'].isin(comets)]
+        unselected_obj = inperi_obj.loc[~inperi_obj['object'].isin(comets)]
+    
+    inlist = selected_obj['object'].to_list()
+    
+    print('\nUnselected objects outside the perihelion file:')
+    print('-------------------------------------------------')
+    print(outperi_obj)
+    print('\nUnselected objects in the perihelion file:')
+    print('--------------------------------------------')
+    print(unselected_obj)
+    print('\nSelected objects:')
+    print('-------------------')
+    print(selected_obj)
+    
+    inp = input('\nbreak and download (d) or recheck (r)?')
     if inp == 'd' or inp =="D":
         break
 

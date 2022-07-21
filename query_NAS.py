@@ -202,9 +202,14 @@ def check_objects_names(startdate, enddate, NASfitstable):
     objects_table = NASfitstable.loc[(NASfitstable['start_night'] >= startdate)
                                 & (NASfitstable['start_night'] <= enddate)
                                 & (NASfitstable['type'].isin(['LIGHT', 'Light Frame']))]
-    objects_list = objects_table['object'].drop_duplicates().values.tolist()
-            
-    return objects_list
+    # objects_list = objects_table['object'].drop_duplicates().values.tolist() #old way to do it
+    objects_names = objects_table['object'].drop_duplicates().reset_index(drop=True)
+    objects = pd.DataFrame({'object':objects_names})
+    for index, row in objects.iterrows():
+        objects.loc[objects['object'] == row['object'], 'nb_nights'] = len(objects_table.loc[objects_table['object'] == row['object']]['start_night'].drop_duplicates())
+        objects.loc[objects['object'] == row['object'], 'nb_images'] = len(objects_table.loc[objects_table['object'] == row['object']])
+    # objects.astype({'nb_nights': 'int32','nb_images': 'int32'}).dtypes
+    return objects
     
 def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=['',''], skip_existing=False):
     '''Look for and prompt for downloading files in the NAS
@@ -465,7 +470,7 @@ def lookforcalib_old(copy=True):
     # imtype = ['BIAS', 'Bias Frame']
     
     telescope = 'TN'
-    night = (2020,12,6) ### set the observation night
+    night = (2020,12,18) ### set the observation night
     
     dayinterval = 20 # starting point for the search
     
