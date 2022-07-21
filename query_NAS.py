@@ -203,6 +203,7 @@ def check_objects_names(startdate, enddate, NASfitstable):
                                 & (NASfitstable['start_night'] <= enddate)
                                 & (NASfitstable['type'].isin(['LIGHT', 'Light Frame']))]
     objects_list = objects_table['object'].drop_duplicates().values.tolist()
+            
     return objects_list
     
 def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=['',''], skip_existing=False):
@@ -427,16 +428,18 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, f
                     output_fold = os.path.join(output_fold, subfold_name, "Calibration")
                 print("output_fold set to", output_fold)
                 trans = input("transfer files?: (y/n)")
+                count = 0
                 if trans == 'y' or trans == 'Y':
                     for item in caliblist:
                         # print(os.path.join(output_fold, item.split('/')[-1]))
                         if 'DARK' in imtype:
-                            shutil.copy(item, os.path.join(output_fold, 'extra' + str(exptime) + item.split('/')[-1]))
+                            shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + str(exptime) + item.split('/')[-1]))
                         elif 'FLAT' in imtype:
-                            shutil.copy(item, os.path.join(output_fold, 'extra' + filt + item.split('/')[-1]))
+                            shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + filt + item.split('/')[-1]))
                         elif 'BIAS' in imtype:
-                            shutil.copy(item, os.path.join(output_fold, 'extra' + '0' + item.split('/')[-1]))
+                            shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + '0' + item.split('/')[-1]))
                         print("copied", item.split('/')[-1])
+                        count +=1
             break
 
 def lookforcalib_old(copy=True):
@@ -448,7 +451,7 @@ def lookforcalib_old(copy=True):
     
     ### uncomment line bellow if querying for a light image
     # imtype = ['LIGHT', 'Light Frame']
-    obj = "CK21F010" #target name in the fits header. only for lights and for the output path
+    obj = "0398P" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
     imtype = ['DARK', 'Dark Frame']
@@ -461,10 +464,10 @@ def lookforcalib_old(copy=True):
     ### uncomment line bellow if querying for bias frames
     # imtype = ['BIAS', 'Bias Frame']
     
-    telescope = 'TS'
-    night = (2022,7,3) ### set the observation night
+    telescope = 'TN'
+    night = (2020,12,6) ### set the observation night
     
-    dayinterval = 0 # starting point for the search
+    dayinterval = 20 # starting point for the search
     
     ####################################
     
@@ -527,18 +530,20 @@ def lookforcalib_old(copy=True):
             if copy == True:
                 print("output_fold set to", output_fold)
                 trans = input("transfer files?: (y/n)")
+                count = 0
                 if trans == 'y' or trans == 'Y':
                     for item in caliblist:
                         # print(os.path.join(output_fold, item.split('/')[-1]))
                         if 'DARK' in imtype:
-                            shutil.copy(item, os.path.join(output_fold, 'extra' + str(exptime) + item.split('/')[-1]))
+                            shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + str(exptime) + item.split('/')[-1]))
                         elif 'FLAT' in imtype:
-                            shutil.copy(item, os.path.join(output_fold, 'extra' + filt + item.split('/')[-1]))
+                            shutil.copy(item, os.path.join(output_fold, 'extra'  + str(count) + '_'+ filt + item.split('/')[-1]))
                         elif 'BIAS' in imtype:
-                            shutil.copy(item, os.path.join(output_fold, 'extra' + '0' + item.split('/')[-1]))
+                            shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + '0' + item.split('/')[-1]))
                         elif 'LIGHT' in imtype:
                             shutil.copy(item, os.path.join(output_fold[:-12], item.split('/')[-1]))
                         print("copied", item.split('/')[-1])
+                        count +=1
             break
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ from matplotlib.lines import Line2D
 
 ### PARAMETERS ###
 calrange = (4.4,5) # range over which to sample the flux in the radfile in log(rho)
-comet = '0007P'
+comet = '0022P'
 # dir_path = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK19L030/20220427TS'
 # dir_path = os.path.join(param['reduced'], 'CK17K020', '20220506TS')
 db_results = os.path.join(os.path.expanduser('~'), 'Documents/TRAPPIST/reduced_data/results.db') # to check for flagged bad data
