@@ -23,8 +23,8 @@ import phase_angle
 startdate = '2010-05-25' #the night starting
 enddate = '2022-07-15' #starting that night not included
 obs = 'TN'
-comets = ['0398P'] # list of comets to take into account. set empty to take all 
-skip = True # skip raw data directory donwload if data already in raw_data.
+comets = ['0260P'] # list of comets to take into account. set empty to take all 
+skip = True # skip without asking raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
 
@@ -64,6 +64,7 @@ while True:
     else:
         selected_obj = inperi_obj.loc[inperi_obj['object'].isin(comets)]
         unselected_obj = inperi_obj.loc[~inperi_obj['object'].isin(comets)]
+        notinperi_selected = outperi_obj.loc[outperi_obj['object'].isin(comets)]
     
     inlist = selected_obj['object'].to_list()
     
@@ -76,6 +77,10 @@ while True:
     print('\nSelected objects:')
     print('-------------------')
     print(selected_obj)
+    if len(notinperi_selected) > 0:
+        print('\nTo add to the perihelion file (unselected):')
+        print('-------------------')
+        print(notinperi_selected)
     
     inp = input('\nbreak and download (d) or recheck (r)?')
     if inp == 'd' or inp =="D":
