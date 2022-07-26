@@ -20,7 +20,7 @@ import phase_angle
 
 ########################
 # INPUT PARAMETERS
-startdate = '2010-05-25' #the night starting
+startdate = '2009-05-25' #the night starting
 enddate = '2022-07-15' #starting that night not included
 obs = 'TN'
 comets = ['0260P'] # list of comets to take into account. set empty to take all 

@@ -13,6 +13,7 @@ import pandas as pd
 from astropy.io import fits
 import shutil
 import datetime
+from trapconfig import param
 # Add a rename fts to fits for TS images
 #Add check if all flats are there
 
@@ -116,8 +117,10 @@ def check_calib(fitstable, filt_list=filt_list):
     
     
     nb_flat_dark = ((fitstable['type'].isin(['DARK', 'Dark Frame'])) & (fitstable.exptime == 15)).sum()
-    print("\nNumber of dark frames for flat correction (exptime = 15s):", nb_flat_dark, "\n")
-    print('\nNOTE: If no right exposure time dark is found, a linear extrapolation of another master dark will be used\n(30->15;45->15;60->15;90->15;600->240;900->1200;1200->1500;1500->1200; see progtrap3.cl)\n')
+    print("\nNumber of dark frames for flat correction (exptime = 15s):", nb_flat_dark)
+    print('\nNOTE: If no right exposure time dark is found, a linear extrapolation from another master dark will be used\nThe extrapolated darks still need to be in the data folder\nCurrent configuration:')
+    print(pd.read_csv(os.path.join(param['calib'], 'dark_substitution'), names=['exptime','scaled from'], sep=' ').transpose().to_string(header=False))
+    print('\n')
     warning_flag = False
     for index, row in lighttable.iterrows() :
         if row['nb_flat'] == 0:

@@ -455,22 +455,22 @@ def lookforcalib_old(copy=True):
     ### PARAMETERS
     
     ### uncomment line bellow if querying for a light image
-    # imtype = ['LIGHT', 'Light Frame']
-    obj = "CK17K020" #target name in the fits header. only for lights and for the output path
+    imtype = ['LIGHT', 'Light Frame']
+    obj = "0260P" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
-    imtype = ['DARK', 'Dark Frame']
-    exptime = 15 #exposure time. only for darks
+    # imtype = ['DARK', 'Dark Frame']
+    exptime = 60 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
     # imtype = ['FLAT', 'Flat Frame']
-    filt = 'R' #filter. only for flats
+    filt = 'BC' #filter. only for flats
     
     ### uncomment line bellow if querying for bias frames
     # imtype = ['BIAS', 'Bias Frame']
     
     telescope = 'TN'
-    night = (2020,8,27) ### set the observation night
+    night = (2019,10,29) ### set the observation night
     
     dayinterval = 0 # starting point for the search
     
@@ -513,7 +513,7 @@ def lookforcalib_old(copy=True):
                                           & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)
                                           & (NASfitstable['object'] == obj)
-                                            # & (NASfitstable['filter'] == filt)
+                                            & (NASfitstable['filter'] == filt)
                                           ]
         elif 'BIAS' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
