@@ -104,4 +104,5 @@ def schleicher_0deg(afrho, pa):
     afrho_corr = afrho / pf
     return afrho_corr
     
-schleicher_0deg(10, 5.9)
+if __name__ == "__main__":
+    generate_palist_reddir(param['reduced'])
