@@ -503,7 +503,8 @@ def generate_haserinput(tmpout, fc=fc, fz=0):
             print("other NB continuum images available:")
             print(NBcont)
             while True:
-                inp = input('enter the index of the NB continuum image to use for dust subtraction, or b to bypass: ')
+                inp = input('enter the index of the NB continuum image to use for dust subtraction, \
+                            or b to bypass: ')
                 try:
                     inp = int(inp)
                 except:
@@ -525,8 +526,8 @@ def generate_haserinput(tmpout, fc=fc, fz=0):
         print('More than one BC image found')
         print(BCtable)
         while True:
-            inp = input("""Input "c" to use the closest BC image in time for each image.
-Alternatively, select the index of the BC image to use: """)
+            inp = input("Input 'c' to use the closest BC image in time for each image.\
+                        \nAlternatively, select the index of the BC image to use: ")
             try:
                 inp = int(inp)
             except:

@@ -444,6 +444,8 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, f
                         shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + filt + item.split('/')[-1]))
                     elif 'BIAS' in imtype:
                         shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + '0' + item.split('/')[-1]))
+                    elif 'LIGHT' in imtype:
+                        shutil.copy(item, os.path.join(output_fold, item.split('/')[-1]))
                     print("copied", item.split('/')[-1])
                     count +=1
             break
