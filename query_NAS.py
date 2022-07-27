@@ -407,47 +407,49 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, f
         if len(calibtable.index) == 0:
             dayinterval += 1
         else:
-            print("day interval of", dayinterval)
-            # print(calibtable)
             caliblist = []
+            print('\nFound:')
             for item in sorted(calibtable['file']):
                 print(item)
                 caliblist.append(item)
+            # print(calibtable)
+            
                 
             ### copy the files from the NAS into the output folder 
-            if copy == True:
-                # date for the subfolder
-                subf_year = str(night[0])
-                if night[1] > 9:
-                    subf_month = str(night[1])
-                else:
-                    subf_month = '0' + str(night[1])
-                if night[2] > 9:
-                    subf_day = str(night[2])
-                else:
-                    subf_day = '0' + str(night[2])
-                subfold_name = subf_year + subf_month + subf_day
-                if 'LIGHT' in imtype:
-                    output_fold = os.path.join(output_fold, subfold_name)
-                else:
-                    output_fold = os.path.join(output_fold, subfold_name, "Calibration")
-                print("output_fold set to", output_fold)
-                trans = input("transfer files?: (y/n)")
-                count = 0
-                if trans == 'y' or trans == 'Y':
-                    for item in caliblist:
-                        # print(os.path.join(output_fold, item.split('/')[-1]))
-                        if 'DARK' in imtype:
-                            shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + str(exptime) + item.split('/')[-1]))
-                        elif 'FLAT' in imtype:
-                            shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + filt + item.split('/')[-1]))
-                        elif 'BIAS' in imtype:
-                            shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + '0' + item.split('/')[-1]))
-                        print("copied", item.split('/')[-1])
-                        count +=1
+            # date for the subfolder
+            subf_year = str(night[0])
+            if night[1] > 9:
+                subf_month = str(night[1])
+            else:
+                subf_month = '0' + str(night[1])
+            if night[2] > 9:
+                subf_day = str(night[2])
+            else:
+                subf_day = '0' + str(night[2])
+            subfold_name = subf_year + subf_month + subf_day
+            if 'LIGHT' in imtype:
+                output_fold = os.path.join(output_fold, subfold_name)
+            else:
+                output_fold = os.path.join(output_fold, subfold_name, "Calibration")
+            print("\noutput_fold set to", output_fold)
+            
+            print("\nDay interval of ", dayinterval)
+            trans = input("Transfer files?: (y/n)")
+            count = 0
+            if trans == 'y' or trans == 'Y':
+                for item in caliblist:
+                    # print(os.path.join(output_fold, item.split('/')[-1]))
+                    if 'DARK' in imtype:
+                        shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + str(exptime) + item.split('/')[-1]))
+                    elif 'FLAT' in imtype:
+                        shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + filt + item.split('/')[-1]))
+                    elif 'BIAS' in imtype:
+                        shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + '0' + item.split('/')[-1]))
+                    print("copied", item.split('/')[-1])
+                    count +=1
             break
 
-def lookforcalib_old(copy=True):
+def lookforcalib_old():
     """
     old version
     """
@@ -455,11 +457,11 @@ def lookforcalib_old(copy=True):
     ### PARAMETERS
     
     ### uncomment line bellow if querying for a light image
-    # imtype = ['LIGHT', 'Light Frame']
+    imtype = ['LIGHT', 'Light Frame']
     obj = "0067P" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
-    imtype = ['DARK', 'Dark Frame']
+    # imtype = ['DARK', 'Dark Frame']
     exptime = 1500 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
@@ -470,9 +472,9 @@ def lookforcalib_old(copy=True):
     # imtype = ['BIAS', 'Bias Frame']
     
     telescope = 'TN'
-    night = (2022,2,1) ### set the observation night
+    night = (2022,2,10) ### set the observation night
     
-    dayinterval = 13 # starting point for the search
+    dayinterval = 0 # starting point for the search
     
     ####################################
     
@@ -524,32 +526,34 @@ def lookforcalib_old(copy=True):
         if len(calibtable.index) == 0:
             dayinterval += 1
         else:
-            print("day interval of", dayinterval)
             # print(calibtable)
             caliblist = []
+            print('\n')
             for item in sorted(calibtable['file']):
                 print(item)
                 caliblist.append(item)
                 
             ### copy the files from the NAS into the output folder 
-            if copy == True:
-                print("output_fold set to", output_fold)
-                trans = input("transfer files?: (y/n)")
-                count = 0
-                if trans == 'y' or trans == 'Y':
-                    for item in caliblist:
-                        # print(os.path.join(output_fold, item.split('/')[-1]))
-                        if 'DARK' in imtype:
-                            shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + str(exptime) + item.split('/')[-1]))
-                        elif 'FLAT' in imtype:
-                            shutil.copy(item, os.path.join(output_fold, 'extra'  + str(count) + '_'+ filt + item.split('/')[-1]))
-                        elif 'BIAS' in imtype:
-                            shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + '0' + item.split('/')[-1]))
-                        elif 'LIGHT' in imtype:
-                            shutil.copy(item, os.path.join(output_fold[:-12], item.split('/')[-1]))
-                        print("copied", item.split('/')[-1])
-                        count +=1
+            print("\noutput_fold set to", output_fold)
+            
+            print("\nday interval of", dayinterval)
+            
+            trans = input("\ntransfer files?: (y/n)")
+            count = 0
+            if trans == 'y' or trans == 'Y':
+                for item in caliblist:
+                    # print(os.path.join(output_fold, item.split('/')[-1]))
+                    if 'DARK' in imtype:
+                        shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + str(exptime) + item.split('/')[-1]))
+                    elif 'FLAT' in imtype:
+                        shutil.copy(item, os.path.join(output_fold, 'extra'  + str(count) + '_'+ filt + item.split('/')[-1]))
+                    elif 'BIAS' in imtype:
+                        shutil.copy(item, os.path.join(output_fold, 'extra' + str(count) + '_' + '0' + item.split('/')[-1]))
+                    elif 'LIGHT' in imtype:
+                        shutil.copy(item, os.path.join(output_fold[:-12], item.split('/')[-1]))
+                    print("copied", item.split('/')[-1])
+                    count +=1
             break
 
 if __name__ == "__main__":
-    lookforcalib_old(copy=True)
+    lookforcalib_old()

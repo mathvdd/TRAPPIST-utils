@@ -113,14 +113,18 @@ def check_calib(fitstable, filt_list=filt_list):
     for index, row in lighttable.iterrows() :
         lighttable.at[index, 'nb_flat'] = ((fitstable['type'].isin(['FLAT', 'Flat Frame'])) & (fitstable.filt == row['filt'])).sum()
         lighttable.at[index, 'nb_dark'] = ((fitstable['type'].isin(['DARK', 'Dark Frame'])) & (fitstable.exptime == row['exptime'])).sum()
-    print(lighttable)    
-    
-    
-    nb_flat_dark = ((fitstable['type'].isin(['DARK', 'Dark Frame'])) & (fitstable.exptime == 15)).sum()
-    print("\nNumber of dark frames for flat correction (exptime = 15s):", nb_flat_dark)
-    print('\nNOTE: If no right exposure time dark is found, a linear extrapolation from another master dark will be used\nThe extrapolated darks still need to be in the data folder\nCurrent configuration:')
+    print('\n-------------------------------------------------')
+    print('CHECK CALIB')
+    print('-------------------------------------------------\n')
+    print('NOTE: If no right exposure time dark is found, a linear extrapolation from another master dark will be used\nThe extrapolated darks still need to be in the data folder\nCurrent configuration:')
     print(pd.read_csv(os.path.join(param['calib'], 'dark_substitution'), names=['exptime','scaled from'], sep=' ').transpose().to_string(header=False))
     print('\n')
+    
+    print(lighttable)    
+
+    nb_flat_dark = ((fitstable['type'].isin(['DARK', 'Dark Frame'])) & (fitstable.exptime == 15)).sum()
+    print("\nNumber of dark frames for flat correction (exptime = 15s):", nb_flat_dark,'\n')
+    
     warning_flag = False
     for index, row in lighttable.iterrows() :
         if row['nb_flat'] == 0:

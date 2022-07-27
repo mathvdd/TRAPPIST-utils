@@ -142,7 +142,6 @@ for path in list_to_reduce:
             print('--- Renaming .fts to .fits ---')
             trap_reduction.renameftsfits(raw_dir)
             print('--- checking for calib files ---')            
-            print('\n----------------------------------------------------------------')
             fitstable = trap_reduction.get_fitstable(raw_dir)
             no_file = False
             if len(fitstable) == 0:
@@ -154,11 +153,11 @@ for path in list_to_reduce:
                     no_file = False
             check_calib_warning, lighttable = trap_reduction.check_calib(fitstable)
             if check_calib_warning == True:
-                inp = input('''Some calibration files are missing!
-                            - Press enter to reload table
-                            - Query for calibration files older than a week (give line index)
-                            - bypass (b)
-                            :''')
+                inp = input("Some calibration files are missing!\
+                            \n   - Press enter to reload table\
+                            \n   - Query for calibration files older than a week (give line index)\
+                            \n   - bypass (b)\
+                            \n   :")
                             
                 if inp == 'b' or inp == 'B':
                     break
