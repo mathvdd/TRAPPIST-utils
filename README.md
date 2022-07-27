@@ -9,7 +9,13 @@ Utilities for the TRAPPIST image reduction for comets. Complementary to the iraf
 
 [trap_plot](#trap_plotpy)
 
-Path configuration is in traputils.conf. If the file is copied in the home directory that version will be read (prefered because not corrupted by updates in trappist-utils)
+## config
+
+Update path configuration is in traputils.conf. If the file is copied in the home directory (/home/user/) that version will be read (prefered because not corrupted by updates in trappist-utils)
+
+Copy 'solarirrad.dat', 'pf_schleicher.dat', 'median_ZPC_North.log', 'median_ZPC_South.log' and 'dark_substitution' in the calib folder
+
+Copy 'perihelions' in the reduced data dir
 
 ## trap_reduction.py
 **renameftsfits**(raw_path):
@@ -63,7 +69,7 @@ Path configuration is in traputils.conf. If the file is copied in the home direc
         ephemeris: ephemeris object (see get_ephem.py)
         fitstable: table containing the fits files info (see get_fitstable())
         ZPparams, optional: table containing constant values in the calib.dat file. default should be fine at all time
-        output_dir (str), optional, default=None: if not given, output in calib dir 
+        output_dir (str), optional, default=None: if not given, output in calib dir
 
 
 **clreduce**(iraf_dir, conda=True):
@@ -323,7 +329,7 @@ Path configuration is in traputils.conf. If the file is copied in the home direc
     solocomet: boolean, optional
         if solocomet = True, only the last reduced image (the last in the centerlist) will be replotted
     comet_name : str, optional
-        name of the comet for the plot tile. default is '' 
+        name of the comet for the plot tile. default is ''
 
     Returns
     -------
