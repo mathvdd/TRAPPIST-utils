@@ -338,7 +338,7 @@ def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=[''
 #     print(item)
 
 ###look for specific calib files around a given date
-def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, filt='R', dayinterval=0, copy=True):
+def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, filt='R', dayinterval=0):
     """
     Look for a specific set of file the closest to the observation file in the database and download it. By default look for the files closest to the observation night
     
@@ -352,7 +352,6 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, f
         exptime (int, semi-optional, defaut=15): exposure time if imtype='dark'
         filt (str, semi-optional, default='R'): name of the filter if imtype='flat'
         dayinterval (int, optional, default=0): the starting point in time to look for image from the observation night
-        copy (boolean, optional, default=True): wheter to prompt for copying the files or not
     """
     ####################################
     ### PARAMETERS
@@ -396,7 +395,7 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, f
                                           & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)
                                           & (NASfitstable['object'] == obj)
-                                           # & (NASfitstable['filter'] == filt)
+                                          & (NASfitstable['filter'] == filt)
                                           ]
         elif 'BIAS' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
@@ -457,12 +456,12 @@ def lookforcalib_old():
     ### PARAMETERS
     
     ### uncomment line bellow if querying for a light image
-    imtype = ['LIGHT', 'Light Frame']
+    # imtype = ['LIGHT', 'Light Frame']
     obj = "0067P" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
-    # imtype = ['DARK', 'Dark Frame']
-    exptime = 1500 #exposure time. only for darks
+    imtype = ['DARK', 'Dark Frame']
+    exptime = 15 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
     # imtype = ['FLAT', 'Flat Frame']
@@ -471,8 +470,8 @@ def lookforcalib_old():
     ### uncomment line bellow if querying for bias frames
     # imtype = ['BIAS', 'Bias Frame']
     
-    telescope = 'TN'
-    night = (2022,2,10) ### set the observation night
+    telescope = 'TS'
+    night = (2021,5,24) ### set the observation night
     
     dayinterval = 0 # starting point for the search
     

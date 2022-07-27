@@ -22,7 +22,7 @@ import phase_angle
 # INPUT PARAMETERS
 startdate = '2020-05-25' #the night starting
 enddate = '2022-07-15' #starting that night not included
-obs = 'TN'
+obs = 'TS'
 comets = ['0067P'] # list of comets to take into account. set empty to take all 
 skip = True # skip without asking raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
@@ -155,12 +155,18 @@ for path in list_to_reduce:
             if check_calib_warning == True:
                 inp = input("Some calibration files are missing!\
                             \n   - Press enter to reload table\
+                            \n   - Query for closest BC continuum file (BC)\
+                            \n   - Query for missing 15s darks for flats (df)\
                             \n   - Query for calibration files older than a week (give line index)\
                             \n   - bypass (b)\
                             \n   :")
                             
                 if inp == 'b' or inp == 'B':
                     break
+                elif inp == 'bc' or inp == 'BC':
+                    query_NAS.lookforcalib(NASfitstable, 'light', raw_dir[:-8], night,obj=comet, filt='BC')
+                elif inp == 'df' or inp == 'DF':
+                    query_NAS.lookforcalib(NASfitstable, 'dark', raw_dir[:-8], night, exptime=15)
                 else:
                     try:
                         ind = int(inp)
