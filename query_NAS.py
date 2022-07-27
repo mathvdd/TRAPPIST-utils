@@ -463,7 +463,7 @@ def lookforcalib_old():
     
     ### uncomment line bellow if querying for dark frames
     imtype = ['DARK', 'Dark Frame']
-    exptime = 15 #exposure time. only for darks
+    exptime = 600 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
     # imtype = ['FLAT', 'Flat Frame']
@@ -473,9 +473,9 @@ def lookforcalib_old():
     # imtype = ['BIAS', 'Bias Frame']
     
     telescope = 'TS'
-    night = (2021,5,24) ### set the observation night
+    night = (2021,10,12) ### set the observation night
     
-    dayinterval = 0 # starting point for the search
+    dayinterval = 10 # starting point for the search
     
     ####################################
     

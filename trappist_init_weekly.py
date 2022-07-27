@@ -20,8 +20,8 @@ import phase_angle
 
 ########################
 # INPUT PARAMETERS
-startdate = '2020-05-25' #the night starting
-enddate = '2022-07-15' #starting that night not included
+startdate = '2020-10-10' #the night starting
+enddate = '2022-10-11' #starting that night not included
 obs = 'TS'
 comets = ['0067P'] # list of comets to take into account. set empty to take all 
 skip = True # skip without asking raw data directory donwload if data already in raw_data.
@@ -267,10 +267,8 @@ for path in list_to_reduce:
                 trap_plot.plot_centering_profile(param['tmpout'], comet_name=comet)
                 continue
             elif inp == 'b' or inp == 'B':
-                print('continuing script')
                 break
         trap_reduction.clean_afrhotot(param['tmpout'])
-        phase_angle.generate_palist_tmpout(comet, obs, param['tmpout'])
         print(len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]))
         if len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]) > 0:            
        	    print('--- initiating haserinput ---')
@@ -303,10 +301,11 @@ for path in list_to_reduce:
                     print('relaunching hasercalctest')
                     continue
                 elif inp == 'b' or inp == 'B':
-                    print('continuing script')
                     break
         else:
             print('No NB filters found, skipping Haser')
+        
+        phase_angle.generate_palist_tmpout(comet, obs, param['tmpout'])
         # save the files in the reduced folder
         print('--- initiating reduced directory structure ---')
         images_dir = os.path.join(reduced_dir, "images")
