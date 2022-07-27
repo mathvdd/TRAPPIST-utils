@@ -20,7 +20,7 @@ import phase_angle
 
 ########################
 # INPUT PARAMETERS
-startdate = '2020-10-10' #the night starting
+startdate = '2021-11-05' #the night starting
 enddate = '2022-10-11' #starting that night not included
 obs = 'TS'
 comets = ['0067P'] # list of comets to take into account. set empty to take all 
@@ -180,7 +180,6 @@ for path in list_to_reduce:
                             query_NAS.lookforcalib(NASfitstable, 'flat', raw_dir[:-8], night, filt=imline['filt'])
                         if imline['nb_dark'] == 0:
                             query_NAS.lookforcalib(NASfitstable, 'dark', raw_dir[:-8], night, exptime=int(imline['exptime']))
-                        # query_NAS.lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, filt='R', dayinterval=0, copy=True)
                     else:
                         print('wrong index')
             else:

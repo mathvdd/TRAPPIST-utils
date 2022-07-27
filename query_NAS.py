@@ -364,6 +364,8 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, f
         imtype = ['BIAS', 'Bias Frame']
     elif imtype == 'flat':
         imtype = ['FLAT', 'Flat Frame']
+    # elif imtype == 'BC':
+    #     print("Let's roll for the special BC round")
     else:
         print('wrong imtype')
         return
@@ -402,6 +404,15 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, f
                                           & (NASfitstable['date'] <= upper_interval)
                                           & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)]
+        # elif imtype == 'BC':
+        #     calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
+        #                                   & (NASfitstable['date'] <= upper_interval)
+        #                                   & (NASfitstable['binning'] == 2)
+        #                                   & NASfitstable['type'].isin(imtype)
+        #                                   & (NASfitstable['object'] == obj)
+        #                                   & (NASfitstable['filter'] == filt)
+        #                                   ]
+            
             # print(NASfitstable['object'][0])
         if len(calibtable.index) == 0:
             dayinterval += 1
@@ -448,6 +459,10 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, f
                         shutil.copy(item, os.path.join(output_fold, item.split('/')[-1]))
                     print("copied", item.split('/')[-1])
                     count +=1
+            # if imtype == 'BC':
+            #     BCexptime = caliblist.iloc[0, 'exptime']
+            #     BCdate = caliblist.iloc[0, 'date']
+                
             break
 
 def lookforcalib_old():
@@ -463,7 +478,7 @@ def lookforcalib_old():
     
     ### uncomment line bellow if querying for dark frames
     imtype = ['DARK', 'Dark Frame']
-    exptime = 600 #exposure time. only for darks
+    exptime = 900 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
     # imtype = ['FLAT', 'Flat Frame']
@@ -473,9 +488,9 @@ def lookforcalib_old():
     # imtype = ['BIAS', 'Bias Frame']
     
     telescope = 'TS'
-    night = (2021,10,12) ### set the observation night
+    night = (2022,2,22) ### set the observation night
     
-    dayinterval = 10 # starting point for the search
+    dayinterval = 7 # starting point for the search
     
     ####################################
     

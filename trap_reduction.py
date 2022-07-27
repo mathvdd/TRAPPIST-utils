@@ -26,6 +26,7 @@ fc = {'OH':5,
 #see calib08140914.dat
 ZP = {'OH': [3090, 10.56e-9,   1.791,  1.698e-2,  0.98,   1,  1.60],
       'NH': [3362,  8.42e-9,   1.188,  1.907e-2,  0.99,   2,  0.65],
+      'UC': [3448,  7.802e-9,  1.101,  1.,        1.,     3,  0.59],
       'CN': [3870,  8.6e-9,    1.031,  1.812e-2,  0.99,   4,  0.36],
       'C3': [4062,  8.16e-9,   0.497,  3.352e-3,  0.19,   5,  0.29],
       'BC': [4450,  6.21e-9,   0.0,    1.,        1.,     7,  0.25],
@@ -38,7 +39,7 @@ ZP = {'OH': [3090, 10.56e-9,   1.791,  1.698e-2,  0.98,   1,  1.60],
       'I': [8637,  9.39e-10, -1.375,  1.,        1,     15,  0.043]
       }
 
-filt_list = ['OH','CN','C2','C3','NH','BC','RC','GC','R','I', 'B', 'V'] #to be coherent with the subsets file for progtrap2.cl
+filt_list = ['OH','CN','C2','C3','NH','UC','BC','RC','GC','R','I', 'B', 'V'] #to be coherent with the subsets file for progtrap2.cl
 
 def renameftsfits(raw_path):
     """
@@ -97,7 +98,7 @@ def check_calib(fitstable, filt_list=filt_list):
     
     Parameters:
         fitstable: table with fits file parameters (see get_fitstable())
-        filt_list, optional: list of filters to take into consideration. Default is ['OH','CN','C2','C3','NH','BC','RC','GC','R','I', 'B', 'V']
+        filt_list, optional: list of filters to take into consideration. Default is ['OH','CN','C2','C3','NH','UC','BC','RC','GC','R','I', 'B', 'V']
     """
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
