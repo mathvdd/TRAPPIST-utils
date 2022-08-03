@@ -253,6 +253,7 @@ def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=[''
         
         filtlist = LIGHTtable['filter'].drop_duplicates().values.tolist()
         exptimelist = LIGHTtable['exptime'].drop_duplicates().values.tolist()
+        exptimelist.append(10)
         exptimelist.append(15)
         
         FLATtable = NASfitstable.loc[NASfitstable['type'].isin(['FLAT', 'Flat Frame'])

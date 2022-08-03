@@ -117,14 +117,19 @@ def check_calib(fitstable, filt_list=filt_list):
     print('\n-------------------------------------------------')
     print('CHECK CALIB')
     print('-------------------------------------------------\n')
-    print('NOTE: If no right exposure time dark is found, a linear extrapolation from another master dark will be used\nThe extrapolated darks still need to be in the data folder\nCurrent configuration:')
+    print('NOTE: If no right exposure time dark is found, a linear extrapolation from another master dark will be used \
+          \nThe extrapolated darks still need to be in the data folder\nCurrent configuration:')
     print(pd.read_csv(os.path.join(param['calib'], 'dark_substitution'), names=['exptime','scaled from'], sep=' ').transpose().to_string(header=False))
     print('\n')
     
     print(lighttable)    
 
-    nb_flat_dark = ((fitstable['type'].isin(['DARK', 'Dark Frame'])) & (fitstable.exptime == 15)).sum()
-    print("\nNumber of dark frames for flat correction (exptime = 15s):", nb_flat_dark,'\n')
+    nb_flat_dark15 = ((fitstable['type'].isin(['DARK', 'Dark Frame'])) & (fitstable.exptime == 15)).sum()
+    nb_flat_dark10 = ((fitstable['type'].isin(['DARK', 'Dark Frame'])) & (fitstable.exptime == 10)).sum()
+    if (nb_flat_dark15 == 0 ) and (nb_flat_dark10 > 0 ):
+        print(f"\nNumber of dark frames for flat correction (exptime = 10s): {nb_flat_dark10}\n")
+    else:
+        print(f"\nNumber of dark frames for flat correction (exptime = 15s): {nb_flat_dark15}\n")
     
     warning_flag = False
     for index, row in lighttable.iterrows() :
@@ -146,12 +151,16 @@ def check_calib(fitstable, filt_list=filt_list):
         elif row['nb_bias'] < 5:
             print("WARNING: less than 5 bias for", row['file'])
             warning_flag = True
-    if nb_flat_dark == 0:
-        print("WARNING: no darks (15s) for flats")
+    if (nb_flat_dark15 == 0) and (nb_flat_dark10 == 0):
+        print("WARNING: no darks (15s or 10s) for flats")
         warning_flag = True
-    elif nb_flat_dark < 5:
+    elif (nb_flat_dark15 != 0) and (nb_flat_dark15 < 5):
         print("WARNING: less than 5 darks (15s) for flats")
         warning_flag = True
+    elif (nb_flat_dark10 != 0) and (nb_flat_dark10 < 5):
+        print("WARNING: less than 5 darks (10s) for flats")
+        warning_flag = True    
+
         
     # check if there is a BC filter for narrow bands
     if lighttable['filt'].isin(['OH', 'C2', 'C3', 'CN', 'NH']).any() and (lighttable['filt'].isin(['BC']).any() == False):
