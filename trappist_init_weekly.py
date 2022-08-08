@@ -27,7 +27,7 @@ comets = ['0004P'] # list of comets to take into account. set empty to take all
 skip = True # skip without asking raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
-Qfit = (3.5, 4.1) # limit in log10 km for the range over which Q is fitted
+Qfitlim = (3.5, 4.1) # limit in log10 km for the range over which Q is fitted
 
 ########################
 
@@ -293,7 +293,7 @@ for path in list_to_reduce:
             
             print('--- launching hasercalctest ---')
             while True:
-                trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfit[0], Qprofhigh=Qfit[1], conda=conda)
+                trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
                 trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
                 while True:
                     inp = input('relaunch hasercalctext (r) or bypass (b)? [r/b]')

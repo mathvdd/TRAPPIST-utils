@@ -680,12 +680,8 @@ def clhasercalctest(iraf_dir, arg='no', Qproflow=3.6, Qprofhigh=4.1, conda=True)
     """
     print('launch hasercalctest.cl')
     with open(os.path.join(iraf_dir, 'wrapper_hasercalctest.cl'), 'w') as f:
-        if arg=='yes':
-            f.write('\n'.join(['hasercalctest yes',
-                          'logout']))
-        elif arg=='no':
-            f.write('\n'.join(['hasercalctest no',
-                          'logout']))
+        f.write('\n'.join([f'hasercalctest {arg} {Qproflow} {Qprofhigh}',
+                      'logout']))
     if conda == True:
         os.system('\n'.join(['cd ' + iraf_dir,
                           'source activate iraf27', #conda activate not working
