@@ -11,9 +11,29 @@ from trapconfig import param
 import os
 import shutil
 import datetime
+import pandas as pd
 
 comet = 'CK19L030'
 Qfitlim = (4.4, 5)
+fc = {'OH':19,
+      'NH':20,
+      'CN':29,
+      'C3':248,
+      'C2':170}
+# fc_default = {'OH':5,
+#       'NH':20,
+#       'CN':25,
+#       'C3':190,
+#       'C2':170}
+
+def rewrite_fc_in_haserinput(fc):
+    inputhaser_path = os.path.join(param["tmpout"], 'inputhaser-BC')
+    inputhaser = pd.read_csv(inputhaser_path, header=None, sep='\s+')
+    for index, row in inputhaser.iterrows():
+        rad = pd.read_csv(os.path.join(param["tmpout"], 'rad_' + row[0]), header=None, sep='\s+')
+        filt = rad.iloc[0,14]
+        inputhaser.iloc[index,2] = fc.get(filt)
+    inputhaser.to_csv(os.path.join(param["tmpout"], 'inputhaser-BC2'), index=False, header=False, sep = ' ')
 
 def haser_reduce_1night(comet, night, obs, Qfitlim, check=True):
     reduced_dir = os.path.join(param['reduced'], comet, night.replace('-','') + obs)
@@ -30,6 +50,7 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True):
             shutil.copy(os.path.join(path, file), os.path.join(param['tmpout'], file))
     shutil.copy(os.path.join(haser_dir, 'inputhaser-BC'), os.path.join(param['tmpout'], 'inputhaser-BC'))
     shutil.copy(os.path.join(garbage_dir, 'ephem.brol'), os.path.join(param['tmpout'], 'ephem.brol'))
+    rewrite_fc_in_haserinput(fc)
     
     conda = True if param['conda'] == 'True' else False #wether to use 'source activate to launch cl or not'
     print('--- launching hasercalctest ---')
@@ -64,7 +85,7 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True):
 # comet = 'CK19L030'
 # night = '2022-01-08'
 # obs = 'TN'     
-# haser_import_1night(comet, night, obs, Qfitlim)
+# haser_reduce_1night(comet, night, obs, Qfitlim)
 
 if __name__ == "__main__":
     dt = datetime.datetime.now()
