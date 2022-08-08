@@ -12,15 +12,14 @@ import os
 import shutil
 
 comet = 'CK19L030'
-night = '2022-01-08'
-obs = 'TN'
+Qfitlim = (4.4, 5)
 
-def haser_import_1night(comet, night, obs):
+def haser_reduce_1night(comet, night, obs, Qfitlim, check=True):
     reduced_dir = os.path.join(param['reduced'], comet, night.replace('-','') + obs)
     profiles_dir = os.path.join(reduced_dir, "profiles")
     haser_dir = os.path.join(reduced_dir, "haser")
     garbage_dir = os.path.join(reduced_dir, "probably_garbage")
-    print(f'Initiating haser for {comet}, {night}, {obs}')
+    print(f'Initiating haser for {comet}, {night}, {obs} with range 10E{Qfitlim} km')
     if os.path.exists(param['tmpout']):
         shutil.rmtree(param['tmpout'])
     os.mkdir(param['tmpout'])
@@ -34,20 +33,42 @@ def haser_import_1night(comet, night, obs):
     conda = True if param['conda'] == 'True' else False #wether to use 'source activate to launch cl or not'
     print('--- launching hasercalctest ---')
     while True:
-        trap_reduction.clhasercalctest(param['iraf'], 'yes', conda=conda)
+        trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
         trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
-        while True:
-            inp = input('relaunch hasercalctext (r) or overwrite results in reduced dir (c)? [r/c]')
-            if inp == 'r' or inp == 'R' or inp == 'c' or inp == 'C':
+        
+        if check == True:
+            while True:
+                inp = input('relaunch hasercalctext (r) or overwrite results in reduced dir (c)? [r/c]')
+                if inp == 'r' or inp == 'R' or inp == 'c' or inp == 'C':
+                    break
+            if inp == 'r' or inp == 'R':
+                print('relaunching hasercalctest')
+                continue
+            elif inp == 'c' or inp == 'C':
+                print('overwriting results')
+                for path2, subdirs2, files2 in os.walk(param['tmpout']):
+                    for file in files2:
+                        if 'haser' in file and 'tmp' not in file:
+                            shutil.copy(os.path.join(path2, file), os.path.join(haser_dir, file))
+                            print('copied', file, "in reduced dir")
                 break
-        if inp == 'r' or inp == 'R':
-            print('relaunching hasercalctest')
-            continue
-        elif inp == 'c' or inp == 'C':
-            print('overwriting results')
+        else:
             for path2, subdirs2, files2 in os.walk(param['tmpout']):
                 for file in files2:
                     if 'haser' in file and 'tmp' not in file:
                         shutil.copy(os.path.join(path2, file), os.path.join(haser_dir, file))
                         print('copied', file, "in reduced dir")
-            break
+
+# comet = 'CK19L030'
+# night = '2022-01-08'
+# obs = 'TN'     
+# haser_import_1night(comet, night, obs, Qfitlim)
+
+if __name__ == "__main__":
+    comet_dir = os.path.join(param['reduced'], comet)
+    for path, subdirs, files in os.walk(comet_dir):
+        if path.split('/')[-1] == 'haser':
+            night = (path.split('/')[-2][:4] +'-'+ path.split('/')[-2][4:6] +'-'+ path.split('/')[-2][6:8])
+            obs = path.split('/')[-2][8:10]
+            haser_reduce_1night(comet, night, obs, Qfitlim, check=False)
+        
