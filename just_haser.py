@@ -10,6 +10,7 @@ import trap_plot
 from trapconfig import param
 import os
 import shutil
+import datetime
 
 comet = 'CK19L030'
 Qfitlim = (4.4, 5)
@@ -32,11 +33,10 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True):
     
     conda = True if param['conda'] == 'True' else False #wether to use 'source activate to launch cl or not'
     print('--- launching hasercalctest ---')
-    while True:
-        trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
-        trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
-        
-        if check == True:
+    if check == True:
+        while True:
+            trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
+            trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
             while True:
                 inp = input('relaunch hasercalctext (r) or overwrite results in reduced dir (c)? [r/c]')
                 if inp == 'r' or inp == 'R' or inp == 'c' or inp == 'C':
@@ -52,12 +52,14 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True):
                             shutil.copy(os.path.join(path2, file), os.path.join(haser_dir, file))
                             print('copied', file, "in reduced dir")
                 break
-        else:
-            for path2, subdirs2, files2 in os.walk(param['tmpout']):
-                for file in files2:
-                    if 'haser' in file and 'tmp' not in file:
-                        shutil.copy(os.path.join(path2, file), os.path.join(haser_dir, file))
-                        print('copied', file, "in reduced dir")
+    else:
+        trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
+        trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
+        for path2, subdirs2, files2 in os.walk(param['tmpout']):
+            for file in files2:
+                if 'haser' in file and 'tmp' not in file:
+                    shutil.copy(os.path.join(path2, file), os.path.join(haser_dir, file))
+                    print('copied', file, "in reduced dir")
 
 # comet = 'CK19L030'
 # night = '2022-01-08'
@@ -65,10 +67,12 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True):
 # haser_import_1night(comet, night, obs, Qfitlim)
 
 if __name__ == "__main__":
+    dt = datetime.datetime.now()
     comet_dir = os.path.join(param['reduced'], comet)
     for path, subdirs, files in os.walk(comet_dir):
-        if path.split('/')[-1] == 'haser':
+        if (path.split('/')[-1] == 'haser') and os.path.isfile(
+                os.path.join(path, 'inputhaser-BC')):
             night = (path.split('/')[-2][:4] +'-'+ path.split('/')[-2][4:6] +'-'+ path.split('/')[-2][6:8])
             obs = path.split('/')[-2][8:10]
             haser_reduce_1night(comet, night, obs, Qfitlim, check=False)
-        
+    print('Executed in ', datetime.datetime.now() - dt)
