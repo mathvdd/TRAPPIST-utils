@@ -256,7 +256,7 @@ def generate_ZP(calib_dir, ephemeris, fitstable, ZPparams=ZP, output_dir=None):
     else:
         output_path = os.path.join(output_dir, "calib.dat")
     with open(output_path, 'w') as f:
-        # the Rc filter is refered as R in the fits headers and the calib.dat file
+        # the Rc filter is refered as R in the fits headers and the calib.dat file # ! only for TS data after 2012-10-17
         ZPtable_closest['filt'] = ZPtable_closest['filt'].replace(['Rc'],'R')
         ZPtable_closest['filt'] = ZPtable_closest['filt'].replace(['Ic'],'I')
         # ZPtable_closest.loc[ZPtable_closest['filt'] == "Rc", 'filt']  = 'R'
@@ -670,7 +670,7 @@ def generate_haserinput(tmpout, fc=fc, fz=0):
 #         print("no radial profile with associated filter found. Please check fc or files. No haserinput written")
 # 
 # =============================================================================
-def clhasercalctest(iraf_dir, arg='no', conda=True):
+def clhasercalctest(iraf_dir, arg='no', Qproflow=3.6, Qprofhigh=4.1, conda=True):
     """
     Wrapper to launch iraf hasercalctest in python
     

@@ -20,13 +20,14 @@ import phase_angle
 
 ########################
 # INPUT PARAMETERS
-startdate = '2010-11-05' #the night starting
+startdate = '2018-11-05' #the night starting
 enddate = '2022-10-11' #starting that night not included
 obs = 'TS'
-comets = ['0260P'] # list of comets to take into account. set empty to take all 
+comets = ['0004P'] # list of comets to take into account. set empty to take all 
 skip = True # skip without asking raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
+Qfit = (3.5, 4.1) # limit in log10 km for the range over which Q is fitted
 
 ########################
 
@@ -91,7 +92,7 @@ for comet in inlist:
     print('Downloading ' + comet)
     output_path = os.path.join(param['raw'], comet, obs)
     query_NAS.get_files(comet, NASfitstable, output_path, dayinterval=7, dateinterval=(startdate, enddate), skip_existing=skip)
-        
+# input('download finished')      
 # makes list of folders to reduce
 list_to_reduce = []
 for comet in inlist:
@@ -292,7 +293,7 @@ for path in list_to_reduce:
             
             print('--- launching hasercalctest ---')
             while True:
-                trap_reduction.clhasercalctest(param['iraf'], 'yes', conda=conda)
+                trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfit[0], Qprofhigh=Qfit[1], conda=conda)
                 trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
                 while True:
                     inp = input('relaunch hasercalctext (r) or bypass (b)? [r/b]')
