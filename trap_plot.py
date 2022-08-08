@@ -715,6 +715,7 @@ def plot_haserprofile(input_dir, output_dir=None, comet_name=''):
                 for index, row in tab.iterrows():
                     imname = row[0]
                     Q = row[11]
+                    fc = row[2]
                     if len(tab.columns) == 17: #old version
                         filt = row[14]
                         Qproflow = row[15]
@@ -763,14 +764,14 @@ def plot_haserprofile(input_dir, output_dir=None, comet_name=''):
                     ax.set_xlim([np.log10(cont[0][xlim1]), np.log10(cont[0][xlim2])])
                     
                     # need to redefine the limit otherwise the plot does not rescale du to high continuum values outside the plotting limits
-                    plt.plot(np.log10(obs[0][:xlim2]),np.log10(obs[1][:xlim2]),label='Observed profile')
-                    plt.plot(np.log10(cont[0][:xlim2]),np.log10(cont[1][:xlim2]), label='Continuum profile (scaled)')
-                    plt.plot(np.log10(cont[0][:xlim2]),np.log10(obscont[1][:xlim2]), label='Observed-Continuum')
+                    plt.plot(np.log10(obs[0][:xlim2]),np.log10(obs[1][:xlim2]),color='tab:red',ls=':',label='Observed profile')
+                    plt.plot(np.log10(cont[0][:xlim2]),np.log10(cont[1][:xlim2]),color='tab:blue',ls=':', label=f'Continuum profile (fc={fc})')
+                    plt.plot(np.log10(cont[0][:xlim2]),np.log10(obscont[1][:xlim2]),color='tab:red', label='Profile after dust subtraction')
                     # plt.plot(np.log10(cont[0][:lim]),np.log10(model[1][:lim]),label='tmpmodel.dat')
-                    plt.plot(np.log10(model[0]),np.log10(model[1]),label='Haser model')
-                    plt.axvline(x=Qproflow,color='black', alpha=0.5, linestyle='--', label='limits for the fit')
+                    plt.plot(np.log10(model[0]),np.log10(model[1]),color='tab:green',label='Haser model')
+                    plt.axvline(x=Qproflow,color='black', alpha=0.5, linestyle='--', label=f'limits for the fit ({Qproflow},{Qprofhigh})')
                     plt.axvline(x=Qprofhigh,color='black', alpha=0.5, linestyle='--')
-                    ax.set_ylabel('Log Flux (erg cm−2 s−1 arcsec−2)')
+                    ax.set_ylabel('Column density (unit?)')
                     ax.set_xlabel('Log rho (km)')
                     
                     plt.legend(loc='lower left')
