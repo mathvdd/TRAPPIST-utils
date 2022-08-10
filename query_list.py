@@ -59,7 +59,7 @@ for comet in comet_list:
     for tabandobs in [TStab, TNtab]:
         tab = tabandobs[0]
         obs = tabandobs[1]
-        
+
         lighttab = tab.loc[(tab['object'] == comet)
                              & (tab['filter'].isin(filt_list))]
         nightslist = lighttab['start_night'].drop_duplicates().tolist()
@@ -70,7 +70,7 @@ for comet in comet_list:
                 os.mkdir(night_dir)
                 #takes the lights
                 lights = lighttab.loc[lighttab['start_night'] == night]
-                
+
                 #getting the calib
                 lower_interval = night - datetime.timedelta(days = dayinterval)
                 upper_interval = night + datetime.timedelta(days = dayinterval)
@@ -78,7 +78,7 @@ for comet in comet_list:
                 exptimelist = lights['exptime'].drop_duplicates().values.tolist()
                 # exptimelist.append(10)
                 exptimelist.append(15)
-                
+
                 flats = tab.loc[tab['type'].isin(['FLAT', 'Flat Frame'])
                                              & (tab['start_night'] > lower_interval)
                                              & (tab['start_night'] <= upper_interval)
@@ -101,7 +101,7 @@ for comet in comet_list:
                     map_flats = flats.loc[flats['filter'] == row['filter']]
                     map_darks = darks.loc[darks['exptime'] == row['exptime']]
                     checktable.at[index, 'nb_flat'] = len(map_flats)
-                    checktable.at[index, 'nb_dark'] = len(map_darks)              
+                    checktable.at[index, 'nb_dark'] = len(map_darks)
                     if checktable.at[index, 'nb_flat'] == 0:
                         print(night)
                         # print("WARNING: no flat for", row['file'])
@@ -119,7 +119,7 @@ for comet in comet_list:
                         warning_flag = True
                     if checktable.at[index, 'nb_dark'] == 0:
                         # print("WARNING: no dark (",row['exptime'],") for", row['file'])
-                        warning_flag = True
+                        warning_flag = True 
                         alldarks = tab.loc[tab['type'].isin(['DARK', 'Dark Frame']) & (tab['start_night'] > lower_interval) & (tab['start_night'] <= upper_interval)]
                         closest_exptime = alldarks.iloc[(alldarks['exptime'] -row['exptime']).abs().argsort(),:].iloc[0]['exptime']
                         sup_dark = alldarks.loc[alldarks['exptime'] == closest_exptime]
@@ -136,7 +136,7 @@ for comet in comet_list:
                     elif row['nb_bias'] < 5:
                         print("WARNING: less than 5 bias for", row['file'])
                         warning_flag = True
-                    
+
                     if copyfile == True:
                         shutil.copy(row['file'], os.path.join(night_dir, row['file'].split('/')[-1]))
 
@@ -148,7 +148,7 @@ for comet in comet_list:
                             map_content.loc[index2, 'file'] = obs + '_calib/' + date + row2['file'].split('/')[-1]
                         # map_content['file'] = [item.split('/')[-1] for item in map_content['file']]
                         map_content.to_csv(os.path.join(night_dir, row['file'].split('/')[-1] + '_calibmapping.txt'), index=False)
-                    
+
                 map_dark15 = darks.loc[darks['exptime'] == 15]
                 nb_flat_dark15 = len(map_dark15)
                 if (nb_flat_dark15 == 0 ):
@@ -161,9 +161,9 @@ for comet in comet_list:
                     # input()
                     nighttable = pd.concat([nighttable, sup_dark15])
                 elif (nb_flat_dark15 < 5):
-                    print("WARNING: less than 5 darks (15s) for flats") 
+                    print("WARNING: less than 5 darks (15s) for flats")
                 # input()
-                
+
                 if make_mapping == True:
                     for index2, row2 in map_dark15.iterrows():
                         date = str(row2['start_night'])[0:4] + str(row2['start_night'])[5:7] + str(row2['start_night'])[8:10]
@@ -173,7 +173,7 @@ for comet in comet_list:
 
                 dt = pd.concat([dt, nighttable])
                 dt_clean = dt.drop_duplicates(subset='file', keep='first', inplace=False)
-                
+
 obs = None
 print(len(dt),len(dt_clean))
 calib_table = dt_clean.loc[~dt_clean['type'].isin(['LIGHT', 'Light Frame'])]
@@ -187,6 +187,5 @@ if copyfile == True:
             calib_dir = TS_calib_dir
         if 'TN' in row['file'].split('/')[1]:
             calib_dir = TN_calib_dir
-            
+
         shutil.copy(row['file'], os.path.join(calib_dir, date + row['file'].split('/')[-1]))
-                    
