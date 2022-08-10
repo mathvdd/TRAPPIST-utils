@@ -725,66 +725,67 @@ def plot_haserprofile(input_dir, output_dir=None, comet_name=''):
                         Qproflow = row[16]
                         Qprofhigh = row[17]
                     error = row[12]
-                    haserprofile_path = os.path.join(path, 'haserprofile_' + imname)
-                    haserprofilecont_path = os.path.join(path, 'haserprofilecont_' + imname)
-                    hasermodel_path = os.path.join(path, 'hasermodel_' + imname)
-                    if os.path.isfile(haserprofile_path) and os.path.isfile(haserprofilecont_path) and os.path.isfile(hasermodel_path):
-                        obs = pd.read_csv(haserprofile_path, header=None, sep="\s+")
-                        cont = pd.read_csv(haserprofilecont_path, header=None, sep="\s+")
-                        model = pd.read_csv(hasermodel_path, header=None, sep="\s+")
-                        obscont = obs-cont
-                    else:
-                        print(path)
-                        print(imname)
-                        print('error finding haser profile paths')
-                        input('Acknowledge press enter to quit')
-                        return
-                    
-                    # replace negative values by np.nan for the log scale
-                    obscont[obscont < 0] = np.nan
-                    obs[obs < 0] = np.nan
-                    cont[cont < 0] = np.nan
-                    # print(cont.loc[cont[1]<0])
-                    
-                    save_dir = path if output_dir is None else output_dir
-                    
-                    # little warning if scale is not the same but should not be a problem
-                    if (obs[0][0] != cont[0][0]) or (obs[0][2] != cont[0][2]):
-                        print(imname)
-                        print('WARNING: x scale may be different for NB and continuum spectrum')
-                        print('difference ratio:', ((cont[0]- obs[0])/obs[0])[0])
-                    
-                    # define the plot
-                    fig = plt.figure(figsize=(12,9))
-                    ax = fig.gca()
-                    
-                    # added this so don't see the extreme right of the continuum which is very noisy and mess the scale
-                    xlim1 = 0
-                    xlim2 = len(cont)-100
-                    ax.set_xlim([np.log10(cont[0][xlim1]), np.log10(cont[0][xlim2])])
-                    
-                    # need to redefine the limit otherwise the plot does not rescale du to high continuum values outside the plotting limits
-                    plt.plot(np.log10(obs[0][:xlim2]),np.log10(obs[1][:xlim2]),color='tab:red',ls=':',label='Observed profile')
-                    plt.plot(np.log10(cont[0][:xlim2]),np.log10(cont[1][:xlim2]),color='tab:blue',ls=':', label=f'Continuum profile (fc={fc})')
-                    plt.plot(np.log10(cont[0][:xlim2]),np.log10(obscont[1][:xlim2]),color='tab:red', label='Profile after dust subtraction')
-                    # plt.plot(np.log10(cont[0][:lim]),np.log10(model[1][:lim]),label='tmpmodel.dat')
-                    plt.plot(np.log10(model[0]),np.log10(model[1]),color='tab:green',label='Haser model')
-                    plt.axvline(x=Qproflow,color='black', alpha=0.5, linestyle='--', label=f'limits for the fit ({Qproflow},{Qprofhigh})')
-                    plt.axvline(x=Qprofhigh,color='black', alpha=0.5, linestyle='--')
-                    ax.set_ylabel('Column density (unit?)')
-                    ax.set_xlabel('Log rho (km)')
-                    
-                    plt.legend(loc='lower left')
-                    haser_magorder = int(math.modf(math.log10(Q))[1])
-                    haser_str = "{:.2f}".format(Q/10**haser_magorder)
-                    error_str = "{:.2f}".format(error/10**haser_magorder)
-                    plt.suptitle(f"{comet_name} {filt} {imname}\nQ({filt}) = {haser_str} ± {error_str} E{haser_magorder} s-1")
-                    
-                    plt.tight_layout()
-                    plt.savefig(os.path.join(save_dir, imname[:-9] + '_haserprofile.png'), bbox_inches='tight')
-                    
-                    plt.show()
-                    plt.close()
+                    if filt != 'CO+' and filt != 'H2O':
+                        haserprofile_path = os.path.join(path, 'haserprofile_' + imname)
+                        haserprofilecont_path = os.path.join(path, 'haserprofilecont_' + imname)
+                        hasermodel_path = os.path.join(path, 'hasermodel_' + imname)
+                        if os.path.isfile(haserprofile_path) and os.path.isfile(haserprofilecont_path) and os.path.isfile(hasermodel_path):
+                            obs = pd.read_csv(haserprofile_path, header=None, sep="\s+")
+                            cont = pd.read_csv(haserprofilecont_path, header=None, sep="\s+")
+                            model = pd.read_csv(hasermodel_path, header=None, sep="\s+")
+                            obscont = obs-cont
+                        else:
+                            print(path)
+                            print(imname)
+                            print('error finding haser profile paths')
+                            input('Acknowledge press enter to quit')
+                            return
+                        
+                        # replace negative values by np.nan for the log scale
+                        obscont[obscont < 0] = np.nan
+                        obs[obs < 0] = np.nan
+                        cont[cont < 0] = np.nan
+                        # print(cont.loc[cont[1]<0])
+                        
+                        save_dir = path if output_dir is None else output_dir
+                        
+                        # little warning if scale is not the same but should not be a problem
+                        if (obs[0][0] != cont[0][0]) or (obs[0][2] != cont[0][2]):
+                            print(imname)
+                            print('WARNING: x scale may be different for NB and continuum spectrum')
+                            print('difference ratio:', ((cont[0]- obs[0])/obs[0])[0])
+                        
+                        # define the plot
+                        fig = plt.figure(figsize=(12,9))
+                        ax = fig.gca()
+                        
+                        # added this so don't see the extreme right of the continuum which is very noisy and mess the scale
+                        xlim1 = 0
+                        xlim2 = len(cont)-100
+                        ax.set_xlim([np.log10(cont[0][xlim1]), np.log10(cont[0][xlim2])])
+                        
+                        # need to redefine the limit otherwise the plot does not rescale du to high continuum values outside the plotting limits
+                        plt.plot(np.log10(obs[0][:xlim2]),np.log10(obs[1][:xlim2]),color='tab:red',ls=':',label='Observed profile')
+                        plt.plot(np.log10(cont[0][:xlim2]),np.log10(cont[1][:xlim2]),color='tab:blue',ls=':', label=f'Continuum profile (fc={fc})')
+                        plt.plot(np.log10(cont[0][:xlim2]),np.log10(obscont[1][:xlim2]),color='tab:red', label='Profile after dust subtraction')
+                        # plt.plot(np.log10(cont[0][:lim]),np.log10(model[1][:lim]),label='tmpmodel.dat')
+                        plt.plot(np.log10(model[0]),np.log10(model[1]),color='tab:green',label='Haser model')
+                        plt.axvline(x=Qproflow,color='black', alpha=0.5, linestyle='--', label=f'limits for the fit ({Qproflow},{Qprofhigh})')
+                        plt.axvline(x=Qprofhigh,color='black', alpha=0.5, linestyle='--')
+                        ax.set_ylabel('Column density (unit?)')
+                        ax.set_xlabel('Log rho (km)')
+                        
+                        plt.legend(loc='lower left')
+                        haser_magorder = int(math.modf(math.log10(Q))[1])
+                        haser_str = "{:.2f}".format(Q/10**haser_magorder)
+                        error_str = "{:.2f}".format(error/10**haser_magorder)
+                        plt.suptitle(f"{comet_name} {filt} {imname}\nQ({filt}) = {haser_str} ± {error_str} E{haser_magorder} s-1")
+                        
+                        plt.tight_layout()
+                        plt.savefig(os.path.join(save_dir, imname[:-9] + '_haserprofile.png'), bbox_inches='tight')
+                        
+                        plt.show()
+                        plt.close()
     
 # plot_haserprofile('/home/Mathieu/Documents/TRAPPIST/tmpout', output_dir=None)
 
