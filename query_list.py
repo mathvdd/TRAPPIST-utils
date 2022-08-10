@@ -65,8 +65,9 @@ for comet in comet_list:
         nightslist = lighttab['start_night'].drop_duplicates().tolist()
         print(comet, obs, len(nightslist))
         if len(nightslist) > 0:
+            os.mkdir(os.path.join(comet_dir, obs))
             for night in nightslist:
-                night_dir = os.path.join(comet_dir, str(night)[0:4] + str(night)[5:7] + str(night)[8:10] + obs)
+                night_dir = os.path.join(comet_dir, obs, str(night)[0:4] + str(night)[5:7] + str(night)[8:10])
                 os.mkdir(night_dir)
                 #takes the lights
                 lights = lighttab.loc[lighttab['start_night'] == night]
@@ -145,7 +146,7 @@ for comet in comet_list:
                     if make_mapping == True:
                         for index2, row2 in map_content.iterrows():
                             date = str(row2['start_night'])[0:4] + str(row2['start_night'])[5:7] + str(row2['start_night'])[8:10]
-                            map_content.loc[index2, 'file'] = obs + '_calib/' + date + row2['file'].split('/')[-1]
+                            map_content.loc[index2, 'file'] = os.path.join(obs + '_calib', date, row2['file'].split('/')[-1])
                         # map_content['file'] = [item.split('/')[-1] for item in map_content['file']]
                         map_content.to_csv(os.path.join(night_dir, row['file'].split('/')[-1] + '_calibmapping.txt'), index=False)
 
@@ -167,7 +168,7 @@ for comet in comet_list:
                 if make_mapping == True:
                     for index2, row2 in map_dark15.iterrows():
                         date = str(row2['start_night'])[0:4] + str(row2['start_night'])[5:7] + str(row2['start_night'])[8:10]
-                        map_dark15.loc[index2, 'file'] = obs + '_calib/' + date + row2['file'].split('/')[-1]
+                        map_dark15.loc[index2, 'file'] = os.path.join(obs + '_calib', date, row2['file'].split('/')[-1])
                     map_dark15.to_csv(os.path.join(night_dir, 'flats_calibmapping.txt'), index=False)
 
 
@@ -184,8 +185,12 @@ if copyfile == True:
         date = str(row['start_night'])[0:4] + str(row['start_night'])[5:7] + str(row['start_night'])[8:10]
         filename = date + row['file'].split('/')[-1]
         if 'TS' in row['file'].split('/')[1]:
-            calib_dir = TS_calib_dir
+            calib_dir = os.path.join(TS_calib_dir, date)
         if 'TN' in row['file'].split('/')[1]:
-            calib_dir = TN_calib_dir
+            calib_dir = os.path.join(TN_calib_dir, date)
 
-        shutil.copy(row['file'], os.path.join(calib_dir, date + row['file'].split('/')[-1]))
+        if os.path.exists(calib_dir):
+            pass
+        else:
+            os.mkdir(calib_dir)
+        shutil.copy(row['file'], os.path.join(calib_dir,row['file'].split('/')[-1]))
