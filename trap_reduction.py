@@ -21,7 +21,9 @@ fc = {'OH':5,
       'NH':20,
       'CN':25,
       'C3':190,
-      'C2':170}
+      'C2':170,
+      'CO+':56,
+      'H2O':129}
 
 #see calib08140914.dat
 ZP = {'OH': [3090, 10.56e-9,   1.791,  1.698e-2,  0.98,   1,  1.60],
@@ -39,7 +41,7 @@ ZP = {'OH': [3090, 10.56e-9,   1.791,  1.698e-2,  0.98,   1,  1.60],
       'I': [8637,  9.39e-10, -1.375,  1.,        1,     15,  0.043]
       }
 
-filt_list = ['OH','CN','C2','C3','NH','UC','BC','RC','GC','R','I', 'B', 'V'] #to be coherent with the subsets file for progtrap2.cl
+filt_list = ['OH','CN','C2','C3','NH','CO+','H2O','UC','BC','RC','GC','R','I', 'B', 'V'] #to be coherent with the subsets file for progtrap2.cl
 
 def renameftsfits(raw_path):
     """
@@ -163,7 +165,7 @@ def check_calib(fitstable, filt_list=filt_list):
 
         
     # check if there is a BC filter for narrow bands
-    if lighttable['filt'].isin(['OH', 'C2', 'C3', 'CN', 'NH']).any() and (lighttable['filt'].isin(['BC']).any() == False):
+    if lighttable['filt'].isin(['OH', 'C2', 'C3', 'CN', 'NH','CO+','H2O']).any() and (lighttable['filt'].isin(['BC']).any() == False):
         print("WARNING: Narrow band images while no continuum BC image")
         warning_flag = True
         

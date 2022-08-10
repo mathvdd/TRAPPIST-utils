@@ -20,10 +20,10 @@ import phase_angle
 
 ########################
 # INPUT PARAMETERS
-startdate = '2018-11-05' #the night starting
+startdate = '2010-11-05' #the night starting
 enddate = '2022-10-11' #starting that night not included
 obs = 'TS'
-comets = ['0004P'] # list of comets to take into account. set empty to take all 
+comets = ['CK21A010'] # list of comets to take into account. set empty to take all 
 skip = True # skip without asking raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
@@ -271,8 +271,12 @@ for path in list_to_reduce:
             elif inp == 'b' or inp == 'B':
                 break
         trap_reduction.clean_afrhotot(param['tmpout'])
-        print(len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]))
-        if len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]) > 0:            
+        print(len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2','CO+','H2O']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]))
+        if len(fitstable.loc[fitstable['filt'].isin(['CO+','H2O']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]) > 0:
+            print(fitstable)
+            input('CO+ or H2O filter detected')
+                             
+        if len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2','CO+','H2O']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]) > 0:            
        	    print('--- initiating haserinput ---')
        	    while True:
                 haserinput_warning = trap_reduction.generate_haserinput(param['tmpout'])
