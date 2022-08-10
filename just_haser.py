@@ -14,11 +14,11 @@ import datetime
 import pandas as pd
 
 comet = 'CK19L030'
-Qfitlim = (4.4, 5)
-fc = {'OH':19,
+Qfitlim = (4.5, 5.5)
+fc = {'OH':5,
       'NH':20,
-      'CN':29,
-      'C3':248,
+      'CN':25,
+      'C3':190,
       'C2':170}
 # fc_default = {'OH':5,
 #       'NH':20,
@@ -33,7 +33,7 @@ def rewrite_fc_in_haserinput(fc):
         rad = pd.read_csv(os.path.join(param["tmpout"], 'rad_' + row[0]), header=None, sep='\s+')
         filt = rad.iloc[0,14]
         inputhaser.iloc[index,2] = fc.get(filt)
-    inputhaser.to_csv(os.path.join(param["tmpout"], 'inputhaser-BC2'), index=False, header=False, sep = ' ')
+    inputhaser.to_csv(os.path.join(param["tmpout"], 'inputhaser-BC'), index=False, header=False, sep = ' ')
 
 def haser_reduce_1night(comet, night, obs, Qfitlim, check=True):
     reduced_dir = os.path.join(param['reduced'], comet, night.replace('-','') + obs)
