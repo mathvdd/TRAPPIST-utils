@@ -261,6 +261,7 @@ def generate_ZP(calib_dir, ephemeris, fitstable, ZPparams=ZP, output_dir=None):
         # the Rc filter is refered as R in the fits headers and the calib.dat file # ! only for TS data after 2012-10-17
         ZPtable_closest['filt'] = ZPtable_closest['filt'].replace(['Rc'],'R')
         ZPtable_closest['filt'] = ZPtable_closest['filt'].replace(['Ic'],'I')
+        ZPtable_closest['filt'] = ZPtable_closest['filt'].replace(['CO'],'CO+')
         # ZPtable_closest.loc[ZPtable_closest['filt'] == "Rc", 'filt']  = 'R'
         # ZPtable_closest['filt'] = ZPtable_closest['filt'].replace({'Rc':'R'})
         for filt in filtlist:
