@@ -10,7 +10,7 @@ from trapconfig import param
 import os
 
 f2 = []
-with open(os.path.join(param['tmpout'], 'outf'), 'rb') as f:
+with open(os.path.join(param['tmpout'], 'outf2'), 'rb') as f:
     for line in f:
         try:
             # print(line.split())
@@ -23,6 +23,6 @@ with open(os.path.join(param['tmpout'], 'outf'), 'rb') as f:
             pass
             # print(line)
             
-with open(os.path.join(param['tmpout'], 'outf2'), 'w') as f:
+with open(os.path.join(param['tmpout'], 'outf3'), 'w') as f:
     for line in f2:
         f.write(line.decode('UTF-8'))
