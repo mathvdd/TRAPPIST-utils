@@ -21,9 +21,9 @@ comet = '0067P'
 # dir_path = os.path.join(param['reduced'], 'CK17K020', '20220506TS')
 db_results = os.path.join(os.path.expanduser('~'), 'Documents/TRAPPIST/reduced_data/results.db') # to check for flagged bad data
 
-gamma = {'BC':1,'GC':1,'RC':1,'C2':5.433e-3, 'C3':3.352e-3, 'OH':1.698e-2, 'CN':1.812e-2}
-F0 = {'BC':6.21e-9,'GC':3.616e-9,'RC':1.316e-9,'C2':3.887e-9, 'C3': 8.16e-9, 'OH':10.56e-9, 'CN':8.6e-9}
-ms = {'BC':0,'GC':-0.507,'RC':-1.276,'C2':-0.423, 'C3':0.497, 'OH':1.791, 'CN':1.031}
+gamma = {'BC':1,'GC':1,'RC':1,'C2':5.433e-3, 'C3':3.352e-3, 'OH':1.698e-2, 'CN':1.812e-2, 'CO+':1.549e-2, 'H2O':5.424e-3}
+F0 = {'BC':6.21e-9,'GC':3.616e-9,'RC':1.316e-9,'C2':3.887e-9, 'C3': 8.16e-9, 'OH':10.56e-9, 'CN':8.6e-9, 'CO+':7.323e-9, 'H2O':1.380e-9}
+ms = {'BC':0,'GC':-0.507,'RC':-1.276,'C2':-0.423, 'C3':0.497, 'OH':1.791, 'CN':1.031, 'CO+':0.338, 'H2O':-1.249}
 KGC1 = 0.0404
 KGC3 = 0.0373
 pixsize = {'TN':2*0.6,'TS':2*0.65}

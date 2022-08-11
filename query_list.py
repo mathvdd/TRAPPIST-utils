@@ -38,9 +38,9 @@ TNtab = (query_NAS.loadcsvtable(param['TN_qNAS']), 'TN')
 dt = pd.DataFrame()
 dayinterval = 15
 output_dir = '/NASTN/BVRI_comets_backup'
-if os.path.exists(output_dir):
-    shutil.rmtree(output_dir)
-os.mkdir(output_dir)
+# if os.path.exists(output_dir):
+#     shutil.rmtree(output_dir)
+# os.mkdir(output_dir)
 TS_calib_dir = os.path.join(output_dir, 'TS_calib')
 TN_calib_dir = os.path.join(output_dir, 'TN_calib')
 os.mkdir(TS_calib_dir)
@@ -55,7 +55,7 @@ def file_path_renaming(row):
 
 for comet in comet_list:
     comet_dir = os.path.join(output_dir, comet)
-    os.mkdir(comet_dir)
+    # os.mkdir(comet_dir)
     for tabandobs in [TStab, TNtab]:
         tab = tabandobs[0]
         obs = tabandobs[1]
@@ -65,10 +65,10 @@ for comet in comet_list:
         nightslist = lighttab['start_night'].drop_duplicates().tolist()
         print(comet, obs, len(nightslist))
         if len(nightslist) > 0:
-            os.mkdir(os.path.join(comet_dir, obs))
+            # os.mkdir(os.path.join(comet_dir, obs))
             for night in nightslist:
                 night_dir = os.path.join(comet_dir, obs, str(night)[0:4] + str(night)[5:7] + str(night)[8:10])
-                os.mkdir(night_dir)
+                # os.mkdir(night_dir)
                 #takes the lights
                 lights = lighttab.loc[lighttab['start_night'] == night]
 
@@ -138,17 +138,17 @@ for comet in comet_list:
                         print("WARNING: less than 5 bias for", row['file'])
                         warning_flag = True
 
-                    if copyfile == True:
-                        shutil.copy(row['file'], os.path.join(night_dir, row['file'].split('/')[-1]))
+                    # if copyfile == True:
+                    #     shutil.copy(row['file'], os.path.join(night_dir, row['file'].split('/')[-1]))
 
                     map_content = pd.concat([map_flats, map_darks, bias])
                     # map_content.loc[map_content['file'],'file'] = map_content['file'].split('/')
-                    if make_mapping == True:
-                        for index2, row2 in map_content.iterrows():
-                            date = str(row2['start_night'])[0:4] + str(row2['start_night'])[5:7] + str(row2['start_night'])[8:10]
-                            map_content.loc[index2, 'file'] = os.path.join(obs + '_calib', date, row2['file'].split('/')[-1])
-                        # map_content['file'] = [item.split('/')[-1] for item in map_content['file']]
-                        map_content.to_csv(os.path.join(night_dir, row['file'].split('/')[-1] + '_calibmapping.txt'), index=False)
+                    # if make_mapping == True:
+                    #     for index2, row2 in map_content.iterrows():
+                    #         date = str(row2['start_night'])[0:4] + str(row2['start_night'])[5:7] + str(row2['start_night'])[8:10]
+                    #         map_content.loc[index2, 'file'] = os.path.join(obs + '_calib', date, row2['file'].split('/')[-1])
+                    #     # map_content['file'] = [item.split('/')[-1] for item in map_content['file']]
+                    #     map_content.to_csv(os.path.join(night_dir, row['file'].split('/')[-1] + '_calibmapping.txt'), index=False)
 
                 map_dark15 = darks.loc[darks['exptime'] == 15]
                 nb_flat_dark15 = len(map_dark15)
@@ -165,11 +165,11 @@ for comet in comet_list:
                     print("WARNING: less than 5 darks (15s) for flats")
                 # input()
 
-                if make_mapping == True:
-                    for index2, row2 in map_dark15.iterrows():
-                        date = str(row2['start_night'])[0:4] + str(row2['start_night'])[5:7] + str(row2['start_night'])[8:10]
-                        map_dark15.loc[index2, 'file'] = os.path.join(obs + '_calib', date, row2['file'].split('/')[-1])
-                    map_dark15.to_csv(os.path.join(night_dir, 'flats_calibmapping.txt'), index=False)
+                # if make_mapping == True:
+                #     for index2, row2 in map_dark15.iterrows():
+                #         date = str(row2['start_night'])[0:4] + str(row2['start_night'])[5:7] + str(row2['start_night'])[8:10]
+                #         map_dark15.loc[index2, 'file'] = os.path.join(obs + '_calib', date, row2['file'].split('/')[-1])
+                #     map_dark15.to_csv(os.path.join(night_dir, 'flats_calibmapping.txt'), index=False)
 
 
                 dt = pd.concat([dt, nighttable])

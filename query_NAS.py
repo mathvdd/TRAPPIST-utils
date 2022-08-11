@@ -475,23 +475,23 @@ def lookforcalib_old():
     
     ### uncomment line bellow if querying for a light image
     # imtype = ['LIGHT', 'Light Frame']
-    obj = "0004P" #target name in the fits header. only for lights and for the output path
+    obj = "CK21A010" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
-    imtype = ['DARK', 'Dark Frame']
-    exptime = 600 #exposure time. only for darks
+    # imtype = ['DARK', 'Dark Frame']
+    exptime = 240 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
-    # imtype = ['FLAT', 'Flat Frame']
-    filt = 'BC' #filter. only for flats
+    imtype = ['FLAT', 'Flat Frame']
+    filt = 'B' #filter. only for flats
     
     ### uncomment line bellow if querying for bias frames
     # imtype = ['BIAS', 'Bias Frame']
     
-    telescope = 'TS'
-    night = (2021,8,6) ### set the observation night
+    telescope = 'TN'
+    night = (2021,4,18) ### set the observation night
     
-    dayinterval = 7 # starting point for the search
+    dayinterval = 15 # starting point for the search
     
     ####################################
     
