@@ -19,7 +19,7 @@ with open(os.path.join(param['tmpout'], 'outf2'), 'rb') as f:
                 float(item)
             f2.append(line)
         except:
-            print('removed from outf:', line)
+            print('binary removed from outf')
             pass
             # print(line)
             
