@@ -19,6 +19,7 @@ from matplotlib import colors
 from matplotlib.patches import Circle
 import numpy as np
 import math 
+from matplotlib.ticker import MultipleLocator
 
 def list_radprof(input_dir, output_dir):
     radtable = pd.DataFrame()
@@ -446,9 +447,14 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     ycent = row[3]
                     delta = row[8] #distance to the earth
                     pixsize = row[9]
-                    pixelcropping = 350 #remove border of the image
+
+                    centerlimit = 200
+                    # pixelcropping = 350 #remove border of the image
                     
                     image_data = fits.getdata(fitspath, ext=0)
+                    
+                    ximcent = len(image_data[1])/2
+                    yimcent = len(image_data)/2
                     # circ5arcsec = Circle((xcent-pixelcropping,ycent-pixelcropping),radius = 5/pixsize, alpha=0.5, fill=False, color='red', label='5arcsec')
                     # arcsec10k = 206265*10000/(delta*1.5*100000000)
                     # circ10k = Circle((xcent-pixelcropping,ycent-pixelcropping),radius = arcsec10k/pixsize, alpha=0.5, fill=False, color='blue', label='10k km')
@@ -462,14 +468,26 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
 
                     def plot_this_thing():
                         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14,6))
-                        circ5arcsec = Circle((xcent-pixelcropping,ycent-pixelcropping),radius = 5/pixsize, alpha=0.5, fill=False, color='red', label='5arcsec')
+                        circ5arcsec = Circle((xcent,ycent),radius = 5/pixsize, alpha=0.5, fill=False, color='red', label='5arcsec')
                         arcsec10k = 206265*10000/(delta*1.5*100000000)
-                        circ10k = Circle((xcent-pixelcropping,ycent-pixelcropping),radius = arcsec10k/pixsize, alpha=0.5, fill=False, color='blue', label='10k km')
+                        circ10k = Circle((xcent,ycent),radius = arcsec10k/pixsize, alpha=0.5, fill=False, color='blue', label='10k km')
                         
                         ax1.add_patch(circ5arcsec)
                         ax1.add_patch(circ10k)
-                        ax1.axis('off')
+                        # ax1.axis('off')
+                        # ax1.grid()
+                        ax1.xaxis.set_major_locator(MultipleLocator(100))
+                        ax1.yaxis.set_major_locator(MultipleLocator(100))
+                        ax1.grid(which='major', alpha=0.8, color='#CCCCCC', linestyle=':')                 
+                        ax1.grid(True)
+                        ax1.tick_params(direction='out',length=5)
+                        ax1.set_ylim(yimcent - centerlimit, yimcent+centerlimit)
+                        ax1.set_xlim(ximcent - centerlimit, ximcent+centerlimit)
                         ax1.legend()
+                        centpixel_value = np.max(image_data[int(ycent)-2:int(ycent)+2, int(xcent)-2:int(xcent)+2])
+                        t = ax1.text(x=0.95,y=0.05,s='Center pixel value: ' + str(int(centpixel_value)).rjust(5), transform=ax1.transAxes,
+                                 horizontalalignment='right')
+                        t.set_bbox(dict(facecolor='white', alpha=0.8))
                         ax2.plot(df[2-1][:40], df[4-1][:40])
                         ax2.axvline(x=5/pixsize,color='red', alpha=0.5, linestyle='--')
                         ax2.axvline(x=arcsec10k/pixsize,color='blue', alpha=0.5, linestyle='--')
@@ -483,7 +501,8 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         fig,ax1=plot_this_thing()
                         
                         plt.suptitle(comet_name + ' ' + filt + ' ' + fitsname +  '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ')')
-                        ax1.imshow(image_data[pixelcropping:-pixelcropping,pixelcropping:-pixelcropping], cmap='pink', norm=colors.LogNorm(vmin=np.median(image_data), vmax=image_data[int(xcent), int(ycent)]*2))
+                        ax1.imshow(image_data, cmap='pink', norm=colors.LogNorm(vmin=np.median(image_data), vmax=image_data[int(xcent), int(ycent)]*2))
+                        
                         fig.savefig(os.path.join(save_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
                     except:
                         print('ERROR LOGSCALE')
@@ -491,7 +510,7 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         fig,ax1=plot_this_thing()
                        
                         plt.suptitle(comet_name + ' ' + filt + ' ' + fitsname + '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ') error logscale')
-                        ax1.imshow(image_data[pixelcropping:-pixelcropping,pixelcropping:-pixelcropping], cmap='binary')
+                        ax1.imshow(image_data, cmap='binary')
                         plt.savefig(os.path.join(save_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
                     
                     
@@ -499,7 +518,7 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     plt.show()
                     plt.close()
                     
-# plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/reduced_data')
+# plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/reduced_data/0007P/20210511TN/centering')
 
 
 def plot_afrho(input_dir, saveplot=''):
