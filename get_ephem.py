@@ -262,9 +262,9 @@ if __name__ == "__main__":
                  # ,'408P', '117P', '61P', '81P', '118P', '116P', '100P', '327P', '71P', '73P'
                     ,'107P', '169P'
               ]
-    observatory = 'TS'
-    night = '2022-08-12'
-    save_path = '/home/Mathieu/visibility_plot.png'
+    observatory = 'TN'
+    night = '2022-08-16'
+    save_path = f'/home/Mathieu/visibility_plot{observatory}.png'
     ##################
     
     dt = datetime.datetime.now()
