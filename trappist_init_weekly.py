@@ -20,11 +20,11 @@ import phase_angle
 
 ########################
 # INPUT PARAMETERS
-startdate = '2010-11-05' #the night starting
-enddate = '2022-10-11' #starting that night not included
+startdate = '2022-03-01' #the night starting
+enddate = '2022-04-11' #starting that night not included
 obs = 'TS'
-comets = ['CK21A010'] # list of comets to take into account. set empty to take all 
-skip = True # skip without asking raw data directory donwload if data already in raw_data.
+comets = ['CK17K020'] # list of comets to take into account. set empty to take all 
+skip = False # skip without asking raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
 Qfitlim = (3.5, 4.1) # limit in log10 km for the range over which Q is fitted
@@ -62,6 +62,7 @@ while True:
     if (len(comets) == 0):
         selected_obj = inperi_obj
         unselected_obj = []
+        notinperi_selected = []
     else:
         selected_obj = inperi_obj.loc[inperi_obj['object'].isin(comets)]
         unselected_obj = inperi_obj.loc[~inperi_obj['object'].isin(comets)]
