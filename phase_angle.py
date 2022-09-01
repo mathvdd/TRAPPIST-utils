@@ -57,10 +57,10 @@ def import_pa_from_eph(imname, target, observatory): #function to import and for
             #check if the record is the last epoch
             year_record = [ elem for elem in last_line.split(" ") if elem != ''][1]
             previous_year = [ elem for elem in eph.query_result[-6].split(" ") if elem != ''][1]
-            # if [ elem for elem in eph.query_result[-5].split(" ") if elem != ''][2] != eph.parameters['COMMAND']:
-            #     print(eph.parameters['COMMAND'])
-            #     print(eph.query_result[-5])
-            #     input("WARNING: last line does not correspond to object?")
+            if [ elem for elem in eph.query_result[-5].split(" ") if elem != ''][2] != eph.parameters['COMMAND']:
+                print(eph.parameters['COMMAND'])
+                print(eph.query_result[-5])
+                input("WARNING: last line does not correspond to object?")
             if int(previous_year) > int(year_record):
                 print('selected record: ', eph.record)
                 input('WARNING: check the epoch selected is the las one')

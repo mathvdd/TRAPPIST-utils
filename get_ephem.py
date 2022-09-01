@@ -184,6 +184,10 @@ class ephemeris:
                 #check if the record is the last epoch
                     year_record = [ elem for elem in last_line.split(" ") if elem != ''][1]
                     previous_year = [ elem for elem in self.query_result[-6].split(" ") if elem != ''][1]
+                    if [ elem for elem in self.query_result[-5].split(" ") if elem != ''][2] != self.parameters['COMMAND']:
+                        print(self.parameters['COMMAND'])
+                        print(self.query_result[-5])
+                        input("WARNING: last line does not correspond to object?")
                     if int(previous_year) > int(year_record):
                         print('selected record: ', self.record)
                         input('WARNING: check the epoch selected is the las one')
