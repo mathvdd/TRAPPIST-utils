@@ -42,14 +42,28 @@ def import_pa_from_eph(imname, target, observatory): #function to import and for
     if eph.query_result[-4][:10] == '    Author':
         pass
     elif "To SELECT, enter record # (integer), followed by semi-colon.)" in eph.query_result[-3]:
-        last_line = eph.query_result[-5]
-        eph.record = [ elem for elem in last_line.split(" ") if elem != ''][0]
-        #check if the record is the last epoch
-        year_record = [ elem for elem in last_line.split(" ") if elem != ''][1]
-        previous_year = [ elem for elem in eph.query_result[-6].split(" ") if elem != ''][1]
-        if int(previous_year) > int(year_record):
-            print('selected record: ', eph.record)
-            input('WARNING: check the epoch selected is the las one')
+        # added an exception for 73P because fragments
+        if eph.parameters['COMMAND'] == '73P':
+            i = -5
+            while True:
+                if [ elem for elem in eph.query_result[i].split(" ") if elem != ''][2] == '73P':
+                    eph.record = [ elem for elem in eph.query_result[i].split(" ") if elem != ''][0]
+                    break
+                else:
+                    i -=1
+        else:
+            last_line = eph.query_result[-5]
+            eph.record = [ elem for elem in last_line.split(" ") if elem != ''][0]
+            #check if the record is the last epoch
+            year_record = [ elem for elem in last_line.split(" ") if elem != ''][1]
+            previous_year = [ elem for elem in eph.query_result[-6].split(" ") if elem != ''][1]
+            # if [ elem for elem in eph.query_result[-5].split(" ") if elem != ''][2] != eph.parameters['COMMAND']:
+            #     print(eph.parameters['COMMAND'])
+            #     print(eph.query_result[-5])
+            #     input("WARNING: last line does not correspond to object?")
+            if int(previous_year) > int(year_record):
+                print('selected record: ', eph.record)
+                input('WARNING: check the epoch selected is the las one')
         eph.parameters['COMMAND'] = eph.record
         eph.query_horizons()
     else:
