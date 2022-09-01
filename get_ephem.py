@@ -168,15 +168,25 @@ class ephemeris:
                 self.good_query = True
                 break
             elif (last_epoch == True) and ("To SELECT, enter record # (integer), followed by semi-colon.)" in self.query_result[-3]):
-                last_line = self.query_result[-5]
-                # record = last_line.split(" ")
-                self.record = [ elem for elem in last_line.split(" ") if elem != ''][0]
+                # added an exception for 73P because fragments
+                if self.parameters['COMMAND'] == '73P':
+                    i = -5
+                    while True:
+                        if [ elem for elem in self.query_result[i].split(" ") if elem != ''][2] == '73P':
+                            self.record = [ elem for elem in self.query_result[i].split(" ") if elem != ''][0]
+                            break
+                        else:
+                            i -=1
+                else:
+                    last_line = self.query_result[-5]
+                    # record = last_line.split(" ")
+                    self.record = [ elem for elem in last_line.split(" ") if elem != ''][0]
                 #check if the record is the last epoch
-                year_record = [ elem for elem in last_line.split(" ") if elem != ''][1]
-                previous_year = [ elem for elem in self.query_result[-6].split(" ") if elem != ''][1]
-                if int(previous_year) > int(year_record):
-                    print('selected record: ', self.record)
-                    input('WARNING: check the epoch selected is the las one')
+                    year_record = [ elem for elem in last_line.split(" ") if elem != ''][1]
+                    previous_year = [ elem for elem in self.query_result[-6].split(" ") if elem != ''][1]
+                    if int(previous_year) > int(year_record):
+                        print('selected record: ', self.record)
+                        input('WARNING: check the epoch selected is the las one')
             else:
                 self.already_quered = True
                 print('previous attempt: ', self.parameters['COMMAND'])
@@ -255,15 +265,15 @@ if __name__ == "__main__":
 
     ### PARAMETERS ###
     comets = ['2017 K2'
-                , '2022 E3', '2021 F1','2021 E3'
+                , '2022 E3', '2019 E3','2021 E3'
                  # ,'2021 E3','2020 R7', '2021 G2', '2020 K1', '2021 C5', '2022 A2'
                  # ,'2019 E3', '2020 V2', '2021 P4', '2021 T2'
-                    ,'22P', '29P'
+                    ,'22P', '29P', '73P'
                  # ,'408P', '117P', '61P', '81P', '118P', '116P', '100P', '327P', '71P', '73P'
                     ,'107P', '169P'
               ]
-    observatory = 'TN'
-    night = '2022-08-16'
+    observatory = 'TS'
+    night = '2022-08-18'
     save_path = f'/home/Mathieu/visibility_plot{observatory}.png'
     ##################
     
