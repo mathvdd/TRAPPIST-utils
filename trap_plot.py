@@ -488,14 +488,17 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         centpixel_value = np.max(image_data[int(ycent)-2:int(ycent)+2, int(xcent)-2:int(xcent)+2])
                         t = ax1.text(x=0.95,y=0.05,s='Center pixel value: ' + str(int(centpixel_value)).rjust(5), transform=ax1.transAxes,
                                  horizontalalignment='right')
-                        t.set_bbox(dict(facecolor='white', alpha=0.8))
+                        if centpixel_value < 58000:
+                            t.set_bbox(dict(facecolor='white', alpha=0.8))
+                        else:
+                            t.set_bbox(dict(facecolor='red', alpha=0.8))
                         ax2.plot(df[2-1][:40], df[4-1][:40])
                         ax2.axvline(x=5/pixsize,color='red', alpha=0.5, linestyle='--', label = '5arcsec')
                         ax2.axvline(x=arcsec10k/pixsize,color='blue', alpha=0.5, linestyle='--',label='10k km')
                         ax2.axvline(x=arcsec4k/pixsize,color='grey', alpha=0.5, linestyle='--',label='10E3.6 km')
                         ax2.set_ylabel('Median flux (ADU/s)')
                         ax2.set_xlabel('Distance from the nucleus (pixel)')
-                        ax2.legend()
+                        ax2.legend(loc='upper right')
                         # add a point in 0,0 to visualize wider profile for gaz filter
                         ax2.plot(0,0, alpha = 0)
                         return fig, ax1
@@ -518,11 +521,11 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     
                     
                     plt.tight_layout()
-                    plt.show()
+                    # plt.show()
                     plt.close()
                     
 
-# plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/reduced_data/CK21A010')
+plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/reduced_data/CK21A010')
 
 
 def plot_afrho(input_dir, saveplot=''):
