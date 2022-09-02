@@ -469,7 +469,8 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     def plot_this_thing():
                         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14,6))
                         circ5arcsec = Circle((xcent,ycent),radius = 5/pixsize, alpha=0.5, fill=False, color='red', label='5arcsec')
-                        arcsec10k = 206265*10000/(delta*1.5*100000000)
+                        arcsec10k = 206265*10**4/(delta*1.5*100000000)
+                        arcsec4k = 206265*10**3.6/(delta*1.5*100000000)
                         circ10k = Circle((xcent,ycent),radius = arcsec10k/pixsize, alpha=0.5, fill=False, color='blue', label='10k km')
                         
                         ax1.add_patch(circ5arcsec)
@@ -489,10 +490,12 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                                  horizontalalignment='right')
                         t.set_bbox(dict(facecolor='white', alpha=0.8))
                         ax2.plot(df[2-1][:40], df[4-1][:40])
-                        ax2.axvline(x=5/pixsize,color='red', alpha=0.5, linestyle='--')
-                        ax2.axvline(x=arcsec10k/pixsize,color='blue', alpha=0.5, linestyle='--')
+                        ax2.axvline(x=5/pixsize,color='red', alpha=0.5, linestyle='--', label = '5arcsec')
+                        ax2.axvline(x=arcsec10k/pixsize,color='blue', alpha=0.5, linestyle='--',label='10k km')
+                        ax2.axvline(x=arcsec4k/pixsize,color='grey', alpha=0.5, linestyle='--',label='10E3.6 km')
                         ax2.set_ylabel('Median flux (ADU/s)')
                         ax2.set_xlabel('Distance from the nucleus (pixel)')
+                        ax2.legend()
                         # add a point in 0,0 to visualize wider profile for gaz filter
                         ax2.plot(0,0, alpha = 0)
                         return fig, ax1
@@ -518,7 +521,8 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     plt.show()
                     plt.close()
                     
-# plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/reduced_data/0007P/20210511TN/centering')
+
+# plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/reduced_data/CK21A010')
 
 
 def plot_afrho(input_dir, saveplot=''):
