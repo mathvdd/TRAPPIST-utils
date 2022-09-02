@@ -521,11 +521,11 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     
                     
                     plt.tight_layout()
-                    # plt.show()
+                    plt.show()
                     plt.close()
                     
 
-plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/reduced_data/CK21A010')
+# plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/reduced_data/CK21A010')
 
 
 def plot_afrho(input_dir, saveplot=''):
