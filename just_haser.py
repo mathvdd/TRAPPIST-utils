@@ -13,8 +13,8 @@ import shutil
 import datetime
 import pandas as pd
 
-comet = 'CK19L030'
-Qfitlim = (4.5, 5.5)
+comet = 'CK21A010'
+Qfitlim = (3.5, 4.1)
 fc = {'OH':5,
       'NH':20,
       'CN':25,
@@ -82,18 +82,18 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True):
                     shutil.copy(os.path.join(path2, file), os.path.join(haser_dir, file))
                     print('copied', file, "in reduced dir")
 
-# comet = 'CK19L030'
-# night = '2022-01-08'
-# obs = 'TN'     
-# haser_reduce_1night(comet, night, obs, Qfitlim)
+comet = 'CK21A010'
+night = '2021-12-31'
+obs = 'TS'     
+haser_reduce_1night(comet, night, obs, Qfitlim)
 
-if __name__ == "__main__":
-    dt = datetime.datetime.now()
-    comet_dir = os.path.join(param['reduced'], comet)
-    for path, subdirs, files in os.walk(comet_dir):
-        if (path.split('/')[-1] == 'haser') and os.path.isfile(
-                os.path.join(path, 'inputhaser-BC')):
-            night = (path.split('/')[-2][:4] +'-'+ path.split('/')[-2][4:6] +'-'+ path.split('/')[-2][6:8])
-            obs = path.split('/')[-2][8:10]
-            haser_reduce_1night(comet, night, obs, Qfitlim, check=False)
-    print('Executed in ', datetime.datetime.now() - dt)
+# if __name__ == "__main__":
+#     dt = datetime.datetime.now()
+#     comet_dir = os.path.join(param['reduced'], comet)
+#     for path, subdirs, files in os.walk(comet_dir):
+#         if (path.split('/')[-1] == 'haser') and os.path.isfile(
+#                 os.path.join(path, 'inputhaser-BC')):
+#             night = (path.split('/')[-2][:4] +'-'+ path.split('/')[-2][4:6] +'-'+ path.split('/')[-2][6:8])
+#             obs = path.split('/')[-2][8:10]
+#             haser_reduce_1night(comet, night, obs, Qfitlim, check=False)
+#     print('Executed in ', datetime.datetime.now() - dt)

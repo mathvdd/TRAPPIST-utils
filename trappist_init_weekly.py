@@ -20,10 +20,10 @@ import phase_angle
 
 ########################
 # INPUT PARAMETERS
-startdate = '2022-03-01' #the night starting
-enddate = '2022-04-11' #starting that night not included
-obs = 'TS'
-comets = ['CK17K020'] # list of comets to take into account. set empty to take all 
+startdate = '2022-09-01' #the night starting
+enddate = '2022-09-06' #starting that night not included
+obs = 'TN'
+comets = ['CK22P010', 'CK17K020', '0073P', 'CK22E030'] # list of comets to take into account. set empty to take all 
 skip = False # skip without asking raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
@@ -83,7 +83,6 @@ while True:
         print('\nTo add to the perihelion file (unselected):')
         print('-------------------')
         print(notinperi_selected)
-    
     inp = input('\nbreak and download (d) or recheck (r)?')
     if inp == 'd' or inp =="D":
         break

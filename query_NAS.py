@@ -42,10 +42,10 @@ def NAS_build(NAS_path, export_path, keyword=''):
     fitstable = pd.DataFrame(columns=('file','object', 'type', 'filter', 'date', 'exptime', 'binning'))
     
     # count = 0
-    for path, subdirs, files in os.walk(NAS_path):
+    for path, subdirs, files in sorted(os.walk(NAS_path)):
         # count += 1
-        
         if keyword in path:
+            print(path)
             for name in files:
                 if name.endswith(".fits") or name.endswith(".fts"):
                     try:
@@ -91,8 +91,9 @@ def NAS_build(NAS_path, export_path, keyword=''):
     
 
 #NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", "202202")
-# if __name__ == "__main__":
-#     NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202207')
+if __name__ == "__main__":
+    NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202209')
+    NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", '202209')
     
 def queryZ(NAS_path):
 
@@ -475,23 +476,23 @@ def lookforcalib_old():
     
     ### uncomment line bellow if querying for a light image
     # imtype = ['LIGHT', 'Light Frame']
-    obj = "CK21A010" #target name in the fits header. only for lights and for the output path
+    obj = "0395P" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
-    # imtype = ['DARK', 'Dark Frame']
-    exptime = 240 #exposure time. only for darks
+    imtype = ['DARK', 'Dark Frame']
+    exptime = 300 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
-    imtype = ['FLAT', 'Flat Frame']
-    filt = 'B' #filter. only for flats
+    # imtype = ['FLAT', 'Flat Frame']
+    filt = 'BC' #filter. only for flats
     
     ### uncomment line bellow if querying for bias frames
     # imtype = ['BIAS', 'Bias Frame']
     
-    telescope = 'TN'
-    night = (2021,4,18) ### set the observation night
+    telescope = 'TS'
+    night = (2022,8,25) ### set the observation night
     
-    dayinterval = 15 # starting point for the search
+    dayinterval = 7 # starting point for the search
     
     ####################################
     
@@ -572,5 +573,5 @@ def lookforcalib_old():
                     count +=1
             break
 
-if __name__ == "__main__":
-    lookforcalib_old()
+# if __name__ == "__main__":
+#     lookforcalib_old()

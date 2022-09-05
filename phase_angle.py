@@ -119,4 +119,4 @@ def schleicher_0deg(afrho, pa):
     return afrho_corr
     
 if __name__ == "__main__":
-    generate_palist_reddir(param['reduced'])
+    generate_palist_reddir(os.path.join(param['reduced'], '0073P'))
