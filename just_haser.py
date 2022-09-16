@@ -83,7 +83,7 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True):
                     print('copied', file, "in reduced dir")
 
 comet = 'CK21A010'
-night = '2021-12-31'
+night = '2022-01-02'
 obs = 'TS'     
 haser_reduce_1night(comet, night, obs, Qfitlim)
 

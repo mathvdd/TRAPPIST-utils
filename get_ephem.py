@@ -270,6 +270,7 @@ if __name__ == "__main__":
     ### PARAMETERS ###
     comets = ['2017 K2'
                 , '2022 E3', '2019 E3','2021 E3'
+                ,'2020 R7'
                  # ,'2021 E3','2020 R7', '2021 G2', '2020 K1', '2021 C5', '2022 A2'
                  # ,'2019 E3', '2020 V2', '2021 P4', '2021 T2'
                     ,'22P', '29P', '73P'
@@ -277,7 +278,7 @@ if __name__ == "__main__":
                     ,'107P', '169P'
               ]
     observatory = 'TS'
-    night = '2022-08-18'
+    night = '2022-09-15'
     save_path = f'/home/Mathieu/visibility_plot{observatory}.png'
     ##################
     
