@@ -28,6 +28,7 @@ skip = False # skip without asking raw data directory donwload if data already i
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
 Qfitlim = (3.5, 4.1) # limit in log10 km for the range over which Q is fitted
+only_BVRI = True
 
 ########################
 
@@ -53,7 +54,7 @@ if obs == 'TS':
 elif obs == 'TN':
     NASfitstable = query_NAS.loadcsvtable(param['TN_qNAS'])
 
-objects_names = query_NAS.check_objects_names(startdate,enddate,NASfitstable)
+objects_names = query_NAS.check_objects_names(startdate,enddate,NASfitstable,only_BVRI = only_BVRI)
 while True:
     perihelions, peri_serie = import_perihelions(param['perihelion'])
     # inobj = pd.merge(objects_names, peri_serie, how='inner', left_on='object', right_on='comet').drop(['comet'],axis=1)
@@ -91,7 +92,8 @@ while True:
 for comet in inlist:
     print('Downloading ' + comet)
     output_path = os.path.join(param['raw'], comet, obs)
-    query_NAS.get_files(comet, NASfitstable, output_path, dayinterval=7, dateinterval=(startdate, enddate), skip_existing=skip)
+    query_NAS.get_files(comet, NASfitstable, output_path, dayinterval=7, dateinterval=(startdate, enddate),
+                        skip_existing=skip, only_BVRI = only_BVRI)
 # input('download finished')      
 # makes list of folders to reduce
 list_to_reduce = []
@@ -152,7 +154,10 @@ for path in list_to_reduce:
                     break
                 else:
                     no_file = False
-            check_calib_warning, lighttable = trap_reduction.check_calib(fitstable)
+            if only_BVRI == True:
+                check_calib_warning, lighttable = trap_reduction.check_calib(fitstable,filt_list=['B','V','R','I','Rc','Ic'])
+            else:
+                check_calib_warning, lighttable = trap_reduction.check_calib(fitstable)
             if check_calib_warning == True:
                 inp = input("Some calibration files are missing!\
                             \n   - Press enter to reload table\
@@ -195,7 +200,7 @@ for path in list_to_reduce:
             shutil.rmtree(param['tmpdata'])
         os.mkdir(param['tmpdata'])
         print('--- Renaming files to Trappist format and copying to tmpdata ---')
-        trap_reduction.pythrename(raw_dir, param['tmpdata'])
+        trap_reduction.pythrename(raw_dir, param['tmpdata'],only_BVRI=only_BVRI)
         if os.path.exists(param['tmpout']):
             shutil.rmtree(param['tmpout'])
         os.mkdir(param['tmpout'])

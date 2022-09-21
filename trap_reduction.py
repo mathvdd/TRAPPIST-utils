@@ -61,7 +61,7 @@ def renameftsfits(raw_path):
                 count += 1
     print("renamed", count, "fts files")
 
-def pythrename(raw_path, tmpdata_dir):
+def pythrename(raw_path, tmpdata_dir,only_BVRI=False):
     """
     Rename fits files to the trappist format and copy them to the tmpdata folder
 
@@ -76,7 +76,12 @@ def pythrename(raw_path, tmpdata_dir):
                 print(os.path.join(path, file))
                 with fits.open(os.path.join(path, file)) as hdul:
                     obsdate = hdul[0].header['DATE-OBS']
-                shutil.copy(os.path.join(path, file), os.path.join(tmpdata_dir, "TRAP." + obsdate[:19] + ".fits"))
+                    if only_BVRI == True and hdul[0].header['IMAGETYP'].isin(['LIGHT', 'Light Frame']):
+                        obsfilt = hdul[0].header['FILTER']
+                        if obsfilt.isin(['B','V','R','I','Rc','Ic']):
+                            shutil.copy(os.path.join(path, file), os.path.join(tmpdata_dir, "TRAP." + obsdate[:19] + ".fits"))
+                    else:
+                        shutil.copy(os.path.join(path, file), os.path.join(tmpdata_dir, "TRAP." + obsdate[:19] + ".fits"))
                 count += 1
             elif os.path.join(path, file).endswith(".fts"):
                 print("WARNING: convert fts to fits")
@@ -205,6 +210,7 @@ def get_fitstable(raw_dir):
                         except:
                             imobservatory = None
                         fitstable.loc[fitstable.shape[0]] = [imfile, imtype, imfilter, imexptime, imobservatory]
+                        
     return fitstable
 
 def generate_ZP(calib_dir, ephemeris, fitstable, ZPparams=ZP, output_dir=None):

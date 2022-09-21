@@ -190,7 +190,7 @@ def date_to_startnight(date):
 #     return nightslist
 # =============================================================================
 
-def check_objects_names(startdate, enddate, NASfitstable):
+def check_objects_names(startdate, enddate, NASfitstable, only_BVRI = False):
     """
     Makes a list of all the objects in a table between given dates
     if the dates are at 12:00, will include the startdate as starting night but not the enddate as starting night
@@ -200,9 +200,14 @@ def check_objects_names(startdate, enddate, NASfitstable):
         enddate (datetime): ending time
         NASfitstable (pandas dataframe): indexed database-style table
     """
+    
+       
     objects_table = NASfitstable.loc[(NASfitstable['start_night'] >= startdate)
                                 & (NASfitstable['start_night'] <= enddate)
                                 & (NASfitstable['type'].isin(['LIGHT', 'Light Frame']))]
+    
+    if only_BVRI == True:
+        objects_table = objects_table.loc[objects_table['filter'].isin(['B','V','R','I','Rc','Ic'])]
     # objects_list = objects_table['object'].drop_duplicates().values.tolist() #old way to do it
     objects_names = objects_table['object'].drop_duplicates().reset_index(drop=True)
     objects = pd.DataFrame({'object':objects_names})
@@ -212,7 +217,7 @@ def check_objects_names(startdate, enddate, NASfitstable):
     # objects.astype({'nb_nights': 'int32','nb_images': 'int32'}).dtypes
     return objects
     
-def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=['',''], skip_existing=False):
+def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=['',''], skip_existing=False,only_BVRI=False):
     '''Look for and prompt for downloading files in the NAS
     It is advised to not mix TN and TS queries
     look on the TN or TS NAS for all the nights containing the object (obj_name).
@@ -244,6 +249,9 @@ def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=[''
     LIGHTS = NASfitstable.loc[NASfitstable['object'].isin([obj_name])
                               & (NASfitstable['start_night'] >= startdate)
                               & (NASfitstable['start_night'] <= enddate)]
+    if only_BVRI == True:
+        LIGHTS = LIGHTS.loc[LIGHTS['filter'].isin(['B','V','R','I','Rc','Ic'])]
+        
     nightslist = LIGHTS['start_night'].drop_duplicates().tolist()
 
     for night in nightslist:
