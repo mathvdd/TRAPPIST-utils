@@ -78,7 +78,7 @@ def pythrename(raw_path, tmpdata_dir,only_BVRI=False):
                     obsdate = hdul[0].header['DATE-OBS']
                     if only_BVRI == True and hdul[0].header['IMAGETYP'] in ['LIGHT', 'Light Frame']:
                         obsfilt = hdul[0].header['FILTER']
-                        if obsfilt.isin(['B','V','R','I','Rc','Ic']):
+                        if obsfilt in ['B','V','R','I','Rc','Ic']:
                             shutil.copy(os.path.join(path, file), os.path.join(tmpdata_dir, "TRAP." + obsdate[:19] + ".fits"))
                     else:
                         shutil.copy(os.path.join(path, file), os.path.join(tmpdata_dir, "TRAP." + obsdate[:19] + ".fits"))
