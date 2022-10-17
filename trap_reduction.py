@@ -76,7 +76,7 @@ def pythrename(raw_path, tmpdata_dir,only_BVRI=False):
                 print(os.path.join(path, file))
                 with fits.open(os.path.join(path, file)) as hdul:
                     obsdate = hdul[0].header['DATE-OBS']
-                    if only_BVRI == True and hdul[0].header['IMAGETYP'].isin(['LIGHT', 'Light Frame']):
+                    if only_BVRI == True and hdul[0].header['IMAGETYP'] in ['LIGHT', 'Light Frame']:
                         obsfilt = hdul[0].header['FILTER']
                         if obsfilt.isin(['B','V','R','I','Rc','Ic']):
                             shutil.copy(os.path.join(path, file), os.path.join(tmpdata_dir, "TRAP." + obsdate[:19] + ".fits"))
@@ -260,7 +260,7 @@ def generate_ZP(calib_dir, ephemeris, fitstable, ZPparams=ZP, output_dir=None):
 
     # get the list of matching filters and print the calib file
     filtlist = fitstable.loc[fitstable['type'].isin(['LIGHT', 'Light Frame']), 'filt'].drop_duplicates().values.tolist()
-
+    # print('filtlist', fitstable)
     if output_dir == None:
         output_path = os.path.join(calib_dir, "calib.dat")
     else:
