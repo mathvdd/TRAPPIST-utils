@@ -90,10 +90,10 @@ def NAS_build(NAS_path, export_path, keyword=''):
     print('Executed in ', datetime.datetime.now() - dt)
     
 
-#NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", "202202")
+# NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", "202202")
 if __name__ == "__main__":
-    NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202209')
-    NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", '202209')
+    NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202210')
+    NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", '202210')
     
 def queryZ(NAS_path):
 
@@ -392,19 +392,19 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, f
         if 'DARK' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
                                           & (NASfitstable['date'] <= upper_interval)
-                                          & (NASfitstable['binning'] == 2)
+                                          # & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)
                                           & (NASfitstable['exptime'] == exptime)]
         elif 'FLAT' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
                                           & (NASfitstable['date'] <= upper_interval)
-                                          & (NASfitstable['binning'] == 2)
+                                          # & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)
                                           & (NASfitstable['filter'] == filt)]
         elif 'LIGHT' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
                                           & (NASfitstable['date'] <= upper_interval)
-                                          & (NASfitstable['binning'] == 2)
+                                          # & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)
                                           & (NASfitstable['object'] == obj)
                                           & (NASfitstable['filter'] == filt)
@@ -412,7 +412,7 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, f
         elif 'BIAS' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
                                           & (NASfitstable['date'] <= upper_interval)
-                                          & (NASfitstable['binning'] == 2)
+                                          # & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)]
         # elif imtype == 'BC':
         #     calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
@@ -484,11 +484,11 @@ def lookforcalib_old():
     
     ### uncomment line bellow if querying for a light image
     # imtype = ['LIGHT', 'Light Frame']
-    obj = "0395P" #target name in the fits header. only for lights and for the output path
+    obj = "CK22P010" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
     imtype = ['DARK', 'Dark Frame']
-    exptime = 300 #exposure time. only for darks
+    exptime =120 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
     # imtype = ['FLAT', 'Flat Frame']
@@ -498,13 +498,14 @@ def lookforcalib_old():
     # imtype = ['BIAS', 'Bias Frame']
     
     telescope = 'TS'
-    night = (2022,8,25) ### set the observation night
+    night = (2022,9,30) ### set the observation night
     
     dayinterval = 7 # starting point for the search
     
     ####################################
     
     NASfitstable = loadcsvtable("/home/Mathieu/Documents/TRAPPIST/raw_data/" + telescope + "_query.txt") ### path to the indexed database
+    # print(NASfitstable.loc[ (NASfitstable['binning'] == 2)])
     # output_fold = "/home/Mathieu/Documents/TRAPPIST/raw_data/2020T2/TS/20210703/Calibration" ### path to the output folder
     subf_year = str(night[0])
     if night[1] > 9:
@@ -526,19 +527,19 @@ def lookforcalib_old():
         if 'DARK' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
                                           & (NASfitstable['date'] <= upper_interval)
-                                          & (NASfitstable['binning'] == 2)
+                                          # & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)
                                           & (NASfitstable['exptime'] == exptime)]
         elif 'FLAT' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
                                           & (NASfitstable['date'] <= upper_interval)
-                                          & (NASfitstable['binning'] == 2)
+                                          # & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)
                                           & (NASfitstable['filter'] == filt)]
         elif 'LIGHT' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
                                           & (NASfitstable['date'] <= upper_interval)
-                                          & (NASfitstable['binning'] == 2)
+                                          # & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)
                                           & (NASfitstable['object'] == obj)
                                             & (NASfitstable['filter'] == filt)
@@ -546,7 +547,7 @@ def lookforcalib_old():
         elif 'BIAS' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
                                           & (NASfitstable['date'] <= upper_interval)
-                                          & (NASfitstable['binning'] == 2)
+                                          # & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)]
             # print(NASfitstable['object'][0])
         if len(calibtable.index) == 0:
