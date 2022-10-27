@@ -77,6 +77,7 @@ class ephemeris:
             if item[0:4] == 'TRAP' and item.endswith('.fits'):
                 print(item)
                 with fits.open(os.path.join(self.fits_dir, item)) as hdul:
+                    print(os.path.join(self.fits_dir, item))
                     self.observatory = hdul[0].header['OBSERVAT']
                 break
         if self.observatory == 'Oukaimeden':
@@ -93,7 +94,9 @@ class ephemeris:
         
         self.fits_datelist=[]
         for item in self.fits_filelist:
-            if item[0:4] == 'TRAP':
+            if (item[0:4] == 'TRAP') and (item.endswith('.fits')):
+                
+                print(os.path.join(self.fits_dir, item))
                 with fits.open(os.path.join(self.fits_dir, item)) as hdul:
                     date = hdul[0].header['DATE-OBS']
                     if len(date) == 23:
@@ -268,17 +271,17 @@ if __name__ == "__main__":
     import matplotlib.dates as mdates
 
     ### PARAMETERS ###
-    comets = ['2017 K2'
+    comets = ['2017 K2', '2022 L1'
                 , '2022 E3', '2019 E3','2021 E3'
-                ,'2020 R7'
+                # ,'2020 R7'
                  # ,'2021 E3','2020 R7', '2021 G2', '2020 K1', '2021 C5', '2022 A2'
                  # ,'2019 E3', '2020 V2', '2021 P4', '2021 T2'
-                    ,'22P', '29P', '73P'
-                 # ,'408P', '117P', '61P', '81P', '118P', '116P', '100P', '327P', '71P', '73P'
-                    ,'107P', '169P'
+                    ,'29P','22P','2022 P1', '29P', '73P'
+                  #,'408P', '117P', '61P', '81P', '118P', '116P', '100P', '327P', '71P', '73P'
+                    # ,'107P', '169P'
               ]
-    observatory = 'TS'
-    night = '2022-09-15'
+    observatory = 'TN'
+    night = '2022-10-26'
     save_path = f'/home/Mathieu/visibility_plot{observatory}.png'
     ##################
     
