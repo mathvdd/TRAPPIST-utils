@@ -12,9 +12,10 @@ import os
 import shutil
 import datetime
 import pandas as pd
+import get_ephem
 
-comet = 'CK21A010'
-Qfitlim = (3.5, 4.1)
+# comet = '0073P'
+Qfitlim = (3.7, 4.5)
 fc = {'OH':5,
       'NH':20,
       'CN':25,
@@ -35,9 +36,25 @@ def rewrite_fc_in_haserinput(fc):
         inputhaser.iloc[index,2] = fc.get(filt)
     inputhaser.to_csv(os.path.join(param["tmpout"], 'inputhaser-BC'), index=False, header=False, sep = ' ')
 
-def haser_reduce_1night(comet, night, obs, Qfitlim, check=True):
+def redo_calib_dat(imdir):
+        fitstable = trap_reduction.get_fitstable(imdir)
+        # fitstable = fitstable.loc[fitstable['type'].isin(['LIGHT', 'Light Frame'])
+        #                           & ~fitstable['file'].isin(['coms.fits', 'comsplus.fits'])]
+        # print(fitstable)
+        print('--- generating ephemeris ---')
+        ephemeris = get_ephem.ephemeris()
+        ephemeris.retrieve_param_from_fits(imdir)
+        ephemeris.query_input(unique_target=False, target=comet, convert_MPC_Horizon=True)
+        ephemeris.generate_ephem_files(param['tmpout'])
+        print('--- generating calib file ---')
+        ZP_warning = trap_reduction.generate_ZP(param['calib'], ephemeris, fitstable, output_dir=param['tmpout'])
+        if ZP_warning == True:
+            input("press enter")
+
+def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False):
     reduced_dir = os.path.join(param['reduced'], comet, night.replace('-','') + obs)
     profiles_dir = os.path.join(reduced_dir, "profiles")
+    images_dir = os.path.join(reduced_dir, "images")
     haser_dir = os.path.join(reduced_dir, "haser")
     garbage_dir = os.path.join(reduced_dir, "probably_garbage")
     print(f'Initiating haser for {comet}, {night}, {obs} with range 10E{Qfitlim} km')
@@ -52,6 +69,9 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True):
     shutil.copy(os.path.join(garbage_dir, 'ephem.brol'), os.path.join(param['tmpout'], 'ephem.brol'))
     rewrite_fc_in_haserinput(fc)
     
+    if redo_ZP == True:
+        redo_calib_dat(imdir= images_dir)
+    # input('end')
     conda = True if param['conda'] == 'True' else False #wether to use 'source activate to launch cl or not'
     print('--- launching hasercalctest ---')
     if check == True:
@@ -81,19 +101,23 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True):
                 if 'haser' in file and 'tmp' not in file:
                     shutil.copy(os.path.join(path2, file), os.path.join(haser_dir, file))
                     print('copied', file, "in reduced dir")
+    if redo_ZP == True:
+        shutil.copy(os.path.join(param['tmpout'], 'calib.dat'), os.path.join(garbage_dir, 'calib2.dat'))
 
-comet = 'CK21A010'
-night = '2022-01-02'
-obs = 'TS'     
-haser_reduce_1night(comet, night, obs, Qfitlim)
 
-# if __name__ == "__main__":
-#     dt = datetime.datetime.now()
-#     comet_dir = os.path.join(param['reduced'], comet)
-#     for path, subdirs, files in os.walk(comet_dir):
-#         if (path.split('/')[-1] == 'haser') and os.path.isfile(
-#                 os.path.join(path, 'inputhaser-BC')):
-#             night = (path.split('/')[-2][:4] +'-'+ path.split('/')[-2][4:6] +'-'+ path.split('/')[-2][6:8])
-#             obs = path.split('/')[-2][8:10]
-#             haser_reduce_1night(comet, night, obs, Qfitlim, check=False)
-#     print('Executed in ', datetime.datetime.now() - dt)
+
+# night = '2022-01-02'
+# obs = 'TS'     
+# haser_reduce_1night(comet, night, obs, Qfitlim)
+
+if __name__ == "__main__":
+    comet = '0073P'
+    dt = datetime.datetime.now()
+    comet_dir = os.path.join(param['reduced'], comet, '20220929TS')
+    for path, subdirs, files in os.walk(comet_dir):
+        if (path.split('/')[-1] == 'haser') and os.path.isfile(
+                os.path.join(path, 'inputhaser-BC')):
+            night = (path.split('/')[-2][:4] +'-'+ path.split('/')[-2][4:6] +'-'+ path.split('/')[-2][6:8])
+            obs = path.split('/')[-2][8:10]
+            haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False)
+    print('Executed in ', datetime.datetime.now() - dt)
