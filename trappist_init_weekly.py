@@ -20,24 +20,26 @@ import phase_angle
 
 ########################
 # INPUT PARAMETERS
-startdate = '2022-09-01' #the night starting
-enddate = '2022-09-06' #starting that night not included
-obs = 'TN'
-comets = ['CK22P010', 'CK17K020', '0073P', 'CK22E030'] # list of comets to take into account. set empty to take all 
+startdate = '2022-09-30' #the night starting
+enddate = '2022-10-01' #starting that night not included
+obs = 'TS'
+comets = ['CK22P010'] # list of comets to take into account. set empty to take all 
 skip = False # skip without asking raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
 Qfitlim = (3.5, 4.1) # limit in log10 km for the range over which Q is fitted
-only_BVRI = True
+only_BVRI = False
 
 ########################
 
-#started mid-March? TS
-# 2022 04 28
+dt = datetime.datetime.now()
+
 startdate = datetime.datetime.strptime(startdate + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #the night starting
 enddate = datetime.datetime.strptime(enddate + 'T12:00:00', '%Y-%m-%dT%H:%M:%S') #starting that night not included
 
-dt = datetime.datetime.now()
+if only_BVRI:
+    if only_BVRI:
+        print('only_BVRI is on')
 
 conda = True if param['conda'] == 'True' else False #wether to use 'source activate to launch cl or not'
 
@@ -223,8 +225,20 @@ for path in list_to_reduce:
         print('--- launching afrhocalcext ---')
         trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], str(0), str(0), str(0), str(0), conda=conda) #launch a first reduction of all the files by default
         trap_plot.plot_centering_profile(param['tmpout'], comet_name=comet)
+        trap_reduction.generate_center_comment(param['tmpout'])
+        
+        def add_comment(row, comment):
+            row_comment = comment.loc[comment['file'] == row['file'], 'comment']
+            return row_comment.to_string(index = False)
+        
         while True:
-            centerlist = pd.read_csv(os.path.join(param['tmpout'], 'centerlist'),header=None, sep=' ',usecols=[0,2,3,5,10], names=['file', 'xcent', 'ycent', 'filt', 'ctnmethod'])
+            centerlist = pd.read_csv(os.path.join(param['tmpout'], 'centerlist'),header=None, sep=' '
+                                     ,usecols=[0,2,3,5,10],
+                                     names=['file', 'xcent', 'ycent', 'filt', 'ctnmethod'])
+            comment = pd.read_csv(os.path.join(param['tmpout'], 'center_comment'),header=None, sep=','
+                                     ,usecols=[0,1,2],
+                                     names=['file', 'filt', 'comment'])
+            centerlist['comment'] = centerlist.apply(lambda row: add_comment(row, comment), axis=1)
             print(centerlist)
             while True:
                 solocomete = False
@@ -232,8 +246,9 @@ for path in list_to_reduce:
                             - Relaunch afrhocalcext for all images (r)
                             - Relaunch afrhocalcext for an individual file (IMINDEX XCENTER YCENTER BOXSIZE)
                             - Bypass (b)
+                            - Add a comment (c IMINDEX comment)
                             :''')
-                if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B':
+                if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B' or inp.split(' ')[0] == 'c' or inp.split(' ')[0] == 'C':
                     break
                 elif len(inp.split(' ')) == 4: #check of good format for a one file reduction
                     solocomete = True
@@ -275,6 +290,15 @@ for path in list_to_reduce:
                 continue
             elif inp == 'b' or inp == 'B':
                 break
+            elif inp.split(' ')[0] == 'c' or inp.split(' ')[0] == 'C':
+                try:
+                    FILE = centerlist.iloc[[inp.split(' ')[1]]].file.values[0]
+                except:
+                    print('Comment wrong format')
+                    continue
+                str_comment = inp.split(' ', 2)[-1]
+                comment.loc[comment['file'] == FILE, 'comment'] = str_comment
+                comment.to_csv(os.path.join(param['tmpout'], 'center_comment'), index=False, sep=",", header=False)
         trap_reduction.clean_afrhotot(param['tmpout'])
         print(len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2','CO+','H2O']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]))
         if len(fitstable.loc[fitstable['filt'].isin(['CO+','H2O']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]) > 0:
@@ -301,18 +325,20 @@ for path in list_to_reduce:
                     break
             
             print('--- launching hasercalctest ---')
-            while True:
-                trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
-                trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
-                while True:
-                    inp = input('relaunch hasercalctext (r) or bypass (b)? [r/b]')
-                    if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B':
-                        break
-                if inp == 'r' or inp == 'R':
-                    print('relaunching hasercalctest')
-                    continue
-                elif inp == 'b' or inp == 'B':
-                    break
+            trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
+            trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
+            # while True:
+            #     trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
+            #     trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
+            #     while True:
+            #         inp = input('relaunch hasercalctext (r) or bypass (b)? [r/b]')
+            #         if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B':
+            #             break
+            #     if inp == 'r' or inp == 'R':
+            #         print('relaunching hasercalctest')
+            #         continue
+            #     elif inp == 'b' or inp == 'B':
+            #         break
         else:
             print('No NB filters found, skipping Haser')
         

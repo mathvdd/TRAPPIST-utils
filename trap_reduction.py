@@ -717,8 +717,17 @@ def clean_afrhotot(direc):
                 df.drop_duplicates(subset =0, keep = 'last', inplace = True)
                 df.to_csv(afrhofile, index=False, sep=" ", header=False)
 
+def generate_center_comment(fold):
+    centerlist = pd.read_csv(os.path.join(fold, 'centerlist'),header=None, sep=' '
+                             ,usecols=[0,2,3,5,10],
+                             names=['file', 'xcent', 'ycent', 'filt', 'ctnmethod'])
+    
+    center_comment = centerlist[['file', 'filt']]
+    center_comment.drop_duplicates(subset ='file', keep = 'last', inplace = True)
+    center_comment['comment'] = ''
+    center_comment.to_csv(os.path.join(fold, 'center_comment'), index=False, sep=",", header=False)
 
-
+# generate_center_comment('/home/Mathieu/Documents/TRAPPIST/reduced_data/CK20R070/20220906TS/centering')
 # import directory_structure
 # ds = directory_structure.directory_structure()
 # clean_afrhotot("/home/Mathieu/Documents/TRAPPIST/reduced_data/2020T2/20211004TS")
