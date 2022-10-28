@@ -726,7 +726,9 @@ def generate_center_comment(fold):
     center_comment.drop_duplicates(subset ='file', keep = 'last', inplace = True)
     center_comment['comment'] = ''
     center_comment.to_csv(os.path.join(fold, 'center_comment'), index=False, sep=",", header=False)
+    
 
+#import_perihelion('/home/Mathieu/Documents/TRAPPIST/scripts/utils/test', update=True)
 # generate_center_comment('/home/Mathieu/Documents/TRAPPIST/reduced_data/CK20R070/20220906TS/centering')
 # import directory_structure
 # ds = directory_structure.directory_structure()

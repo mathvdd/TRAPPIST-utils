@@ -91,10 +91,86 @@ def NAS_build(NAS_path, export_path, keyword=''):
     
 
 # NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", "202202")
-if __name__ == "__main__":
-    NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202210')
-    NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", '202210')
+# if __name__ == "__main__":
+#     NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202210')
+#     NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", '202210')
+
+def NAS_update(NAS_path, export_path, keyword=''):
     
+    dt = datetime.datetime.now()
+    
+    fitstable = pd.read_csv(export_path)
+    blacklist_path = os.path.join('/'.join(export_path.split('/')[:-1]), 'blacklist')
+    if os.path.isfile(blacklist_path):
+        blacklisttable = pd.read_csv(blacklist_path, header=None,names=['file', 'object'], sep=',')
+        blacklist = pd.concat([fitstable['file'], blacklisttable['file']], ignore_index=True)
+    else:
+        blacklisttable = pd.DataFrame(columns=['file', 'object'])
+        blacklist = fitstable['file']
+    # print(blacklist.str.contains('/NASTN/Data_TrappistNord/ACP Astronomy/Images/20221024/Calibration/Bias-S001-R001-C008-B1.fts').any())
+    # input()
+    
+    for path, subdirs, files in sorted(os.walk(NAS_path)):
+        # count += 1
+        if keyword in path:
+            print(path)
+            for name in files:
+                if name.endswith(".fits") or name.endswith(".fts"):
+                    # print(blacklist.str.contains(os.path.join(path,name)).any())
+                    # if blacklist.str.contains(os.path.join(path,name)).any() == False:
+                    if (os.path.join(path,name) in blacklist.values) == False:
+                        try:
+                            with fits.open(os.path.join(path, name)) as hdul:
+                                try:
+                                    imobject = hdul[0].header['OBJECT']
+                                except:
+                                    imobject = None
+                                try:
+                                    imtype = hdul[0].header['IMAGETYP']
+                                except:
+                                    imtype = None
+                                try:
+                                    imfilter = hdul[0].header['FILTER']
+                                except:
+                                    imfilter = None
+                                try:
+                                    imdate = hdul[0].header['DATE-OBS']
+                                except:
+                                    imdate = None
+                                try:
+                                    imexptime = hdul[0].header['EXPTIME']
+                                except:
+                                    imexptime = None
+                                try:
+                                    imbinning = hdul[0].header['XBINNING']
+                                except:
+                                    imbinning = None
+                        except:
+                            print("error with", os.path.join(path, name))
+                            continue
+                        # print(os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning)
+                        if imbinning == 2:
+                            # print('added',len(fitstable))
+                            fitstable.loc[fitstable.shape[0]] = [os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning]
+                            
+                        else:
+                            # print(os.path.join(path, name), len(blacklisttable))
+                            blacklisttable.loc[blacklisttable.shape[0]] = [os.path.join(path, name), imobject]
+                            
+                    # else:
+                    #     print('rejected', os.path.join(path, name))
+    fitstable.sort_values(by=['date']).to_csv(export_path, index=False)
+    blacklisttable.to_csv(blacklist_path, index=False, sep=",", header=False)
+    
+    print('Executed in ', datetime.datetime.now() - dt)
+    
+
+# NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", "202202")
+if __name__ == "__main__":
+    NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.txt", '202210')
+    NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.txt", '202210')
+  
+  
 def queryZ(NAS_path):
 
     year = ("2017","2018","2019")
@@ -107,29 +183,6 @@ def queryZ(NAS_path):
                 if name.endswith(".fits.Z") or name.endswith(".fts.Z"):
                     count += 1
                     print(count, os.path.join(path, name))
-    
-def loadcsvtable(path):
-    """
-    Load an already existing indexed database and return it in the form of a pandas table
-    Used by the other functions
-    
-    Parameters
-    ----------
-    path : str
-        path to the database
-    
-    Returns
-    -------
-    None.
-
-    """
-      
-    NASfitstable = pd.read_csv(path)
-    # fitstable['date'] =  pd.to_datetime(fitstable['date'], format='%%Y-%m-%dT%H:%M:%S.%f')
-    
-    NASfitstable['date'] =  pd.to_datetime(NASfitstable['date'], format='%Y-%m-%dT%H:%M:%S.%f')
-    NASfitstable['start_night'] = NASfitstable.apply(lambda row: date_to_startnight(row['date']), axis=1)
-    return NASfitstable
 
 def convertdate(date):
     """
@@ -158,6 +211,29 @@ def date_to_startnight(date):
         return pd.Timestamp(date.year, date.month, date.day, 23, 59) - datetime.timedelta(days=1)
     else:
         return pd.Timestamp(date.year, date.month, date.day, 23, 59)
+
+def loadcsvtable(path):
+    """
+    Load an already existing indexed database and return it in the form of a pandas table
+    Used by the other functions
+    
+    Parameters
+    ----------
+    path : str
+        path to the database
+    
+    Returns
+    -------
+    None.
+
+    """
+      
+    NASfitstable = pd.read_csv(path)
+    # fitstable['date'] =  pd.to_datetime(fitstable['date'], format='%%Y-%m-%dT%H:%M:%S.%f')
+    
+    NASfitstable['date'] =  pd.to_datetime(NASfitstable['date'], format='%Y-%m-%dT%H:%M:%S.%f')
+    NASfitstable['start_night'] = NASfitstable.apply(lambda row: date_to_startnight(row['date']), axis=1)
+    return NASfitstable
 
 # =============================================================================
 # def datelist(fitstable):
