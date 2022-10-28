@@ -727,6 +727,22 @@ def generate_center_comment(fold):
     center_comment['comment'] = ''
     center_comment.to_csv(os.path.join(fold, 'center_comment'), index=False, sep=",", header=False)
     
+def import_perihelion(file_path, update=False):
+    #columns designation at https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
+    columns = ['id','pyear','pmonth','pday','pdist','e','param1','param2','param3',
+                'param4','absmag','slope','name']
+    if update == True:
+        #url='132456789'
+        url="https://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt"
+        tab=pd.read_fwf(url, header=None, widths=[13,18-13,22-18,30-22,40-30,50-40,60-50,70-60,
+                        80-70,90-80,96-90,101-96,158-101])
+        # except:
+        #     print('could not download comet MPC database')
+        tab.columns=columns
+        tab.to_csv(file_path, index=False)
+    else:
+        tab=pd.read_csv(file_path)
+    return tab
 
 #import_perihelion('/home/Mathieu/Documents/TRAPPIST/scripts/utils/test', update=True)
 # generate_center_comment('/home/Mathieu/Documents/TRAPPIST/reduced_data/CK20R070/20220906TS/centering')
