@@ -391,7 +391,7 @@ def plot_centering(input_dir, output_dir=None):
                     
 # plot_centering('/home/Mathieu/Documents/TRAPPIST/tmpout')
 
-def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_name=''):
+def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_name='',centering=True):
     """
     Same as plot_centering + a plot of the radial profile
     Create a png for each image with the centering given by the pipeline at a radius of 5'' and 10 000 km.
@@ -482,8 +482,14 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         ax1.grid(which='major', alpha=0.8, color='#CCCCCC', linestyle=':')                 
                         ax1.grid(True)
                         ax1.tick_params(direction='out',length=5)
-                        ax1.set_ylim(yimcent - centerlimit, yimcent+centerlimit)
-                        ax1.set_xlim(ximcent - centerlimit, ximcent+centerlimit)
+                        if centering == True:
+                            ax1.set_ylim(ycent - centerlimit, ycent+centerlimit)
+                            ax1.set_xlim(xcent - centerlimit, xcent+centerlimit)
+                            ax1.axvline(x=ximcent,color='red', alpha=0.5, linestyle=':')
+                            ax1.axhline(y=yimcent,color='red', alpha=0.5, linestyle=':')
+                        else:
+                            ax1.set_ylim(yimcent - centerlimit, yimcent+centerlimit)
+                            ax1.set_xlim(ximcent - centerlimit, ximcent+centerlimit)
                         ax1.legend()
                         centpixel_value = np.max(image_data[int(ycent)-2:int(ycent)+2, int(xcent)-2:int(xcent)+2])
                         t = ax1.text(x=0.95,y=0.05,s='Center pixel value: ' + str(int(centpixel_value)).rjust(5), transform=ax1.transAxes,
