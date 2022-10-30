@@ -252,7 +252,7 @@ for path in list_to_reduce:
                             - Bypass (b)
                             - Add a comment (c IMINDEX comment)
                             :''')
-                if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B' or inp.split(' ')[0] == 'c' or inp.split(' ')[0] == 'C':
+                if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B' or inp.split(' ')[0] == 'c' or inp.split(' ')[0] == 'C' or inp.split(' ')[0] == 'ds9':
                     break
                 elif len(inp.split(' ')) == 4: #check of good format for a one file reduction
                     solocomete = True
@@ -263,11 +263,15 @@ for path in list_to_reduce:
                         print('IMINDEX wrong format')
                     try:
                         XCENTER = float(inp.split(' ')[1])
+                        if XCENTER ==0:
+                            XCENTER = centerlist.iloc[[inp.split(' ')[2]]].file.values[0]
                     except:
                         solocomete = False
                         print('XCENTER wrong format')
                     try:
                         YCENTER = float(inp.split(' ')[2])
+                        if YCENTER ==0:
+                            YCENTER = centerlist.iloc[[inp.split(' ')[3]]].file.values[0]
                     except:
                         solocomete = False
                         print('YCENTER wrong format')
@@ -313,6 +317,17 @@ for path in list_to_reduce:
                 str_comment = inp.split(' ', 2)[-1]
                 comment.loc[comment['file'] == FILE, 'comment'] = str_comment
                 comment.to_csv(os.path.join(param['tmpout'], 'center_comment'), index=False, sep=",", header=False)
+            elif inp.split(' ')[0] == 'ds9':
+                try:
+                    FILE = centerlist.iloc[[inp.split(' ')[1]]].file.values[0]
+                except:
+                    print('ds9 command wrong format')
+                    continue
+                try:
+                    os.system(f'ds9 "{param["tmpout"] + "/" +  FILE}"')
+                else:
+                    print(f'could not open {FILE} with ds9')
+                
         trap_reduction.clean_afrhotot(param['tmpout'])
         print(len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2','CO+','H2O']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]))
         if len(fitstable.loc[fitstable['filt'].isin(['CO+','H2O']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]) > 0:
