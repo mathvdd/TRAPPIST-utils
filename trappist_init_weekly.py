@@ -246,15 +246,16 @@ for path in list_to_reduce:
             print(centerlist)
             while True:
                 solocomete = False
-                inp = input('''check individual images for centering.
-                            - Relaunch afrhocalcext for all images (r)
-                            - Relaunch afrhocalcext for an individual file (IMINDEX XCENTER YCENTER BOXSIZE)
-                            - Bypass (b)
-                            - Add a comment (c IMINDEX comment)
-                            :''')
-                if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B' or inp.split(' ')[0] == 'c' or inp.split(' ')[0] == 'C' or inp.split(' ')[0] == 'ds9':
+                inp = input('Check individual images for centering.\n
+                            - Relaunch afrhocalcext for all images (r)\n
+                            - Relaunch afrhocalcext for an individual file (IMINDEX XCENTER YCENTER BOXSIZE)\n
+                              optional: YMIN YMAX\n
+                            - Bypass (b)\n
+                            - Add a comment (c IMINDEX comment)\n
+                            :')
+                if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B' or inp.split(' ')[0] == 'c' or inp.split(' ')[0] == 'C':
                     break
-                elif len(inp.split(' ')) == 4: #check of good format for a one file reduction
+                elif len(inp.split(' ')) == 4 or len(inp.split(' ')) == 6: #check of good format for a one file reduction
                     solocomete = True
                     try:
                         FILE = centerlist.iloc[[inp.split(' ')[0]]].file.values[0]
@@ -264,14 +265,14 @@ for path in list_to_reduce:
                     try:
                         XCENTER = float(inp.split(' ')[1])
                         if XCENTER ==0:
-                            XCENTER = centerlist.iloc[[inp.split(' ')[2]]].file.values[0]
+                            XCENTER = centerlist.iloc[[inp.split(' ')[0]]].xcent.values[0]
                     except:
                         solocomete = False
                         print('XCENTER wrong format')
                     try:
                         YCENTER = float(inp.split(' ')[2])
                         if YCENTER ==0:
-                            YCENTER = centerlist.iloc[[inp.split(' ')[3]]].file.values[0]
+                            YCENTER = centerlist.iloc[[inp.split(' ')[0]]].ycent.values[0]
                     except:
                         solocomete = False
                         print('YCENTER wrong format')
@@ -283,13 +284,26 @@ for path in list_to_reduce:
                     except:
                         solocomete = False
                         print('BOXSIZE wrong format')
+
+                    if len(inp.split(' ')) == 6:
+                        try:
+                            ZMIN = float(inp.split(' ')[4])
+                        except:
+                            solocomete = False
+                            print('ZMIN wrong format')
+                        try:
+                            ZMAX = float(inp.split(' ')[5])
+                        except:
+                            solocomete = False
+                            print('ZMAX wrong format')
+                            
                     if solocomete == True: # break if good format
                         break
                 else:
                     print('wrong input')
             if solocomete == True:
                 trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], FILE, str(XCENTER), str(YCENTER), str(BOXSIZE), conda=conda)
-                trap_plot.plot_centering_profile(param['tmpout'], solocomet=True, comet_name=comet)
+                trap_plot.plot_centering_profile(param['tmpout'], solocomet=True, comet_name=comet,                                                 zmin=ZMIN,zmax=ZMAX)
                 if kitty == True:
                             try:
                                 os.system(f'kitty +kitten icat "{param["tmpout"] + "/" +  FILE[:-5] + "_centering.png"}"')
@@ -317,16 +331,6 @@ for path in list_to_reduce:
                 str_comment = inp.split(' ', 2)[-1]
                 comment.loc[comment['file'] == FILE, 'comment'] = str_comment
                 comment.to_csv(os.path.join(param['tmpout'], 'center_comment'), index=False, sep=",", header=False)
-            elif inp.split(' ')[0] == 'ds9':
-                try:
-                    FILE = centerlist.iloc[[inp.split(' ')[1]]].file.values[0]
-                except:
-                    print('ds9 command wrong format')
-                    continue
-                try:
-                    os.system(f'ds9 "{param["tmpout"] + "/" +  FILE}"')
-                else:
-                    print(f'could not open {FILE} with ds9')
                 
         trap_reduction.clean_afrhotot(param['tmpout'])
         print(len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2','CO+','H2O']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]))

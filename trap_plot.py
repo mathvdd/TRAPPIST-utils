@@ -391,7 +391,7 @@ def plot_centering(input_dir, output_dir=None):
                     
 # plot_centering('/home/Mathieu/Documents/TRAPPIST/tmpout')
 
-def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_name='',centering=True):
+def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_name='',centering=True,                           zmin=None,zmax=None):
     """
     Same as plot_centering + a plot of the radial profile
     Create a png for each image with the centering given by the pipeline at a radius of 5'' and 10 000 km.
@@ -531,7 +531,7 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     plt.close()
                     
 
-# plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/reduced_data/CK21A010')
+#plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/tmpout/')
 
 
 def plot_afrho(input_dir, saveplot=''):
