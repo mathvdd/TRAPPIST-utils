@@ -524,13 +524,17 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         axins.xaxis.set_major_locator(MultipleLocator(5))
                         axins.yaxis.set_major_locator(MultipleLocator(5))
                         if zmin == None:
-                            zmin = vmin
+                            zminval = vmin
+                        else:
+                            zminval = zmin
                         if zmax == None:
-                            zmax = vmax
-                        t2 = ax1.text(x=0.03,y=0.12,s=f'zmin = {str(int(zmin))}\nzmax = {str(int(zmax))}', transform=ax1.transAxes,
+                            zmaxval = vmax
+                        else:
+                            zmaxval = zmax
+                        t2 = ax1.text(x=0.03,y=0.12,s=f'zmin = {str(int(zminval))}\nzmax = {str(int(zmaxval))}', transform=ax1.transAxes,
                                                         horizontalalignment='left') 
                         t2.set_bbox(dict(facecolor='white', alpha=0.8))
-                        axins.imshow(image_data, cmap ='binary',vmin=zmin,vmax=zmax)
+                        axins.imshow(image_data, cmap ='binary',vmin=zminval,vmax=zmaxval)
                         axins.set_xlim(xcent - 12, xcent+12)
                         axins.set_ylim(ycent - 12, ycent+12)
                         circ5arcsec = Circle((xcent,ycent),radius = 5/pixsize, alpha=0.5, fill=False, color='red', label='5arcsec')
@@ -560,7 +564,7 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     plt.close()
                     
 
-#plot_centering_profile('/home/math/Documents/TRAPPIST/tmpout', zmin=0,zmax=60000)
+#plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/tmpout')
 
 
 def plot_afrho(input_dir, saveplot=''):
