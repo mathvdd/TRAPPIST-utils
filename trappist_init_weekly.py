@@ -29,7 +29,7 @@ skip = True # skip without asking raw data directory donwload if data already in
 # If set to False, will ask what to do in both cases
 Qfitlim = (3.5, 4.1) # limit in log10 km for the range over which Q is fitted
 only_BVRI = False
-
+kitty = True
 ########################
 
 dt = datetime.datetime.now()
@@ -226,7 +226,11 @@ for path in list_to_reduce:
         trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], str(0), str(0), str(0), str(0), conda=conda) #launch a first reduction of all the files by default
         trap_plot.plot_centering_profile(param['tmpout'], comet_name=comet)
         trap_reduction.generate_center_comment(param['tmpout'])
-        
+        if kitty == True:
+            try:
+                os.system(f'for f in {param["tmpout"]}/*_centering.png ; do kitty +kitten icat "$f" ; done')
+            except:
+                print('kitty command failed')
         def add_comment(row, comment):
             row_comment = comment.loc[comment['file'] == row['file'], 'comment']
             return row_comment.to_string(index = False)
@@ -282,11 +286,21 @@ for path in list_to_reduce:
             if solocomete == True:
                 trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], FILE, str(XCENTER), str(YCENTER), str(BOXSIZE), conda=conda)
                 trap_plot.plot_centering_profile(param['tmpout'], solocomet=True, comet_name=comet)
+                if kitty == True:
+                            try:
+                                os.system(f'kitty +kitten icat "{param["tmpout"] + "/" +  FILE[:-5] + "_centering.png"}"')
+                            except:
+                                print('kitty command failed')
                 continue
             if inp == 'r' or inp == 'R':
                 print('relaunching afrhocalcext')
                 trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], str(0), str(0), str(0), str(0), conda=conda)
                 trap_plot.plot_centering_profile(param['tmpout'], comet_name=comet)
+                if kitty == True:
+                            try:
+                                os.system(f'for f in {param["tmpout"]}/*_centering.png ; do kitty +kitten icat "$f" ; done')
+                            except:
+                                print('kitty command failed')
                 continue
             elif inp == 'b' or inp == 'B':
                 break
@@ -327,6 +341,11 @@ for path in list_to_reduce:
             print('--- launching hasercalctest ---')
             trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
             trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
+            if kitty == True:
+                try:
+                    os.system(f'for f in {param["tmpout"]}/*_haserprofile.png ; do kitty +kitten icat "$f" ; done')
+                except:
+                    print('kitty command failed')
             # while True:
             #     trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
             #     trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
