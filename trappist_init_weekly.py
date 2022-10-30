@@ -246,12 +246,12 @@ for path in list_to_reduce:
             print(centerlist)
             while True:
                 solocomete = False
-                inp = input('Check individual images for centering.\n
-                            - Relaunch afrhocalcext for all images (r)\n
-                            - Relaunch afrhocalcext for an individual file (IMINDEX XCENTER YCENTER BOXSIZE)\n
-                              optional: YMIN YMAX\n
-                            - Bypass (b)\n
-                            - Add a comment (c IMINDEX comment)\n
+                inp = input('Check individual images for centering.\n \
+                            - Relaunch afrhocalcext for all images (r)\n \
+                            - Relaunch afrhocalcext for an individual file (IMINDEX XCENTER YCENTER BOXSIZE)\n \
+                              optional: YMIN YMAX\n \
+                            - Bypass (b)\n \
+                            - Add a comment (c IMINDEX comment)\n \
                             :')
                 if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B' or inp.split(' ')[0] == 'c' or inp.split(' ')[0] == 'C':
                     break
