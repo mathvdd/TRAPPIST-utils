@@ -20,7 +20,9 @@ from matplotlib.patches import Circle
 import numpy as np
 import math 
 from matplotlib.ticker import MultipleLocator
-
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset
+                    
 def list_radprof(input_dir, output_dir):
     radtable = pd.DataFrame()
     for path, subdirs, files in os.walk(input_dir):
@@ -391,7 +393,7 @@ def plot_centering(input_dir, output_dir=None):
                     
 # plot_centering('/home/Mathieu/Documents/TRAPPIST/tmpout')
 
-def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_name='',centering=True,                           zmin=None,zmax=None):
+def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_name='',centering=True,zmin=None,zmax=None):
     """
     Same as plot_centering + a plot of the radial profile
     Create a png for each image with the centering given by the pipeline at a radius of 5'' and 10 000 km.
@@ -490,10 +492,10 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         else:
                             ax1.set_ylim(yimcent - centerlimit, yimcent+centerlimit)
                             ax1.set_xlim(ximcent - centerlimit, ximcent+centerlimit)
-                        ax1.legend()
+                        ax1.legend(loc="upper right")
                         centpixel_value = np.max(image_data[int(ycent)-2:int(ycent)+2, int(xcent)-2:int(xcent)+2])
-                        t = ax1.text(x=0.95,y=0.05,s='Center pixel value: ' + str(int(centpixel_value)).rjust(5), transform=ax1.transAxes,
-                                 horizontalalignment='right')
+                        t = ax1.text(x=0.03,y=0.04,s='Center pixel value: ' + str(int(centpixel_value)).rjust(5), transform=ax1.transAxes,
+                                 horizontalalignment='left')
                         if centpixel_value < 58000:
                             t.set_bbox(dict(facecolor='white', alpha=0.8))
                         else:
@@ -513,8 +515,35 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         fig,ax1=plot_this_thing()
                         
                         plt.suptitle(comet_name + ' ' + filt + ' ' + fitsname +  '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ')')
-                        ax1.imshow(image_data, cmap='pink', norm=colors.LogNorm(vmin=np.median(image_data), vmax=image_data[int(xcent), int(ycent)]*2))
+                        vmin = np.median(image_data)
+                        vmax = image_data[int(xcent), int(ycent)]*2
+                        ax1.imshow(image_data, cmap='pink', norm=colors.LogNorm(vmin=vmin, vmax=vmax))
                         
+                        axins = zoomed_inset_axes(ax1, 6, loc=4,borderpad=0.4)
+                        
+                        axins.xaxis.set_major_locator(MultipleLocator(5))
+                        axins.yaxis.set_major_locator(MultipleLocator(5))
+                        if zmin == None:
+                            zmin = vmin
+                        if zmax == None:
+                            zmax = vmax
+                        t2 = ax1.text(x=0.03,y=0.12,s=f'zmin = {str(int(zmin))}\nzmax = {str(int(zmax))}', transform=ax1.transAxes,
+                                                        horizontalalignment='left') 
+                        t2.set_bbox(dict(facecolor='white', alpha=0.8))
+                        axins.imshow(image_data, cmap ='binary',vmin=zmin,vmax=zmax)
+                        axins.set_xlim(xcent - 12, xcent+12)
+                        axins.set_ylim(ycent - 12, ycent+12)
+                        circ5arcsec = Circle((xcent,ycent),radius = 5/pixsize, alpha=0.5, fill=False, color='red', label='5arcsec')
+                        arcsec10k = 206265*10**4/(delta*1.5*100000000)
+                        circ10k = Circle((xcent,ycent),radius = arcsec10k/pixsize, alpha=0.5, fill=False, color='blue', label='10k km')
+                                             
+                        axins.add_patch(circ5arcsec)
+                        axins.add_patch(circ10k)
+                        plt.xticks(visible=True)
+                        plt.yticks(visible=True)
+                        axins.yaxis.tick_right()
+                        #mark_inset(ax1, axins, loc1=1, loc2=3, fc="none", ec="0.5")
+
                         fig.savefig(os.path.join(save_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
                     except:
                         print('ERROR LOGSCALE')
@@ -531,7 +560,7 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     plt.close()
                     
 
-#plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/tmpout/')
+#plot_centering_profile('/home/math/Documents/TRAPPIST/tmpout', zmin=0,zmax=60000)
 
 
 def plot_afrho(input_dir, saveplot=''):
