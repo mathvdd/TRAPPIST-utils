@@ -511,20 +511,12 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         ax2.legend(loc='upper right')
                         # add a point in 0,0 to visualize wider profile for gaz filter
                         ax2.plot(0,0, alpha = 0)
-                        return fig, ax1
-                          
-                    try:
-                        fig,ax1=plot_this_thing()
-                        
-                        plt.suptitle(comet_name + ' ' + filt + ' ' + fitsname +  '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ')')
-                        
-                        ax1.imshow(image_data, cmap='pink', norm=colors.LogNorm(vmin=vminmain, vmax=vmaxmain))
-                        
+
                         axins = zoomed_inset_axes(ax1, 6, loc=4,borderpad=0.4)
-                        
+                                      
                         axins.xaxis.set_major_locator(MultipleLocator(5))
                         axins.yaxis.set_major_locator(MultipleLocator(5))
-                        
+
                         if zmin == None:
                             vminzoom = vminmain
                         else:
@@ -533,10 +525,10 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                             vmaxzoom = centpixel_value
                         else:
                             vmaxzoom = zmax
-                        
+
                         t2 = ax1.text(x=0.03,y=0.12,s=f'zmin = {str(int(vminmain))} ({str(int(vminzoom))})\nzmax = {str(int(vmaxmain))} ({str(int(vmaxzoom))})', transform=ax1.transAxes,
-                                                        horizontalalignment='left') 
-                    
+                                                       horizontalalignment='left') 
+
                         t2.set_bbox(dict(facecolor='white', alpha=0.8))
                         axins.imshow(image_data, cmap ='binary',vmin=vminzoom,vmax=vmaxzoom)
                         axins.set_xlim(xcent - 12, xcent+12)
@@ -551,7 +543,18 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         plt.yticks(visible=True)
                         axins.yaxis.tick_right()
                         #mark_inset(ax1, axins, loc1=1, loc2=3, fc="none", ec="0.5")
-
+                        
+                        return fig, ax1
+                          
+                    try:
+                        
+                        fig,ax1=plot_this_thing()
+                        
+                        plt.suptitle(comet_name + ' ' + filt + ' ' + fitsname +  '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ')')
+                        
+                        ax1.imshow(image_data, cmap='pink', norm=colors.LogNorm(vmin=vminmain, vmax=vmaxmain))
+                        
+                        
                         fig.savefig(os.path.join(save_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
                     except:
                         print('ERROR LOGSCALE')
@@ -559,11 +562,12 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         fig,ax1=plot_this_thing()
                        
                         plt.suptitle(comet_name + ' ' + filt + ' ' + fitsname + '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ') error logscale')
-                        ax1.imshow(image_data, cmap='binary')
+                        ax1.imshow(image_data, cmap='gray', vmin=vminmain, vmax=vmaxmain)
                         plt.savefig(os.path.join(save_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
                     
+                
                     
-                    plt.tight_layout()
+                    #plt.tight_layout()
                     #plt.show()
                     plt.close()
                     
