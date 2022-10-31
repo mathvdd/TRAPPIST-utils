@@ -21,9 +21,9 @@ import phase_angle
 ########################
 # INPUT PARAMETERS
 startdate = '2022-09-30' #the night starting
-enddate = '2022-10-28' #starting that night not included
-obs = 'TS'
-comets = [] # list of comets to take into account. set empty to take all 
+enddate = '2022-10-30' #starting that night not included
+obs = 'TN'
+comets = ['CK17K020', '0073P', 'CK22P010', 'CK22E030'] # list of comets to take into account. set empty to take all 
 skip = True # skip without asking raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
@@ -161,13 +161,13 @@ for path in list_to_reduce:
             else:
                 check_calib_warning, lighttable = trap_reduction.check_calib(fitstable)
             if check_calib_warning == True:
-                inp = input("Some calibration files are missing!\
-                            \n   - Press enter to reload table\
-                            \n   - Query for closest BC continuum file (BC)\
-                            \n   - Query for missing 15s darks for flats (df), 10s darks for old TS data (df10)\
-                            \n   - Query for calibration files older than a week (give line index)\
-                            \n   - bypass (b)\
-                            \n   :")
+                inp = input("\nSome calibration files are missing!\
+                \n   - Press enter to reload table\
+                \n   - Query for closest BC continuum file (BC)\
+                \n   - Query for missing 15s darks for flats (df), 10s darks for old TS data (df10)\
+                \n   - Query for calibration files older than a week (give line index)\
+                \n   - bypass (b)\
+                \n   :")
                             
                 if inp == 'b' or inp == 'B':
                     break
@@ -246,13 +246,13 @@ for path in list_to_reduce:
             print(centerlist)
             while True:
                 solocomete = False
-                inp = input('Check individual images for centering.\n \
-                            - Relaunch afrhocalcext for all images (r)\n \
-                            - Relaunch afrhocalcext for an individual file (IMINDEX XCENTER YCENTER BOXSIZE)\n \
-                              optional: YMIN YMAX\n \
-                            - Bypass (b)\n \
-                            - Add a comment (c IMINDEX comment)\n \
-                            :')
+                inp = input('\nCheck individual images for centering.\
+                \n   - Relaunch afrhocalcext for all images (r)\
+                \n   - Relaunch afrhocalcext for an individual file (IMINDEX XCENTER YCENTER BOXSIZE)\
+                \n     optional: YMIN YMAX\
+                \n   - Bypass (b)\
+                \n   - Add a comment (c IMINDEX comment)\
+                \n   :')
                 if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B' or inp.split(' ')[0] == 'c' or inp.split(' ')[0] == 'C':
                     break
                 elif len(inp.split(' ')) == 4 or len(inp.split(' ')) == 6: #check of good format for a one file reduction

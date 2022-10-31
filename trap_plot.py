@@ -465,12 +465,25 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     vminmain = np.median(image_data)
                     vmaxmain = image_data[int(xcent), int(ycent)]*2
 
+                    if vminmain < 10:   
+                        print(f'approximate vminmain (current value {vminmain} to 0)')
+                        vminmain = 0
+                    if vmaxmain < 10:
+                        print(f'approximate vmaxmain (current value {vmaxmain} to 10)')
+                        vmaxmain = 10
                     vminmainflag =''
                     while vminmain > vmaxmain: # vmin > vmax was causing the error logscale?
+                        print('vminmain:', vminmain, 'vmaxmain:', vmaxmain)
                         vminmain = vminmain/2
                         print('vminmain > vmaxmain, dividing vminmain by 2')
                         vminmainflag = '-'
-                        
+                        if vminmain < 10:
+                            print(f'approximate vminmain (current value {vminmain} to 0)')
+                            vminmain = 0
+                        if vmaxmain < 10:
+                            print(f'approximate vmaxmain (current value {vmaxmain} to 10)')
+                            vmaxmain = 10
+                                
                     # plotting radial profile
                     
                     df = pd.read_csv(radpath, header=None, sep="\s+")
@@ -568,8 +581,6 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         fig,ax1=plot_this_thing()
                        
                         plt.suptitle(comet_name + ' ' + filt + ' ' + fitsname + '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ') error logscale')
-                        print('vmin', vminmain)
-                        print('vmax', vmaxmain)
                         ax1.imshow(image_data, cmap='gray', vmin=vminmain, vmax=vmaxmain)
                         plt.savefig(os.path.join(save_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
                     
@@ -837,7 +848,7 @@ def plot_haserprofile(input_dir, output_dir=None, comet_name=''):
                             print('difference ratio:', ((cont[0]- obs[0])/obs[0])[0])
                         
                         # define the plot
-                        fig = plt.figure(figsize=(12,9))
+                        fig = plt.figure(figsize=(14,6))
                         ax = fig.gca()
                         
                         # added this so don't see the extreme right of the continuum which is very noisy and mess the scale

@@ -166,9 +166,9 @@ def NAS_update(NAS_path, export_path, keyword=''):
     
 
 # NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", "202202")
-if __name__ == "__main__":
-    NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.txt", '202210')
-    NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.txt", '202210')
+#if __name__ == "__main__":
+#    NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.txt", '202210')
+#    NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.txt", '202210')
   
   
 def queryZ(NAS_path):
@@ -560,11 +560,11 @@ def lookforcalib_old():
     
     ### uncomment line bellow if querying for a light image
     # imtype = ['LIGHT', 'Light Frame']
-    obj = "0073P" #target name in the fits header. only for lights and for the output path
+    obj = "CK22E030" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
     imtype = ['DARK', 'Dark Frame']
-    exptime =300 #exposure time. only for darks
+    exptime =180 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
     # imtype = ['FLAT', 'Flat Frame']
@@ -573,10 +573,10 @@ def lookforcalib_old():
     ### uncomment line bellow if querying for bias frames
     # imtype = ['BIAS', 'Bias Frame']
     
-    telescope = 'TS'
-    night = (2022,10,12) ### set the observation night
+    telescope = 'TN'
+    night = (2022,10,17) ### set the observation night
     
-    dayinterval = 7 # starting point for the search
+    dayinterval = 12 # starting point for the search
     
     ####################################
     
@@ -658,5 +658,5 @@ def lookforcalib_old():
                     count +=1
             break
 
-#if __name__ == "__main__":
-#    lookforcalib_old()
+if __name__ == "__main__":
+    lookforcalib_old()
