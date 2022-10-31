@@ -166,9 +166,9 @@ def NAS_update(NAS_path, export_path, keyword=''):
     
 
 # NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", "202202")
-# if __name__ == "__main__":
-#     NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.txt", '202210')
-#     NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.txt", '202210')
+if __name__ == "__main__":
+    NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.txt", '202210')
+    NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.txt", '202210')
   
   
 def queryZ(NAS_path):
@@ -658,5 +658,5 @@ def lookforcalib_old():
                     count +=1
             break
 
-if __name__ == "__main__":
-    lookforcalib_old()
+#if __name__ == "__main__":
+#    lookforcalib_old()

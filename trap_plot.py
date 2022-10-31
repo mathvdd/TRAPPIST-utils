@@ -464,7 +464,13 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     centpixel_value = np.max(image_data[int(ycent)-2:int(ycent)+2, int(xcent)-2:int(xcent)+2])
                     vminmain = np.median(image_data)
                     vmaxmain = image_data[int(xcent), int(ycent)]*2
-                   
+
+                    vminmainflag =''
+                    while vminmain > vmaxmain: # vmin > vmax was causing the error logscale?
+                        vminmain = vminmain/2
+                        print('vminmain > vmaxmain, dividing vminmain by 2')
+                        vminmainflag = '-'
+                        
                     # plotting radial profile
                     
                     df = pd.read_csv(radpath, header=None, sep="\s+")
@@ -526,7 +532,7 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         else:
                             vmaxzoom = zmax
 
-                        t2 = ax1.text(x=0.03,y=0.12,s=f'zmin = {str(int(vminmain))} ({str(int(vminzoom))})\nzmax = {str(int(vmaxmain))} ({str(int(vmaxzoom))})', transform=ax1.transAxes,
+                        t2 = ax1.text(x=0.03,y=0.12,s=f'zmin = {str(int(vminmain))}{vminmainflag} ({str(int(vminzoom))})\nzmax = {str(int(vmaxmain))} ({str(int(vmaxzoom))})', transform=ax1.transAxes,
                                                        horizontalalignment='left') 
 
                         t2.set_bbox(dict(facecolor='white', alpha=0.8))
@@ -562,6 +568,8 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         fig,ax1=plot_this_thing()
                        
                         plt.suptitle(comet_name + ' ' + filt + ' ' + fitsname + '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ') error logscale')
+                        print('vmin', vminmain)
+                        print('vmax', vmaxmain)
                         ax1.imshow(image_data, cmap='gray', vmin=vminmain, vmax=vmaxmain)
                         plt.savefig(os.path.join(save_dir, fitsname[:-5] + '_centering.png'), bbox_inches='tight')
                     
@@ -572,7 +580,7 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     plt.close()
                     
 
-plot_centering_profile('/home/math/Documents/TRAPPIST/tmpout')
+#plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/tmpout')
 
 
 def plot_afrho(input_dir, saveplot=''):
