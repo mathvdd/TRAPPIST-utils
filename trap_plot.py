@@ -461,7 +461,10 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     # arcsec10k = 206265*10000/(delta*1.5*100000000)
                     # circ10k = Circle((xcent-pixelcropping,ycent-pixelcropping),radius = arcsec10k/pixsize, alpha=0.5, fill=False, color='blue', label='10k km')
                     
-                    
+                    centpixel_value = np.max(image_data[int(ycent)-2:int(ycent)+2, int(xcent)-2:int(xcent)+2])
+                    vminmain = np.median(image_data)
+                    vmaxmain = image_data[int(xcent), int(ycent)]*2
+                   
                     # plotting radial profile
                     
                     df = pd.read_csv(radpath, header=None, sep="\s+")
@@ -493,7 +496,6 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                             ax1.set_ylim(yimcent - centerlimit, yimcent+centerlimit)
                             ax1.set_xlim(ximcent - centerlimit, ximcent+centerlimit)
                         ax1.legend(loc="upper right")
-                        centpixel_value = np.max(image_data[int(ycent)-2:int(ycent)+2, int(xcent)-2:int(xcent)+2])
                         t = ax1.text(x=0.03,y=0.04,s='Center pixel value: ' + str(int(centpixel_value)).rjust(5), transform=ax1.transAxes,
                                  horizontalalignment='left')
                         if centpixel_value < 58000:
@@ -515,32 +517,34 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                         fig,ax1=plot_this_thing()
                         
                         plt.suptitle(comet_name + ' ' + filt + ' ' + fitsname +  '\n' + str(xcent) + ' ' + str(ycent) + ' (' + ctnmethod + ')')
-                        vmin = np.median(image_data)
-                        vmax = image_data[int(xcent), int(ycent)]*2
-                        ax1.imshow(image_data, cmap='pink', norm=colors.LogNorm(vmin=vmin, vmax=vmax))
+                        
+                        ax1.imshow(image_data, cmap='pink', norm=colors.LogNorm(vmin=vminmain, vmax=vmaxmain))
                         
                         axins = zoomed_inset_axes(ax1, 6, loc=4,borderpad=0.4)
                         
                         axins.xaxis.set_major_locator(MultipleLocator(5))
                         axins.yaxis.set_major_locator(MultipleLocator(5))
+                        
                         if zmin == None:
-                            zminval = vmin
+                            vminzoom = vminmain
                         else:
-                            zminval = zmin
+                            vminzoom = zmin
                         if zmax == None:
-                            zmaxval = vmax
+                            vmaxzoom = centpixel_value
                         else:
-                            zmaxval = zmax
-                        t2 = ax1.text(x=0.03,y=0.12,s=f'zmin = {str(int(zminval))}\nzmax = {str(int(zmaxval))}', transform=ax1.transAxes,
+                            vmaxzoom = zmax
+                        
+                        t2 = ax1.text(x=0.03,y=0.12,s=f'zmin = {str(int(vminmain))} ({str(int(vminzoom))})\nzmax = {str(int(vmaxmain))} ({str(int(vmaxzoom))})', transform=ax1.transAxes,
                                                         horizontalalignment='left') 
+                    
                         t2.set_bbox(dict(facecolor='white', alpha=0.8))
-                        axins.imshow(image_data, cmap ='binary',vmin=zminval,vmax=zmaxval)
+                        axins.imshow(image_data, cmap ='binary',vmin=vminzoom,vmax=vmaxzoom)
                         axins.set_xlim(xcent - 12, xcent+12)
                         axins.set_ylim(ycent - 12, ycent+12)
                         circ5arcsec = Circle((xcent,ycent),radius = 5/pixsize, alpha=0.5, fill=False, color='red', label='5arcsec')
                         arcsec10k = 206265*10**4/(delta*1.5*100000000)
                         circ10k = Circle((xcent,ycent),radius = arcsec10k/pixsize, alpha=0.5, fill=False, color='blue', label='10k km')
-                                             
+                        axins.scatter(xcent,ycent, alpha=0.5,color='red',marker="+")                                         
                         axins.add_patch(circ5arcsec)
                         axins.add_patch(circ10k)
                         plt.xticks(visible=True)
@@ -564,7 +568,7 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     plt.close()
                     
 
-#plot_centering_profile('/home/Mathieu/Documents/TRAPPIST/tmpout')
+plot_centering_profile('/home/math/Documents/TRAPPIST/tmpout')
 
 
 def plot_afrho(input_dir, saveplot=''):
