@@ -296,6 +296,9 @@ for path in list_to_reduce:
                         except:
                             solocomete = False
                             print('ZMAX wrong format')
+                    else:
+                        ZMIN = None
+                        ZMAX = None
                             
                     if solocomete == True: # break if good format
                         break
