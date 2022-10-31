@@ -15,7 +15,7 @@ import pandas as pd
 import get_ephem
 
 # comet = '0073P'
-Qfitlim = (3.7, 4.5)
+Qfitlim = (4, 4.6)
 fc = {'OH':5,
       'NH':20,
       'CN':25,
@@ -111,9 +111,9 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False):
 # haser_reduce_1night(comet, night, obs, Qfitlim)
 
 if __name__ == "__main__":
-    comet = '0073P'
+    comet = 'CK22E030'
     dt = datetime.datetime.now()
-    comet_dir = os.path.join(param['reduced'], comet, '20220929TS')
+    comet_dir = os.path.join(param['reduced'], comet, '20221017TN')
     for path, subdirs, files in os.walk(comet_dir):
         if (path.split('/')[-1] == 'haser') and os.path.isfile(
                 os.path.join(path, 'inputhaser-BC')):

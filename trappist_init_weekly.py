@@ -20,11 +20,11 @@ import phase_angle
 
 ########################
 # INPUT PARAMETERS
-startdate = '2022-09-30' #the night starting
-enddate = '2022-10-30' #starting that night not included
-obs = 'TN'
+startdate = '2022-10-21' #the night starting
+enddate = '2022-10-22' #starting that night not included
+obs = 'TS'
 comets = ['CK17K020', '0073P', 'CK22P010', 'CK22E030'] # list of comets to take into account. set empty to take all 
-skip = True # skip without asking raw data directory donwload if data already in raw_data.
+skip = False # skip without asking raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
 Qfitlim = (3.5, 4.1) # limit in log10 km for the range over which Q is fitted
