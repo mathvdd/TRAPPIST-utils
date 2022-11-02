@@ -18,76 +18,76 @@ pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
-def NAS_build(NAS_path, export_path, keyword=''):
-    """
-    Generate or update an indexed database of .fits and .fts file in the NAS of binning 2, containing keywords from the fits headers
-    An indexed database can be queryed much faster than going through all the files each time
+# def NAS_build(NAS_path, export_path, keyword=''):
+#     """
+#     Generate or update an indexed database of .fits and .fts file in the NAS of binning 2, containing keywords from the fits headers
+#     An indexed database can be queryed much faster than going through all the files each time
     
-    Parameters
-    ----------
-    NAS_path : str
-        path the NAS to query
-    export_path : str
-        path for export of the database (with the filename)
-    keyword : str, optional
-        if different than '', needs to be present in the folder path for it to be considered. The default is ''.
+#     Parameters
+#     ----------
+#     NAS_path : str
+#         path the NAS to query
+#     export_path : str
+#         path for export of the database (with the filename)
+#     keyword : str, optional
+#         if different than '', needs to be present in the folder path for it to be considered. The default is ''.
 
-    Returns
-    -------
-    None.
+#     Returns
+#     -------
+#     None.
 
-    """
+#     """
     
-    dt = datetime.datetime.now()
-    fitstable = pd.DataFrame(columns=('file','object', 'type', 'filter', 'date', 'exptime', 'binning'))
+#     dt = datetime.datetime.now()
+#     fitstable = pd.DataFrame(columns=('file','object', 'type', 'filter', 'date', 'exptime', 'binning'))
     
-    # count = 0
-    for path, subdirs, files in sorted(os.walk(NAS_path)):
-        # count += 1
-        if keyword in path:
-            print(path)
-            for name in files:
-                if name.endswith(".fits") or name.endswith(".fts"):
-                    try:
-                        with fits.open(os.path.join(path, name)) as hdul:
-                            try:
-                                imobject = hdul[0].header['OBJECT']
-                            except:
-                                imobject = None
-                            try:
-                                imtype = hdul[0].header['IMAGETYP']
-                            except:
-                                imtype = None
-                            try:
-                                imfilter = hdul[0].header['FILTER']
-                            except:
-                                imfilter = None
-                            try:
-                                imdate = hdul[0].header['DATE-OBS']
-                            except:
-                                imdate = None
-                            try:
-                                imexptime = hdul[0].header['EXPTIME']
-                            except:
-                                imexptime = None
-                            try:
-                                imbinning = hdul[0].header['XBINNING']
-                            except:
-                                imbinning = None
-                    except:
-                        print("error with", os.path.join(path, name))
-                        continue
-                # print(os.path.join(path, name))
-                    if imbinning == 2:
-                        fitstable.loc[fitstable.shape[0]] = [os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning]
-            # print(path)L
-        # if count % 10 == 0:
-            # print(path)
-            # print(len(fitstable.index))
+#     # count = 0
+#     for path, subdirs, files in sorted(os.walk(NAS_path)):
+#         # count += 1
+#         if keyword in path:
+#             print(path)
+#             for name in files:
+#                 if name.endswith(".fits") or name.endswith(".fts"):
+#                     try:
+#                         with fits.open(os.path.join(path, name)) as hdul:
+#                             try:
+#                                 imobject = hdul[0].header['OBJECT']
+#                             except:
+#                                 imobject = None
+#                             try:
+#                                 imtype = hdul[0].header['IMAGETYP']
+#                             except:
+#                                 imtype = None
+#                             try:
+#                                 imfilter = hdul[0].header['FILTER']
+#                             except:
+#                                 imfilter = None
+#                             try:
+#                                 imdate = hdul[0].header['DATE-OBS']
+#                             except:
+#                                 imdate = None
+#                             try:
+#                                 imexptime = hdul[0].header['EXPTIME']
+#                             except:
+#                                 imexptime = None
+#                             try:
+#                                 imbinning = hdul[0].header['XBINNING']
+#                             except:
+#                                 imbinning = None
+#                     except:
+#                         print("error with", os.path.join(path, name))
+#                         continue
+#                 # print(os.path.join(path, name))
+#                     if imbinning == 2:
+#                         fitstable.loc[fitstable.shape[0]] = [os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning]
+#             # print(path)L
+#         # if count % 10 == 0:
+#             # print(path)
+#             # print(len(fitstable.index))
     
-    fitstable.sort_values(by=['date']).to_csv(export_path, index=False)
+#     fitstable.sort_values(by=['date']).to_csv(export_path, index=False)
     
-    print('Executed in ', datetime.datetime.now() - dt)
+#     print('Executed in ', datetime.datetime.now() - dt)
     
 
 # NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", "202202")
