@@ -20,7 +20,7 @@ pd.set_option('display.width', 1000)
 
 def NAS_build(NAS_path, export_path, keyword=''):
     """
-    Generate an indexed database of .fits and .fts file in the NAS of binning 2, containing keywords from the fits headers
+    Generate or update an indexed database of .fits and .fts file in the NAS of binning 2, containing keywords from the fits headers
     An indexed database can be queryed much faster than going through all the files each time
     
     Parameters
@@ -95,12 +95,17 @@ def NAS_build(NAS_path, export_path, keyword=''):
 #     NAS_build("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS2_query_update.txt", '202210')
 #     NAS_build("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_update.txt", '202210')
 
-def NAS_update(NAS_path, export_path, keyword=''):
+def NAS_update(NAS_path, export_path, keyword='', cometlist = 'current'):
     
     dt = datetime.datetime.now()
+    discarded_obj = []
+
+    if os.path.isfile(export_path):
+        fitstable = pd.read_csv(export_path)
+    else:
+        fitstable = pd.DataFrame(columns=('file','object', 'type', 'filter', 'date', 'exptime', 'binning', 'readmode'))
     
-    fitstable = pd.read_csv(export_path)
-    blacklist_path = os.path.join('/'.join(export_path.split('/')[:-1]), 'blacklist')
+    blacklist_path = os.path.join('/'.join(export_path.split('/')[:-1]), 'blacklist_' +export_path.split('/')[-1] )
     if os.path.isfile(blacklist_path):
         blacklisttable = pd.read_csv(blacklist_path, header=None,names=['file', 'object'], sep=',')
         blacklist = pd.concat([fitstable['file'], blacklisttable['file']], ignore_index=True)
@@ -109,15 +114,24 @@ def NAS_update(NAS_path, export_path, keyword=''):
         blacklist = fitstable['file']
     # print(blacklist.str.contains('/NASTN/Data_TrappistNord/ACP Astronomy/Images/20221024/Calibration/Bias-S001-R001-C008-B1.fts').any())
     # input()
+
+    if cometlist == 'current':
+        from trapconfig import param
+        from trap_reduction import import_perihelion
+        objlist = import_perihelion(param['perihelion'], update=False)['id']
+    elif cometlist == 'update':
+        from trapconfig import param
+        from trap_reduction import import_perihelion
+        objlist = import_perihelion(param['perihelion'], update=True)['id']
+    else:
+        objlist = pd.read_csv(cometlist)
     
     for path, subdirs, files in sorted(os.walk(NAS_path)):
         # count += 1
         if keyword in path:
             print(path)
             for name in files:
-                if name.endswith(".fits") or name.endswith(".fts"):
-                    # print(blacklist.str.contains(os.path.join(path,name)).any())
-                    # if blacklist.str.contains(os.path.join(path,name)).any() == False:
+                if name.endswith(".fits") or name.endswith(".fts"):                    # if blacklist.str.contains(os.path.join(path,name)).any() == False:
                     if (os.path.join(path,name) in blacklist.values) == False:
                         try:
                             with fits.open(os.path.join(path, name)) as hdul:
@@ -145,28 +159,36 @@ def NAS_update(NAS_path, export_path, keyword=''):
                                     imbinning = hdul[0].header['XBINNING']
                                 except:
                                     imbinning = None
+                                try:
+                                    imreadmode = hdul[0].header['READOUTM']
+                                except:
+                                    imreadmode = None
                         except:
                             print("error with", os.path.join(path, name))
                             continue
-                        # print(os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning)
-                        if imbinning == 2:
-                            # print('added',len(fitstable))
-                            fitstable.loc[fitstable.shape[0]] = [os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning]
-                            
+                        # print(os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning) 
+
+                        if objlist.isin([imobject]).any():
+                            fitstable.loc[fitstable.shape[0]] = [os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning,imreadmode]
+                            if imbinning != 2:
+                                print(f"WARNING: found {name} ({imobject}) to be binning {imbinning}")
+                        elif imtype in (['DARK', 'Dark Frame','FLAT', 'Flat Frame','BIAS', 'Bias Frame']) and (imbinning == 2):
+                            fitstable.loc[fitstable.shape[0]] = [os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning,imreadmode]
                         else:
-                            # print(os.path.join(path, name), len(blacklisttable))
                             blacklisttable.loc[blacklisttable.shape[0]] = [os.path.join(path, name), imobject]
-                            
+                            if (len(imobject) != 0) and (imobject in discarded_obj) == False:
+                                discarded_obj.append(imobject)
                     # else:
                     #     print('rejected', os.path.join(path, name))
     fitstable.sort_values(by=['date']).to_csv(export_path, index=False)
     blacklisttable.to_csv(blacklist_path, index=False, sep=",", header=False)
-    
+    print('Discarded objects:', discarded_obj)
     print('Executed in ', datetime.datetime.now() - dt)
     
 if __name__ == "__main__":
-    NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images/2022", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.txt", '202210')
-    NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.txt", '202210')
+    NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '')
+    NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.db", '')
+    NAS_update("/NASTS/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '')
   
   
 def queryZ(NAS_path):

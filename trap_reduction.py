@@ -731,6 +731,9 @@ def import_perihelion(file_path, update=False):
     #columns designation at https://www.minorplanetcenter.net/iau/info/CometOrbitFormat.html
     columns = ['id','pyear','pmonth','pday','pdist','e','param1','param2','param3',
                 'param4','absmag','slope','name']
+    if os.path.isfile(file_path) == False:
+        print('perihelion file not found, forcing update')
+        update = True
     if update == True:
         #url='132456789'
         url="https://www.minorplanetcenter.net/iau/MPCORB/CometEls.txt"
