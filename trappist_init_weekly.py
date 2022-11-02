@@ -20,16 +20,16 @@ import phase_angle
 
 ########################
 # INPUT PARAMETERS
-startdate = '2022-10-21' #the night starting
-enddate = '2022-10-22' #starting that night not included
-obs = 'TS'
-comets = ['CK17K020', '0073P', 'CK22P010', 'CK22E030'] # list of comets to take into account. set empty to take all 
-skip = False # skip without asking raw data directory donwload if data already in raw_data.
+startdate = '2022-08-04' #the night starting
+enddate = '2022-10-30' #starting that night not included
+obs = 'TN'
+comets = ['CK22E030'] # list of comets to take into account. set empty to take all 
+skip = True # skip without asking raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
 Qfitlim = (3.5, 4.1) # limit in log10 km for the range over which Q is fitted
 only_BVRI = False
-kitty = True
+kitty = False
 ########################
 
 dt = datetime.datetime.now()
@@ -43,13 +43,13 @@ if only_BVRI:
 
 conda = True if param['conda'] == 'True' else False #wether to use 'source activate to launch cl or not'
 
-def import_perihelions(file_path):
-    file = pd.read_csv(file_path)
-    perihelions = {}
-    peri_serie = file['comet']
-    for index, row in file.iterrows():
-        perihelions[row['comet']] = pd.Timestamp(year=row['year'], month=row['month'], day=row['day'])
-    return perihelions, peri_serie
+#def import_perihelions(file_path):
+#    file = pd.read_csv(file_path)
+#    perihelions = {}
+#    peri_serie = file['comet']
+#    for index, row in file.iterrows():
+#        perihelions[row['comet']] = pd.Timestamp(year=row['year'], month=row['month'], day=row['day'])
+#    return perihelions, peri_serie
 
 if obs == 'TS':
     NASfitstable = query_NAS.loadcsvtable(param['TS_qNAS'])
@@ -58,7 +58,7 @@ elif obs == 'TN':
 
 objects_names = query_NAS.check_objects_names(startdate,enddate,NASfitstable,only_BVRI = only_BVRI)
 while True:
-    perihelions, peri_serie = import_perihelions(param['perihelion'])
+    peri_serie = trap_reduction.import_perihelion(param['perihelion'], update=True)['id']
     # inobj = pd.merge(objects_names, peri_serie, how='inner', left_on='object', right_on='comet').drop(['comet'],axis=1)
     inperi_obj = objects_names.loc[objects_names['object'].isin(peri_serie)]
     outperi_obj = objects_names.loc[~objects_names['object'].isin(peri_serie)]

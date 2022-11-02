@@ -739,12 +739,13 @@ def import_perihelion(file_path, update=False):
         # except:
         #     print('could not download comet MPC database')
         tab.columns=columns
+        tab.drop(['param1','param2','param3','param4'], inplace=True, axis=1)
         tab.to_csv(file_path, index=False)
     else:
         tab=pd.read_csv(file_path)
     return tab
 
-#import_perihelion('/home/Mathieu/Documents/TRAPPIST/scripts/utils/test', update=True)
+#import_perihelion('/home/Mathieu/Documents/TRAPPIST/scripts/utils/test', update=False)
 # generate_center_comment('/home/Mathieu/Documents/TRAPPIST/reduced_data/CK20R070/20220906TS/centering')
 # import directory_structure
 # ds = directory_structure.directory_structure()

@@ -271,17 +271,19 @@ if __name__ == "__main__":
     import matplotlib.dates as mdates
 
     ### PARAMETERS ###
-    comets = ['2017 K2', '2022 L1'
-                , '2022 E3', '2019 E3','2021 E3', '2022 P1'
+    comets = ['2017 K2', '2022 P1', '2022 E3'
+                ,'2022 L1', '2019 E3','2021 E3','2021 P4'
                 # ,'2020 R7'
                  # ,'2021 E3','2020 R7', '2021 G2', '2020 K1', '2021 C5', '2022 A2'
                  # ,'2019 E3', '2020 V2', '2021 P4', '2021 T2'
-                    ,'29P','22P','2022 P1', '29P', '73P'
+                    ,'2022 V2', '2019 U5' #obs with the Indians
+                    ,'29P', '73P', '22P','96P'
+                    ,'9P','61P','2021 T4','2022 L3'
                   #,'408P', '117P', '61P', '81P', '118P', '116P', '100P', '327P', '71P', '73P'
                     # ,'107P', '169P'
               ]
     observatory = 'TS'
-    night = '2022-10-31'
+    night = '2022-11-02'
     save_path = f'/home/Mathieu/visibility_plot{observatory}.png'
     ##################
     
