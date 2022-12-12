@@ -286,8 +286,8 @@ if __name__ == "__main__":
                   #,'408P', '117P', '61P', '81P', '118P', '116P', '100P', '327P', '71P', '73P'
                     # ,'107P', '169P'
               ]
-    observatory = 'TS' #TS, TN, HCT, Deva
-    night = '2023-04-01'
+    observatory = 'HCT' #TS, TN, HCT, Deva
+    night = '2023-02-20'
     save_path = f'/home/Mathieu/visibility_plot_{observatory}_{night}.png'
     ##################
     
@@ -342,7 +342,7 @@ if __name__ == "__main__":
     eph.parameters['STOP_TIME'] = datetime.datetime.strptime(night + 'T12:00', '%Y-%m-%dT%H:%M') + datetime.timedelta(days=1)
     
     #initiate the plot
-    fig = plt.figure(figsize=(12,8))
+    fig = plt.figure(figsize=(12,5))
     ax = fig.gca()
     
     # for the moon
@@ -363,6 +363,11 @@ if __name__ == "__main__":
         ax.text(df_moon.loc[df_moon['elev'].idxmax(), 'date'],
                 df_moon.loc[df_moon['elev'].idxmax(), 'elev'] + 1,
                 'Moon', ha='center')
+
+    naut_end_time = df_moon.loc[df_moon['sol_marq'] == "A"][-1:]['date']
+    naut_start_time = df_moon.loc[df_moon['sol_marq'] == "A"][:1]['date']
+    dark_start_time = df_moon.loc[df_moon['sol_marq'] == " "][:1]['date']
+    dark_end_time = df_moon.loc[df_moon['sol_marq'] == " "][-1:]['date'] 
     
     #get and plot the comets
     for comet in comets:
@@ -374,22 +379,34 @@ if __name__ == "__main__":
             plt.plot(df['date'], df['elev'])
             lunang_start = int(float(df.loc[naut_start,'lun_ang']))
             lunang_end = int(float(df.loc[naut_end,'lun_ang']))
-            ax.text(df.loc[df['elev'].idxmax(), 'date'],
+            max_elev_date = df.loc[df['elev'].idxmax(), 'date']
+            print(max_elev_date)
+            print(naut_start_time.values[0])
+            if max_elev_date < dark_start_time.values[0]:
+                x_pos = naut_start_time.values[0] + (dark_start_time.values[0] - naut_start_time.values[0])/1.3
+            elif max_elev_date > dark_end_time.values[0]:
+                x_pos = naut_end_time.values[0] - (dark_start_time.values[0] - naut_start_time.values[0])/1.3
+                         
+            else:
+                x_pos = max_elev_date 
+            print(x_pos)
+            print(type(x_pos))
+            ax.text(x_pos,
                     df.loc[df['elev'].idxmax(), 'elev'] + 1,
+                    #f"{comet}", ha='center')
                     f"{comet}\n({str(lunang_start)}-{str(lunang_end)}°)", ha='center')
     
     
     
     # #pretty plot
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-    plt.xlim(df_moon.loc[df_moon['sol_marq'] == "A"][:1]['date'],
-              df_moon.loc[df_moon['sol_marq'] == "A"][-1:]['date'])
+    plt.xlim(naut_start_time, naut_end_time)
     plt.ylim(0,90)
-    plt.axvline(x=df_moon.loc[df_moon['sol_marq'] == " "][:1]['date'],
+    plt.axvline(x=dark_start_time,
                 color='black', ls='dotted', alpha=0.5)
-    plt.axvline(x=df_moon.loc[df_moon['sol_marq'] == " "][-1:]['date'],
+    plt.axvline(x=dark_end_time,
                 color='black', ls='dotted', alpha=0.5)
-    plt.axhline(y=20, color='black', ls='dotted')
+    plt.axhline(y=25, color='black', ls='dotted')
     moon_illu_min = int(float(df_moon.loc[naut_start, 'lun_ill']))
     moon_illu_max = int(float(df_moon.loc[naut_end, 'lun_ill']))
     title = f'{night}\nMoon illumination {str(moon_illu_min)}-{str(moon_illu_max)}%'
