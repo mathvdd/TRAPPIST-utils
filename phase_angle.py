@@ -28,6 +28,8 @@ def import_pa_from_eph(imname, target, observatory): #function to import and for
         eph.parameters['COMMAND'] = target[2:]
     elif (len(target) == 5) and (target[0:1] + target[-1] == '0P'):
         eph.parameters['COMMAND'] = target[1:]
+    elif target == 'CK14UR1N':
+        eph.parameters['COMMAND'] = '2014 UN271'
     else:
         eph.parameters['COMMAND'] = target
     eph.parameters['QUANTITIES'] = '24'

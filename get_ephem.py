@@ -154,6 +154,8 @@ class ephemeris:
                         self.parameters['COMMAND'] = target[2:]
                     elif (len(target) == 5) and (target[0:1] + target[-1] == '0P'):
                         self.parameters['COMMAND'] = target[1:]
+                    elif target == 'CK14UR1N':
+                        self.parameters['COMMAND'] = '2014 UN271'
                     else:
                         self.parameters['COMMAND'] = target
                 else:
