@@ -29,11 +29,20 @@ fc = {'OH':5,
 
 def rewrite_fc_in_haserinput(fc):
     inputhaser_path = os.path.join(param["tmpout"], 'inputhaser-BC')
-    inputhaser = pd.read_csv(inputhaser_path, header=None, sep='\s+')
+    try:
+        inputhaser = pd.read_csv(inputhaser_path, header=None, sep='\s+',names=[0,1,2,3])
+    except:
+        print('WARNING: could not read', inputhaser_path)
+        print('trying with error_bad_lines=False')
+        inputhaser = pd.read_csv(inputhaser_path, header=None, sep='\s+',names=[0,1,2,3]
+                                 ,error_bad_lines=False)
+        input(inputhaser)
     for index, row in inputhaser.iterrows():
+        print(row)
         rad = pd.read_csv(os.path.join(param["tmpout"], 'rad_' + row[0]), header=None, sep='\s+')
         filt = rad.iloc[0,14]
         inputhaser.iloc[index,2] = fc.get(filt)
+        inputhaser.iloc[index,3] = 0
     inputhaser.to_csv(os.path.join(param["tmpout"], 'inputhaser-BC'), index=False, header=False, sep = ' ')
 
 def redo_calib_dat(imdir):
@@ -111,13 +120,21 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False):
 # haser_reduce_1night(comet, night, obs, Qfitlim)
 
 if __name__ == "__main__":
-    comet = 'CK22E030'
+    Qfitlim = (3.5, 4.3)
+    fc = {'OH':16,
+          'NH':22,
+          'CN':44,
+          'C3':235,
+          'C2':221,
+          'CO+':56,
+          'H2O':129}
+    comet = 'CK21A010'
     dt = datetime.datetime.now()
-    comet_dir = os.path.join(param['reduced'], comet, '20221017TN')
+    comet_dir = os.path.join(param['reduced'], comet)
     for path, subdirs, files in os.walk(comet_dir):
         if (path.split('/')[-1] == 'haser') and os.path.isfile(
                 os.path.join(path, 'inputhaser-BC')):
             night = (path.split('/')[-2][:4] +'-'+ path.split('/')[-2][4:6] +'-'+ path.split('/')[-2][6:8])
             obs = path.split('/')[-2][8:10]
-            haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False)
+            haser_reduce_1night(comet, night, obs, Qfitlim, check=False, redo_ZP=False)
     print('Executed in ', datetime.datetime.now() - dt)
