@@ -40,6 +40,7 @@ def import_pa_from_eph(imname, target, observatory): #function to import and for
     eph.parameters['START_TIME'] = datetime.datetime.strptime(imname, 'TRAP.%Y-%m-%dT%H:%M:%S.fits')
     eph.parameters['STOP_TIME'] = eph.parameters['START_TIME'] + datetime.timedelta(minutes=1)
     eph.parameters['STEP_SIZE'] = '1 m'
+    # eph.parameters['COMMAND'] = '2022 L3'
     eph.query_horizons()
     if eph.query_result[-4][:10] == '    Author':
         pass
@@ -71,6 +72,7 @@ def import_pa_from_eph(imname, target, observatory): #function to import and for
     else:
         print(eph.query_result)
         input('debug this')
+        return None
     data = []
     for line in eph.query_result[eph.query_result.index('$$SOE')+1:eph.query_result.index('$$EOE')]:
         data.append((imname +',' + line[:-1]).split(','))
@@ -121,4 +123,5 @@ def schleicher_0deg(afrho, pa):
     return afrho_corr
     
 if __name__ == "__main__":
-    generate_palist_reddir(os.path.join(param['reduced'], '0073P'))
+    # generate_palist_reddir(os.path.join(param['reduced'], 'PK22L030'))
+    generate_palist_reddir('/home/Mathieu/Documents/TRAPPIST/reduced_data/0073P/20220929TS')
