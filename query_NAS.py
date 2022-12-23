@@ -115,6 +115,11 @@ def NAS_update(NAS_path, export_path, keyword='', cometlist = 'current'):
     # print(blacklist.str.contains('/NASTN/Data_TrappistNord/ACP Astronomy/Images/20221024/Calibration/Bias-S001-R001-C008-B1.fts').any())
     # input()
 
+    add_to_list = []
+    # ['CK15E61R', 'CK15V020','CK17U010','CK17E030','CK14B010','CK14R030', '19K7',
+    #                'CK19Q040','AK19U060','K14UR1N','CK09P010','CK10X010','CK10B010', 'CK10F87B',
+    #                'CK11C010','CK09F040','CK09K030','CK10M010','CK06W030','CK11C030','PK11A020',
+    #                '0073P      c',]
     if cometlist == 'current':
         from trapconfig import param
         from trap_reduction import import_perihelion
@@ -125,6 +130,7 @@ def NAS_update(NAS_path, export_path, keyword='', cometlist = 'current'):
         objlist = import_perihelion(param['perihelion'], update=True)['id']
     else:
         objlist = pd.read_csv(cometlist)
+    objlist = objlist.append(pd.Series(add_to_list), ignore_index=True)
     
     for path, subdirs, files in sorted(os.walk(NAS_path)):
         # count += 1
@@ -185,10 +191,11 @@ def NAS_update(NAS_path, export_path, keyword='', cometlist = 'current'):
     print('Discarded objects:', discarded_obj)
     print('Executed in ', datetime.datetime.now() - dt)
     
-if __name__ == "__main__":
-    NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '')
-    NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.db", '')
-    NAS_update("/NASTS/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '')
+# if __name__ == "__main__":
+    # NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '202212')
+    # NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.db", '202212')
+    
+    # NAS_update("/NASTS/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '')
   
   
 def queryZ(NAS_path):
@@ -580,11 +587,11 @@ def lookforcalib_old():
     
     ### uncomment line bellow if querying for a light image
     # imtype = ['LIGHT', 'Light Frame']
-    obj = "CK22P010" #target name in the fits header. only for lights and for the output path
+    obj = "CK22E030" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
     imtype = ['DARK', 'Dark Frame']
-    exptime =600 #exposure time. only for darks
+    exptime =1200 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
     # imtype = ['FLAT', 'Flat Frame']
@@ -593,16 +600,17 @@ def lookforcalib_old():
     ### uncomment line bellow if querying for bias frames
     # imtype = ['BIAS', 'Bias Frame']
     
-    telescope = 'TS'
-    night = (2022,10,21) ### set the observation night
+    telescope = 'TN'
+    night = (2022,12,19) ### set the observation night
     
-    dayinterval = 12 # starting point for the search
+    dayinterval = 30 # starting point for the search
     
     ####################################
     
-    NASfitstable = loadcsvtable("/home/Mathieu/Documents/TRAPPIST/raw_data/" + telescope + "_query.txt") ### path to the indexed database
+    NASfitstable = loadcsvtable("/home/Mathieu/Documents/TRAPPIST/raw_data/" + telescope + "_query.db") ### path to the indexed database
     # print(NASfitstable.loc[ (NASfitstable['binning'] == 2)])
     # output_fold = "/home/Mathieu/Documents/TRAPPIST/raw_data/2020T2/TS/20210703/Calibration" ### path to the output folder
+
     subf_year = str(night[0])
     if night[1] > 9:
         subf_month = str(night[1])
@@ -678,5 +686,12 @@ def lookforcalib_old():
                     count +=1
             break
 
-#if __name__ == "__main__":
-#    lookforcalib_old()
+if __name__ == "__main__":
+    lookforcalib_old()
+
+# if __name__ == "__main__":
+#     NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '202212')
+    # NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.db", '202212')
+    
+    # NAS_update("/NASTS/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '')
+  
