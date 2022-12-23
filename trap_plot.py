@@ -586,8 +586,8 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                     
                 
                     
-                    #plt.tight_layout()
-                    #plt.show()
+                    plt.tight_layout()
+                    plt.show()
                     plt.close()
                     
 
@@ -848,12 +848,12 @@ def plot_haserprofile(input_dir, output_dir=None, comet_name=''):
                             print('difference ratio:', ((cont[0]- obs[0])/obs[0])[0])
                         
                         # define the plot
-                        fig = plt.figure(figsize=(14,6))
+                        fig = plt.figure(figsize=(10,6))
                         ax = fig.gca()
                         
                         # added this so don't see the extreme right of the continuum which is very noisy and mess the scale
                         xlim1 = 0
-                        xlim2 = len(cont)-100
+                        xlim2 = len(cont)-120
                         ax.set_xlim([np.log10(cont[0][xlim1]), np.log10(cont[0][xlim2])])
                         
                         # need to redefine the limit otherwise the plot does not rescale du to high continuum values outside the plotting limits
@@ -876,7 +876,7 @@ def plot_haserprofile(input_dir, output_dir=None, comet_name=''):
                         plt.tight_layout()
                         plt.savefig(os.path.join(save_dir, imname[:-9] + '_haserprofile.png'), bbox_inches='tight')
                         
-                        #plt.show()
+                        plt.show()
                         plt.close()
     
 # plot_haserprofile('/home/Mathieu/Documents/TRAPPIST/tmpout', output_dir=None)
