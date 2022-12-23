@@ -15,15 +15,15 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
 ### PARAMETERS ###
-calrange = (4.4,5) # range over which to sample the flux in the radfile in log(rho)
-comet = '0067P'
+calrange = (3.5,4.3) # range over which to sample the flux in the radfile in log(rho)
+comet = 'CK21A010'
 # dir_path = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK19L030/20220427TS'
 # dir_path = os.path.join(param['reduced'], 'CK17K020', '20220506TS')
 db_results = os.path.join(os.path.expanduser('~'), 'Documents/TRAPPIST/reduced_data/results.db') # to check for flagged bad data
 
-gamma = {'BC':1,'GC':1,'RC':1,'C2':5.433e-3, 'C3':3.352e-3, 'OH':1.698e-2, 'CN':1.812e-2, 'CO+':1.549e-2, 'H2O':5.424e-3}
-F0 = {'BC':6.21e-9,'GC':3.616e-9,'RC':1.316e-9,'C2':3.887e-9, 'C3': 8.16e-9, 'OH':10.56e-9, 'CN':8.6e-9, 'CO+':7.323e-9, 'H2O':1.380e-9}
-ms = {'BC':0,'GC':-0.507,'RC':-1.276,'C2':-0.423, 'C3':0.497, 'OH':1.791, 'CN':1.031, 'CO+':0.338, 'H2O':-1.249}
+gamma = {'BC':1,'GC':1,'RC':1,'C2':5.433e-3, 'C3':3.352e-3, 'OH':1.698e-2,'NH':1.907e-2, 'CN':1.812e-2, 'CO+':1.549e-2, 'H2O':5.424e-3}
+F0 = {'BC':6.21e-9,'GC':3.616e-9,'RC':1.316e-9,'C2':3.887e-9, 'C3': 8.16e-9, 'OH':10.56e-9, 'NH':8.42e-9, 'CN':8.6e-9, 'CO+':7.323e-9, 'H2O':1.380e-9}
+ms = {'BC':0,'GC':-0.507,'RC':-1.276,'C2':-0.423, 'C3':0.497, 'OH':1.791,'NH':1.188, 'CN':1.031, 'CO+':0.338, 'H2O':-1.249}
 KGC1 = 0.0404
 KGC3 = 0.0373
 pixsize = {'TN':2*0.6,'TS':2*0.65}
@@ -140,6 +140,20 @@ def calculate_correction_1night(dir_path, calrange):
         F_CN = df_CN.iloc[calrangepix[1]]['intFband'] - df_CN.iloc[calrangepix[0]]['intFband']
     else:
         corr_CN = False
+        
+    if len(df_cf.loc[df_cf['filter'] == 'C3']) > 0 and len(df_cf.loc[df_cf['filter'] == 'NH']) > 0:
+        corr_NH = True
+        # C3 is used for NH decontamination
+        radfile_C3 = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf['filter'] == 'C3'].iloc[-1][0] + '.txt')
+        df_C3 = read_radfile(radfile_C3)
+        F_C3 = df_C3.iloc[calrangepix[1]]['intFband'] - df_C3.iloc[calrangepix[0]]['intFband']
+        # f_C3 = F_C3 / F0['C3'] * gamma['C3']
+
+        radfile_NH = os.path.join(dir_path, 'profiles', 'rad_' + df_cf.loc[df_cf['filter'] == 'NH'].iloc[-1][0] + '.txt')
+        df_NH = read_radfile(radfile_NH)
+        F_NH = df_NH.iloc[calrangepix[1]]['intFband'] - df_NH.iloc[calrangepix[0]]['intFband']
+    else:
+        corr_NH = False
     
     fp_BC = f_BC
     
@@ -185,6 +199,8 @@ def calculate_correction_1night(dir_path, calrange):
         corr_iraf_OHcGCC2 = fc_OH*F0['OH']/gamma['OH']/F_BC
         fc_CN = fp_BC*10**(-0.4* (ms['CN']-ms['BC'])) * 10**(-0.2320*R_BCGCcC2)
         corr_iraf_CNcGCC2 = fc_CN*F0['CN']/gamma['CN']/F_BC
+        fc_NH = fp_BC*10**(-0.4* (ms['NH']-ms['BC'])) * 10**(-0.2320*R_BCGCcC2)
+        corr_iraf_NHcGCC2 = fc_NH*F0['NH']/gamma['NH']/F_BC
         if corr_CN == True: # contamination of C3 in CN
             F_C3_corrected = F_C3- corr_iraf_C3cGCC2*F_BC
             corr_iraf_CNC3cGCC2 = (fc_CN*F0['CN'] + F_C3_corrected*1.427e-3 )/gamma['CN']/F_BC
@@ -195,6 +211,16 @@ def calculate_correction_1night(dir_path, calrange):
         else:
             corr_iraf_CNC3cGCC2 = np.nan
             CNC3cGCC2_factor = np.nan
+        if corr_NH == True: # contamination of C3 in NH
+            F_C3_corrected = F_C3- corr_iraf_C3cGCC2*F_BC
+            corr_iraf_NHC3cGCC2 = (fc_NH*F0['NH'] + F_C3_corrected*1.433e-5 )/gamma['NH']/F_BC
+            NHC3cGCC2_factor = (F_NH*gamma['NH']-F_C3_corrected*1.433e-5) / gamma['NH'] / (F_NH)
+            # print(F_C3- corr_iraf_C3cGCC2*F_BC)
+            # print('NHC3_factor', NHC3_factor)
+            # print('FNH:', F_NH,'F_BC:', F_BC)
+        else:
+            corr_iraf_NHC3cGCC2 = np.nan
+            NHC3cGCC2_factor = np.nan
     else:
         corr_iraf_C2cGCC2 = np.nan
         corr_iraf_C3cGCC2 = np.nan
@@ -202,6 +228,10 @@ def calculate_correction_1night(dir_path, calrange):
         corr_iraf_CNcGCC2 = np.nan
         corr_iraf_CNC3cGCC2 = np.nan
         CNC3cGCC2_factor = np.nan
+        
+        corr_iraf_NHcGCC2 = np.nan
+        corr_iraf_NHC3cGCC2 = np.nan
+        NHC3cGCC2_factor = np.nan
             
     if corr_GC == True:
         fc_C2 = fp_BC*10**(-0.4* (ms['C2']-ms['BC'])) * 10**(0.2764*R_BCGC)
@@ -219,6 +249,17 @@ def calculate_correction_1night(dir_path, calrange):
         else:
             corr_iraf_CNC3cGC = np.nan
             CNC3cGC_factor = np.nan
+        
+        fc_NH = fp_BC*10**(-0.4* (ms['NH']-ms['BC'])) * 10**(-0.2320*R_BCGC)
+        corr_iraf_NHcGC = fc_NH*F0['NH']/gamma['NH']/F_BC
+        if corr_NH == True:
+            F_C3_corrected = F_C3- corr_iraf_C3cGC*F_BC
+            corr_iraf_NHC3cGC = (fc_NH*F0['NH'] + F_C3_corrected*1.433e-5 )/gamma['NH']/F_BC
+            NHC3cGC_factor = (F_NH*gamma['NH']-F_C3_corrected*1.433e-5) / gamma['NH'] / (F_NH)
+        else:
+            corr_iraf_NHC3cGC = np.nan
+            NHC3cGC_factor = np.nan
+            
     else:
         corr_iraf_C2cGC = np.nan
         corr_iraf_C3cGC = np.nan
@@ -226,6 +267,10 @@ def calculate_correction_1night(dir_path, calrange):
         corr_iraf_CNcGC = np.nan
         corr_iraf_CNC3cGC = np.nan
         CNC3cGC_factor = np.nan
+        
+        corr_iraf_NHcGC = np.nan
+        corr_iraf_NHC3cGC = np.nan
+        NHC3cGC_factor = np.nan
         
     fc_C2 = fp_BC*10**(-0.4* (ms['C2']-ms['BC'])) * 10**(0.2764*0)
     corr_iraf_C2 = fc_C2*F0['C2']/gamma['C2']/F_BC
@@ -242,6 +287,16 @@ def calculate_correction_1night(dir_path, calrange):
     else:
         corr_iraf_CNC3 = np.nan
         CNC3_factor = np.nan
+        
+    fc_NH = fp_BC*10**(-0.4* (ms['NH']-ms['BC'])) * 10**(-0.2320*0)
+    corr_iraf_NH = fc_NH*F0['NH']/gamma['NH']/F_BC
+    if corr_NH == True:
+        F_C3_corrected = F_C3- corr_iraf_C3*F_BC
+        corr_iraf_NHC3 = (fc_NH*F0['NH'] + F_C3_corrected*1.433e-5 )/gamma['NH']/F_BC
+        NHC3_factor = (F_NH*gamma['NH']-F_C3_corrected*1.433e-5) / gamma['NH'] / (F_NH)
+    else:
+        corr_iraf_NHC3 = np.nan
+        NHC3_factor = np.nan
         
     date = dir_path.split('/')[-1][:8]
     obs = dir_path.split('/')[-1][8:]
@@ -270,7 +325,16 @@ def calculate_correction_1night(dir_path, calrange):
                                 'CNC3':round(corr_iraf_CNC3,3),
                                 'CNC3cGCC2_factor':round(CNC3cGCC2_factor,3),
                                 'CNC3cGC_factor':round(CNC3cGC_factor,3),         
-                                'CNC3_factor':round(CNC3_factor,3)},
+                                'CNC3_factor':round(CNC3_factor,3),
+                                'NHcGCC2':round(corr_iraf_NHcGCC2,3),
+                                'NHcGC':round(corr_iraf_NHcGC,3),
+                                'NH':round(corr_iraf_NH,3),
+                                'NHC3cGCC2':round(corr_iraf_NHC3cGCC2,3),
+                                'NHC3cGC':round(corr_iraf_NHC3cGC,3),
+                                'NHC3':round(corr_iraf_NHC3,3),
+                                'NHC3cGCC2_factor':round(NHC3cGCC2_factor,3),
+                                'NHC3cGC_factor':round(NHC3cGC_factor,3),         
+                                'NHC3_factor':round(NHC3_factor,3)},
                           index=[0])
     
     return result
@@ -291,42 +355,48 @@ def calculate_correction_all(comet, calrange):
     return coeffs_table, coeffs_average
 
 def plots_factors(coeffs_table, coeffs_average, export_path):
-    filtlist= ['C2', 'C3', 'CN', 'CNC3', 'OH']
+    filtlist= ['C2', 'C3', 'CN', 'CNC3','NH', 'NHC3', 'OH']
     fc = {'OH':5,
           'NH':20,
           'CN':25,
           'CNC3':25,
+          'NH':20,
+          'NHC3':20,
           'C3':190,
           'C2':170}
-    fig = plt.figure(figsize=(12,14))
-    gs = fig.add_gridspec(6, hspace=0.2)
+    fig = plt.figure(figsize=(12,19))
+    gs = fig.add_gridspec(7, hspace=0.2)
     axs = gs.subplots(sharex=True)
     # fig.suptitle('Dust correction factors')
     # axs.set_xlabel('Date')
     
     count = 0
     for filt in filtlist:
+        if filt == 'NHC3':
+            continue
         axs[count].scatter(coeffs_table['date'], coeffs_table[f'{filt}'], color='tab:blue',
-                           label=f'{"%.0f" % (coeffs_table[f"{filt}"].mean())} ({"%.0f" % (3*coeffs_table[f"{filt}"].std())})')
+                           label=f'{"%.0f" % (coeffs_table[f"{filt}"].mean())} ({"%.0f" % (coeffs_table[f"{filt}"].std())})')
         axs[count].axhline(coeffs_table[f'{filt}'].mean(), color='tab:blue')
-        axs[count].axhspan(ymin=coeffs_table[f'{filt}'].mean()-3*coeffs_table[f'{filt}'].std(),
-                           ymax=coeffs_table[f'{filt}'].mean()+3*coeffs_table[f'{filt}'].std(),
+        axs[count].axhspan(ymin=coeffs_table[f'{filt}'].mean()-coeffs_table[f'{filt}'].std(),
+                           ymax=coeffs_table[f'{filt}'].mean()+coeffs_table[f'{filt}'].std(),
                            color='tab:blue', alpha=0.15)
         axs[count].scatter(coeffs_table['date'], coeffs_table[f'{filt}cGC'], color='tab:red',
-                           label=f'{"%.0f" % (coeffs_table[f"{filt}cGC"].mean())} ({"%.0f" % (3*coeffs_table[f"{filt}cGC"].std())})')
+                           label=f'{"%.0f" % (coeffs_table[f"{filt}cGC"].mean())} ({"%.0f" % (coeffs_table[f"{filt}cGC"].std())})')
         axs[count].axhline(coeffs_table[f'{filt}cGC'].mean(), color='tab:red')
-        axs[count].axhspan(ymin=coeffs_table[f'{filt}cGC'].mean()-3*coeffs_table[f'{filt}cGC'].std(),
-                           ymax=coeffs_table[f'{filt}cGC'].mean()+3*coeffs_table[f'{filt}cGC'].std(),
+        axs[count].axhspan(ymin=coeffs_table[f'{filt}cGC'].mean()-coeffs_table[f'{filt}cGC'].std(),
+                           ymax=coeffs_table[f'{filt}cGC'].mean()+coeffs_table[f'{filt}cGC'].std(),
                            color='tab:red', alpha=0.15)
         axs[count].scatter(coeffs_table['date'], coeffs_table[f'{filt}cGCC2'], color='tab:green',
-                           label=f'{"%.0f" % (coeffs_table[f"{filt}cGCC2"].mean())} ({"%.0f" % (3*coeffs_table[f"{filt}cGCC2"].std())})')
+                           label=f'{"%.0f" % (coeffs_table[f"{filt}cGCC2"].mean())} ({"%.0f" % (coeffs_table[f"{filt}cGCC2"].std())})')
         axs[count].axhline(coeffs_table[f'{filt}cGCC2'].mean(), color='tab:green')
-        axs[count].axhspan(ymin=coeffs_table[f'{filt}cGCC2'].mean()-3*coeffs_table[f'{filt}cGCC2'].std(),
-                           ymax=coeffs_table[f'{filt}cGCC2'].mean()+3*coeffs_table[f'{filt}cGCC2'].std(),
+        axs[count].axhspan(ymin=coeffs_table[f'{filt}cGCC2'].mean()-coeffs_table[f'{filt}cGCC2'].std(),
+                           ymax=coeffs_table[f'{filt}cGCC2'].mean()+coeffs_table[f'{filt}cGCC2'].std(),
                            color='tab:green', alpha=0.15)
         axs[count].axhline(fc.get(filt), color='black', ls='--', label=fc.get(filt))
         if filt == 'CNC3':
             axs[count].set_title('CN with C3 decontamination', fontsize=15)
+        elif filt == 'NHC3':
+            axs[count].set_title('NH with C3 decontamination', fontsize=15)
         else:
             axs[count].set_title(f'{filt}', fontsize=15)
         axs[count].legend(loc="center left",
@@ -336,22 +406,22 @@ def plots_factors(coeffs_table, coeffs_average, export_path):
         # if filt == 'CN':
         #     count +=1
         #     axs[count].scatter(coeffs_table['date'], coeffs_table[f'{filt}C3'], color='tab:blue',
-        #                        label=f'{int(coeffs_table[f"{filt}C3"].mean())} ({int(3*coeffs_table[f"{filt}C3"].std())})')
+        #                        label=f'{int(coeffs_table[f"{filt}C3"].mean())} ({int(coeffs_table[f"{filt}C3"].std())})')
         #     axs[count].axhline(coeffs_table[f'{filt}C3'].mean(), color='tab:blue')
-        #     axs[count].axhspan(ymin=coeffs_table[f'{filt}C3'].mean()-3*coeffs_table[f'{filt}C3'].std(),
-        #                        ymax=coeffs_table[f'{filt}C3'].mean()+3*coeffs_table[f'{filt}C3'].std(),
+        #     axs[count].axhspan(ymin=coeffs_table[f'{filt}C3'].mean()-coeffs_table[f'{filt}C3'].std(),
+        #                        ymax=coeffs_table[f'{filt}C3'].mean()+coeffs_table[f'{filt}C3'].std(),
         #                        color='tab:blue', alpha=0.15)
         #     axs[count].scatter(coeffs_table['date'], coeffs_table[f'{filt}C3cGC'], color='tab:red',
-        #                        label=f'{int(coeffs_table[f"{filt}C3cGC"].mean())} ({int(3*coeffs_table[f"{filt}C3cGC"].std())})')
+        #                        label=f'{int(coeffs_table[f"{filt}C3cGC"].mean())} ({int(coeffs_table[f"{filt}C3cGC"].std())})')
         #     axs[count].axhline(coeffs_table[f'{filt}C3cGC'].mean(), color='tab:red')
-        #     axs[count].axhspan(ymin=coeffs_table[f'{filt}C3cGC'].mean()-3*coeffs_table[f'{filt}C3cGC'].std(),
-        #                        ymax=coeffs_table[f'{filt}C3cGC'].mean()+3*coeffs_table[f'{filt}C3cGC'].std(),
+        #     axs[count].axhspan(ymin=coeffs_table[f'{filt}C3cGC'].mean()-coeffs_table[f'{filt}C3cGC'].std(),
+        #                        ymax=coeffs_table[f'{filt}C3cGC'].mean()+coeffs_table[f'{filt}C3cGC'].std(),
         #                        color='tab:red', alpha=0.15)
         #     axs[count].scatter(coeffs_table['date'], coeffs_table[f'{filt}C3cGCC2'], color='tab:green',
-        #                        label=f'{int(coeffs_table[f"{filt}C3cGCC2"].mean())} ({int(3*coeffs_table[f"{filt}C3cGCC2"].std())})')
+        #                        label=f'{int(coeffs_table[f"{filt}C3cGCC2"].mean())} ({int(coeffs_table[f"{filt}C3cGCC2"].std())})')
         #     axs[count].axhline(coeffs_table[f'{filt}C3cGCC2'].mean(), color='tab:green')
-        #     axs[count].axhspan(ymin=coeffs_table[f'{filt}C3cGCC2'].mean()-3*coeffs_table[f'{filt}C3cGCC2'].std(),
-        #                        ymax=coeffs_table[f'{filt}C3cGCC2'].mean()+3*coeffs_table[f'{filt}C3cGCC2'].std(),
+        #     axs[count].axhspan(ymin=coeffs_table[f'{filt}C3cGCC2'].mean()-coeffs_table[f'{filt}C3cGCC2'].std(),
+        #                        ymax=coeffs_table[f'{filt}C3cGCC2'].mean()+coeffs_table[f'{filt}C3cGCC2'].std(),
         #                        color='tab:green', alpha=0.15)
         #     axs[count].axhline(fc.get(filt), color='black', ls='--')
         #     axs[count].set_title(f'{filt} with C3 decontamination')
@@ -359,40 +429,40 @@ def plots_factors(coeffs_table, coeffs_average, export_path):
         
     if len(coeffs_table.dropna(axis=0)['R_BCGC']) > 0 or len(coeffs_table.dropna(axis=0)['R_GCRC']) > 0:
         # added this condition because if no datapoints messes the x scale
-        axs[5].scatter(coeffs_table['date'], coeffs_table['R_BCGC'], color='tab:blue', marker='X',
-                            label=f'{round(coeffs_table["R_BCGC"].mean(), 2)} ({round(3*coeffs_table["R_BCGC"].std(), 2)})')
-        axs[5].axhline(coeffs_table['R_BCGC'].mean(), color='tab:blue')
-        axs[5].axhspan(ymin=coeffs_table['R_BCGC'].mean()-3*coeffs_table['R_BCGC'].std(),
-                            ymax=coeffs_table['R_BCGC'].mean()+3*coeffs_table['R_BCGC'].std(),
+        axs[6].scatter(coeffs_table['date'], coeffs_table['R_BCGC'], color='tab:blue', marker='X',
+                            label=f'{round(coeffs_table["R_BCGC"].mean(), 2)} ({round(coeffs_table["R_BCGC"].std(), 2)})')
+        axs[6].axhline(coeffs_table['R_BCGC'].mean(), color='tab:blue')
+        axs[6].axhspan(ymin=coeffs_table['R_BCGC'].mean()-coeffs_table['R_BCGC'].std(),
+                            ymax=coeffs_table['R_BCGC'].mean()+coeffs_table['R_BCGC'].std(),
                             color='tab:blue', alpha=0.15)
-        axs[5].scatter(coeffs_table['date'], coeffs_table['R_BCGCcC2'], color='tab:green', marker='X',
-                            label=f'{round(coeffs_table["R_BCGCcC2"].mean(), 2)} ({round(3*coeffs_table["R_BCGCcC2"].std(), 2)})')
-        axs[5].axhline(coeffs_table['R_BCGCcC2'].mean(), color='tab:green')
-        axs[5].axhspan(ymin=coeffs_table['R_BCGCcC2'].mean()-3*coeffs_table['R_BCGCcC2'].std(),
-                            ymax=coeffs_table['R_BCGCcC2'].mean()+3*coeffs_table['R_BCGCcC2'].std(),
+        axs[6].scatter(coeffs_table['date'], coeffs_table['R_BCGCcC2'], color='tab:green', marker='X',
+                            label=f'{round(coeffs_table["R_BCGCcC2"].mean(), 2)} ({round(coeffs_table["R_BCGCcC2"].std(), 2)})')
+        axs[6].axhline(coeffs_table['R_BCGCcC2'].mean(), color='tab:green')
+        axs[6].axhspan(ymin=coeffs_table['R_BCGCcC2'].mean()-coeffs_table['R_BCGCcC2'].std(),
+                            ymax=coeffs_table['R_BCGCcC2'].mean()+coeffs_table['R_BCGCcC2'].std(),
                             color='tab:green', alpha=0.15)
-        axs[5].scatter(coeffs_table['date'], coeffs_table['R_GCRC'], color='tab:red', marker='X',
-                            label=f'{round(coeffs_table["R_GCRC"].mean(), 2)} ({round(3*coeffs_table["R_GCRC"].std(), 2)})')
-        axs[5].axhline(coeffs_table['R_GCRC'].mean(), color='tab:red')
-        axs[5].axhspan(ymin=coeffs_table['R_GCRC'].mean()-3*coeffs_table['R_GCRC'].std(),
-                            ymax=coeffs_table['R_GCRC'].mean()+3*coeffs_table['R_GCRC'].std(),
+        axs[6].scatter(coeffs_table['date'], coeffs_table['R_GCRC'], color='tab:red', marker='X',
+                            label=f'{round(coeffs_table["R_GCRC"].mean(), 2)} ({round(coeffs_table["R_GCRC"].std(), 2)})')
+        axs[6].axhline(coeffs_table['R_GCRC'].mean(), color='tab:red')
+        axs[6].axhspan(ymin=coeffs_table['R_GCRC'].mean()-coeffs_table['R_GCRC'].std(),
+                            ymax=coeffs_table['R_GCRC'].mean()+coeffs_table['R_GCRC'].std(),
                             color='tab:red', alpha=0.15)
-        axs[5].scatter(coeffs_table['date'], coeffs_table['R_GCcC2RC'], color='tab:orange', marker='X',
-                            label=f'{round(coeffs_table["R_GCcC2RC"].mean(), 2)} ({round(3*coeffs_table["R_GCcC2RC"].std(), 2)})')
-        axs[5].axhline(coeffs_table['R_GCcC2RC'].mean(), color='tab:orange')
-        axs[5].axhspan(ymin=coeffs_table['R_GCcC2RC'].mean()-3*coeffs_table['R_GCcC2RC'].std(),
-                            ymax=coeffs_table['R_GCcC2RC'].mean()+3*coeffs_table['R_GCcC2RC'].std(),
+        axs[6].scatter(coeffs_table['date'], coeffs_table['R_GCcC2RC'], color='tab:orange', marker='X',
+                            label=f'{round(coeffs_table["R_GCcC2RC"].mean(), 2)} ({round(coeffs_table["R_GCcC2RC"].std(), 2)})')
+        axs[6].axhline(coeffs_table['R_GCcC2RC'].mean(), color='tab:orange')
+        axs[6].axhspan(ymin=coeffs_table['R_GCcC2RC'].mean()-coeffs_table['R_GCcC2RC'].std(),
+                            ymax=coeffs_table['R_GCcC2RC'].mean()+coeffs_table['R_GCcC2RC'].std(),
                             color='tab:orange', alpha=0.15)
-        axs[5].legend(loc="center left",
+        axs[6].legend(loc="center left",
                           bbox_to_anchor=(1.,0.5),
-                          bbox_transform=axs[5].transAxes)
-    axs[5].set_title('Dust color', fontsize=15)
+                          bbox_transform=axs[6].transAxes)
+    axs[6].set_title('Dust color', fontsize=15)
     
     handles = [Line2D([0], [0], marker='o',lw=0, color='tab:blue', label='Coefficients computed only from solar color'),
               Line2D([0], [0], marker='o',lw=0, color='tab:red', label='... and taking into account comet color (BC-GC)'),
               Line2D([0], [0], marker='o',lw=0, color='tab:green', label='... and GC contamination by C2'),
               Line2D([0], [0], lw=1, color='black',ls='--', label='Standard values used in the pipeline'),
-              Line2D([0], [0], lw=10, color='tab:green', alpha=0.15, label='3 sigma error'),
+              Line2D([0], [0], lw=10, color='tab:green', alpha=0.15, label='sigma error'),
               Line2D([0], [0], lw=0, label='Dust color in magnitude per 1000 $\AA$'),
               Line2D([0], [0], marker='X',lw=0, color='tab:blue', label='BC-GC dust color'),
               Line2D([0], [0], marker='X',lw=0, color='tab:green', label='BC-GC dust color with C2 decontamination of GC'),
@@ -400,7 +470,7 @@ def plots_factors(coeffs_table, coeffs_average, export_path):
               Line2D([0], [0], marker='X',lw=0, color='tab:orange', label='GC-RC dust color with C2 decontamination of GC')]
     fig.legend(handles=handles, loc="lower center", ncol=2,
         bbox_to_anchor=(0.57, -0.03),
-        bbox_transform=fig.transFigure)
+        bbox_transform=fig.transFigure, prop={'size': 17})
     # plt.tight_layout()
     fig.suptitle(comet + ' dust coefficients', x = 0.57,y=0.93, fontsize=17)
     fig.savefig(os.path.join(export_path, comet + '_dust_coefficients.png'), bbox_inches="tight")
