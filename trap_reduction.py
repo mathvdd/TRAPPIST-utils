@@ -40,10 +40,11 @@ ZP = {'OH': [3090, 10.56e-9,   1.791,  1.698e-2,  0.98,   1,  1.60],
       'R': [6855,  1.92e-9,  -1.019,  1.,        1,     14,  0.098],
       'I': [8637,  9.39e-10, -1.375,  1.,        1,     15,  0.043],
       'CO+': [4266, 7.323e-9, 0.338, 1.549e-2, 0.99, 6, 0.25],
-      'H2O' : [7020, 1.38e-9, -1.249, 5.424e-3, 1., 10, 0.07]
+      'H2O' : [7020, 1.38e-9, -1.249, 5.424e-3, 1., 10, 0.07],
+      'NaI' : [5890, 0, 0, 1., 1., 20, 0.13] # no value of F0 for NaI
       }
 
-filt_list = ['OH','CN','C2','C3','NH','CO+','H2O','UC','BC','RC','GC','R','I', 'B', 'V'] #to be coherent with the subsets file for progtrap2.cl
+filt_list = ['OH','CN','C2','C3','NH','CO+','H2O','UC','BC','RC','GC','R','I', 'B', 'V','NaI'] #to be coherent with the subsets file for progtrap2.cl
 
 def renameftsfits(raw_path):
     """
