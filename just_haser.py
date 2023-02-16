@@ -101,6 +101,8 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False):
                         if 'haser' in file and 'tmp' not in file:
                             shutil.copy(os.path.join(path2, file), os.path.join(haser_dir, file))
                             print('copied', file, "in reduced dir")
+                shutil.copy(os.path.join(param['tmpout'], 'calib.dat'), os.path.join(garbage_dir, 'calib.dat'))
+                print('copied calib.dat in garbage_dir')
                 break
     else:
         trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
@@ -110,9 +112,8 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False):
                 if 'haser' in file and 'tmp' not in file:
                     shutil.copy(os.path.join(path2, file), os.path.join(haser_dir, file))
                     print('copied', file, "in reduced dir")
-    if redo_ZP == True:
-        shutil.copy(os.path.join(param['tmpout'], 'calib.dat'), os.path.join(garbage_dir, 'calib2.dat'))
-
+        shutil.copy(os.path.join(param['tmpout'], 'calib.dat'), os.path.join(garbage_dir, 'calib.dat'))
+        print('copied calib.dat in garbage_dir')
 
 
 # night = '2022-01-02'
@@ -120,15 +121,16 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False):
 # haser_reduce_1night(comet, night, obs, Qfitlim)
 
 if __name__ == "__main__":
-    Qfitlim = (3.5, 4.3)
+    kitty = True
+    Qfitlim = (4.4, 5.0)
     fc = {'OH':16,
           'NH':22,
-          'CN':44,
-          'C3':235,
-          'C2':221,
+          'CN':31,
+          'C3':237,
+          'C2':185,
           'CO+':56,
           'H2O':129}
-    comet = 'CK21A010'
+    comet = 'CK19L030'
     dt = datetime.datetime.now()
     comet_dir = os.path.join(param['reduced'], comet)
     for path, subdirs, files in os.walk(comet_dir):
@@ -136,5 +138,11 @@ if __name__ == "__main__":
                 os.path.join(path, 'inputhaser-BC')):
             night = (path.split('/')[-2][:4] +'-'+ path.split('/')[-2][4:6] +'-'+ path.split('/')[-2][6:8])
             obs = path.split('/')[-2][8:10]
-            haser_reduce_1night(comet, night, obs, Qfitlim, check=False, redo_ZP=False)
+            haser_reduce_1night(comet, night, obs, Qfitlim, check=False, redo_ZP=True)
+            if kitty == True:
+                try:
+                    os.system(f'for f in {param["tmpout"]}/*_haserprofile.png ; do kitty +kitten icat "$f" ; done')
+                except:
+                    print('kitty command failed')
+                        
     print('Executed in ', datetime.datetime.now() - dt)
