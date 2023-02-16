@@ -393,7 +393,7 @@ def plot_centering(input_dir, output_dir=None):
                     
 # plot_centering('/home/Mathieu/Documents/TRAPPIST/tmpout')
 
-def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_name='',centering=True,zmin=None,zmax=None):
+def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_name='',centering=True,zmin=None,zmax=None,kitty=False):
     """
     Same as plot_centering + a plot of the radial profile
     Create a png for each image with the centering given by the pipeline at a radius of 5'' and 10 000 km.
@@ -587,7 +587,8 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                 
                     
                     plt.tight_layout()
-                    plt.show()
+                    if kitty == False:
+                        plt.show()
                     plt.close()
                     
 
@@ -778,7 +779,7 @@ def plot_haser(input_dir, saveplot=''):
 # plot_radprof(input_dir=input_path, saveplot=savepath)
 # plot_mag(input_dir=input_path, saveplot='')
 
-def plot_haserprofile(input_dir, output_dir=None, comet_name=''):
+def plot_haserprofile(input_dir, output_dir=None, comet_name='', kitty=False):
     """
     Plot the flux profile for the NB images, the continuum, their difference and the Haser model.
     Create a png for each NB image.
@@ -876,7 +877,8 @@ def plot_haserprofile(input_dir, output_dir=None, comet_name=''):
                         plt.tight_layout()
                         plt.savefig(os.path.join(save_dir, imname[:-9] + '_haserprofile.png'), bbox_inches='tight')
                         
-                        plt.show()
+                        if kitty == False:
+                            plt.show()
                         plt.close()
     
 # plot_haserprofile('/home/Mathieu/Documents/TRAPPIST/tmpout', output_dir=None)

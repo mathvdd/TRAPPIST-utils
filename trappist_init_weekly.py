@@ -20,10 +20,10 @@ import phase_angle
 
 ########################
 # INPUT PARAMETERS
-startdate = '2022-12-20' #the night starting
-enddate = '2022-12-22' #starting that night not included
-obs = 'TN'
-comets = [] # list of comets to take into account. set empty to take all 
+startdate = '2023-01-25' #the night starting
+enddate = '2023-01-30' #starting that night not included
+obs = 'TS'
+comets = ['CK19L030'] # list of comets to take into account. set empty to take all 
 skip = True # skip without asking raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
@@ -100,9 +100,9 @@ for comet in inlist:
 # input('download finished')      
 # makes list of folders to reduce
 list_to_reduce = []
-list_to_reduce = ['/home/Mathieu/Documents/TRAPPIST/raw_data/0073P/TN/20221221',
-                  '/home/Mathieu/Documents/TRAPPIST/raw_data/0081P/TN/20221221',
-                  '/home/Mathieu/Documents/TRAPPIST/raw_data/CK22A020/TN/20221221']
+# list_to_reduce = ['/home/Mathieu/Documents/TRAPPIST/raw_data/0073P/TN/20221221',
+#                   '/home/Mathieu/Documents/TRAPPIST/raw_data/0081P/TN/20221221',
+#                   '/home/Mathieu/Documents/TRAPPIST/raw_data/CK22A020/TN/20221221']
 for comet in inlist:
     output_path = os.path.join(param['raw'], comet, obs)
     for path, subdirs, files in os.walk(output_path):
@@ -228,7 +228,7 @@ for path in list_to_reduce:
         pixsize = trap_reduction.set_pixsize_in_clafrhocalcext(fitstable)
         print('--- launching afrhocalcext ---')
         trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], str(0), str(0), str(0), str(0), conda=conda) #launch a first reduction of all the files by default
-        trap_plot.plot_centering_profile(param['tmpout'], comet_name=comet)
+        trap_plot.plot_centering_profile(param['tmpout'], comet_name=comet,kitty=kitty)
         trap_reduction.generate_center_comment(param['tmpout'])
         if kitty == True:
             try:
@@ -310,7 +310,7 @@ for path in list_to_reduce:
                     print('wrong input')
             if solocomete == True:
                 trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], FILE, str(XCENTER), str(YCENTER), str(BOXSIZE), conda=conda)
-                trap_plot.plot_centering_profile(param['tmpout'], solocomet=True, comet_name=comet,                                                 zmin=ZMIN,zmax=ZMAX)
+                trap_plot.plot_centering_profile(param['tmpout'], solocomet=True, comet_name=comet,zmin=ZMIN,zmax=ZMAX, kitty=kitty)
                 if kitty == True:
                             try:
                                 os.system(f'kitty +kitten icat "{param["tmpout"] + "/" +  FILE[:-5] + "_centering.png"}"')
@@ -320,7 +320,7 @@ for path in list_to_reduce:
             if inp == 'r' or inp == 'R':
                 print('relaunching afrhocalcext')
                 trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], str(0), str(0), str(0), str(0), conda=conda)
-                trap_plot.plot_centering_profile(param['tmpout'], comet_name=comet)
+                trap_plot.plot_centering_profile(param['tmpout'], comet_name=comet,kitty=kitty)
                 if kitty == True:
                             try:
                                 os.system(f'for f in {param["tmpout"]}/*_centering.png ; do kitty +kitten icat "$f" ; done')
@@ -366,7 +366,7 @@ for path in list_to_reduce:
             
             print('--- launching hasercalctest ---')
             trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
-            trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
+            trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet,kitty=kitty)
             if kitty == True:
                 try:
                     os.system(f'for f in {param["tmpout"]}/*_haserprofile.png ; do kitty +kitten icat "$f" ; done')
