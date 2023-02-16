@@ -423,6 +423,7 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                 tab = pd.read_csv(centerfile, header=None, sep="\s+")
                 if solocomet == True:
                     tab = tab.iloc[[-1]]
+                tab.drop_duplicates(subset=0,keep='last',inplace=True)
                 for index, row in tab.iterrows():
                     fitsname = row[0]
                     if os.path.isfile(os.path.join(path, fitsname)):
