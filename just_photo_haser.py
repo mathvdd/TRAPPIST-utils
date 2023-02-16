@@ -15,7 +15,7 @@ import shutil
 import datetime
 import pandas as pd
 
-working_dir = '/home/Mathieu/Documents/TRAPPIST/testdir'
+working_dir = '/home/Mathieu/Documents/TRAPPIST/CK19L030'
 # Qfitlim = (3.5, 4.1) # limit in log10 km for the range over which Q is fitted
 
 if __name__ == "__main__":
@@ -45,7 +45,15 @@ if __name__ == "__main__":
             
             print('--- copying previous reduction to tmpout ---')
             shutil.copy(os.path.join(root, 'centering', 'centerlist'), os.path.join(param['tmpout']))
-            shutil.copy(os.path.join(root, 'probably_garbage', 'calib.dat'), os.path.join(param['tmpout']))
+            for path2, subdirs2, files2 in os.walk(os.path.join(root, 'images')):
+                for file in files2:
+                    if file.endswith('.fits') and file.startswith('TRAP'):
+                        shutil.copy(os.path.join(path2, file), os.path.join(param['tmpout']))
+            try:
+                shutil.copy(os.path.join(root, 'probably_garbage', 'calib.dat'), os.path.join(param['tmpout']))
+            except:
+                import just_haser
+                just_haser.redo_calib_dat(param['tmpout'])
             shutil.copy(os.path.join(root, 'probably_garbage', 'eph.dat'), os.path.join(param['tmpout']))
             shutil.copy(os.path.join(root, 'probably_garbage', 'ephem.brol'), os.path.join(param['tmpout']))
             try:
@@ -55,10 +63,6 @@ if __name__ == "__main__":
             except:
                 print('no haser files')
                 haser = False
-            for path2, subdirs2, files2 in os.walk(os.path.join(root, 'images')):
-                for file in files2:
-                    if file.endswith('.fits') and file.startswith('TRAP'):
-                        shutil.copy(os.path.join(path2, file), os.path.join(param['tmpout']))
 
             print('--- starting reduction ---')
             centerlist = pd.read_csv(os.path.join(param['tmpout'], 'centerlist'),header=None, sep=' '
