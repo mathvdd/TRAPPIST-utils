@@ -45,7 +45,7 @@ def rewrite_fc_in_haserinput(fc):
         inputhaser.iloc[index,3] = 0
     inputhaser.to_csv(os.path.join(param["tmpout"], 'inputhaser-BC'), index=False, header=False, sep = ' ')
 
-def redo_calib_dat(imdir):
+def redo_calib_dat(imdir, comet):
         fitstable = trap_reduction.get_fitstable(imdir)
         # fitstable = fitstable.loc[fitstable['type'].isin(['LIGHT', 'Light Frame'])
         #                           & ~fitstable['file'].isin(['coms.fits', 'comsplus.fits'])]
@@ -79,7 +79,7 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False):
     rewrite_fc_in_haserinput(fc)
     
     if redo_ZP == True:
-        redo_calib_dat(imdir= images_dir)
+        redo_calib_dat(imdir= images_dir, comet=comet)
     # input('end')
     conda = True if param['conda'] == 'True' else False #wether to use 'source activate to launch cl or not'
     print('--- launching hasercalctest ---')

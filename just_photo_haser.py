@@ -53,7 +53,7 @@ if __name__ == "__main__":
                 shutil.copy(os.path.join(root, 'probably_garbage', 'calib.dat'), os.path.join(param['tmpout']))
             except:
                 import just_haser
-                just_haser.redo_calib_dat(param['tmpout'])
+                just_haser.redo_calib_dat(param['tmpout'],comet=comet)
             shutil.copy(os.path.join(root, 'probably_garbage', 'eph.dat'), os.path.join(param['tmpout']))
             shutil.copy(os.path.join(root, 'probably_garbage', 'ephem.brol'), os.path.join(param['tmpout']))
             try:
