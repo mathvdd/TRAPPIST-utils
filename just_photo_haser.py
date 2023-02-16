@@ -14,7 +14,6 @@ import os
 import shutil
 import datetime
 import pandas as pd
-import get_ephem
 
 working_dir = '/home/Mathieu/Documents/TRAPPIST/testdir'
 # Qfitlim = (3.5, 4.1) # limit in log10 km for the range over which Q is fitted
