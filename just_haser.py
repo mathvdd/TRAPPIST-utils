@@ -15,12 +15,12 @@ import pandas as pd
 import get_ephem
 
 # comet = '0073P'
-Qfitlim = (4, 4.6)
-fc = {'OH':5,
-      'NH':20,
-      'CN':25,
-      'C3':190,
-      'C2':170}
+# Qfitlim = (4, 4.6)
+# fc = {'OH':5,
+#       'NH':20,
+#       'CN':25,
+#       'C3':190,
+#       'C2':170}
 # fc_default = {'OH':5,
 #       'NH':20,
 #       'CN':25,
@@ -76,10 +76,13 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False):
             shutil.copy(os.path.join(path, file), os.path.join(param['tmpout'], file))
     shutil.copy(os.path.join(haser_dir, 'inputhaser-BC'), os.path.join(param['tmpout'], 'inputhaser-BC'))
     shutil.copy(os.path.join(garbage_dir, 'ephem.brol'), os.path.join(param['tmpout'], 'ephem.brol'))
+       
     rewrite_fc_in_haserinput(fc)
     
     if redo_ZP == True:
         redo_calib_dat(imdir= images_dir, comet=comet)
+    elif redo_ZP == False:
+        shutil.copy(os.path.join(garbage_dir, 'calib.dat'), os.path.join(param['tmpout'], 'calib.dat'))
     # input('end')
     conda = True if param['conda'] == 'True' else False #wether to use 'source activate to launch cl or not'
     print('--- launching hasercalctest ---')
@@ -121,7 +124,8 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False):
 # haser_reduce_1night(comet, night, obs, Qfitlim)
 
 if __name__ == "__main__":
-    kitty = True
+    kitty = False
+    redo_ZP=False
     Qfitlim = (4.4, 5.0)
     fc = {'OH':16,
           'NH':22,
@@ -138,7 +142,7 @@ if __name__ == "__main__":
                 os.path.join(path, 'inputhaser-BC')):
             night = (path.split('/')[-2][:4] +'-'+ path.split('/')[-2][4:6] +'-'+ path.split('/')[-2][6:8])
             obs = path.split('/')[-2][8:10]
-            haser_reduce_1night(comet, night, obs, Qfitlim, check=False, redo_ZP=True)
+            haser_reduce_1night(comet, night, obs, Qfitlim, check=False, redo_ZP=redo_ZP)
             if kitty == True:
                 try:
                     os.system(f'for f in {param["tmpout"]}/*_haserprofile.png ; do kitty +kitten icat "$f" ; done')
