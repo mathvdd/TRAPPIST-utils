@@ -15,8 +15,10 @@ import shutil
 import datetime
 import pandas as pd
 
-working_dir = '/home/Mathieu/Documents/TRAPPIST/CK19L030'
+working_dir = '/home/Mathieu/Documents/TRAPPIST/CK21A010'
 # Qfitlim = (3.5, 4.1) # limit in log10 km for the range over which Q is fitted
+
+kitty=None
 
 if __name__ == "__main__":
     input(f'!!! this will overwrite any previous reduction in {working_dir} Press any key to continue')
@@ -72,9 +74,10 @@ if __name__ == "__main__":
             print(centerlist)
             for index, item in centerlist.iterrows():
                 trap_reduction.clafrhocalcext(param['iraf'], str(pixsize), item['file'], str(item['xcent']), str(item['ycent']), str(0), conda=conda)
-            trap_plot.plot_centering_profile(param['tmpout'], comet_name=comet,kitty=True)
+            trap_plot.plot_centering_profile(param['tmpout'], comet_name=comet,kitty=kitty)
             trap_reduction.clean_afrhotot(param['tmpout'])
 
+            haser is False
             print('--- launching hasercalctest ---')
             if haser== True:
                 haserinput = pd.read_csv(os.path.join(param['tmpout'], 'inputhaser-BC'), header=None, sep="\s+")
@@ -83,7 +86,7 @@ if __name__ == "__main__":
                     Qfitlim0 = haseroutput[16][0]
                     Qfitlim1 = haseroutput[17][0]
                     trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim0, Qprofhigh=Qfitlim1, conda=conda)
-                    trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet,kitty=True)
+                    trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet,kitty=kitty)
             else:
                 print('No haserinput filters found, skipping Haser') 
 

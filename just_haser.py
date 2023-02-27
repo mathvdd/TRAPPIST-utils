@@ -60,7 +60,7 @@ def redo_calib_dat(imdir, comet):
         if ZP_warning == True:
             input("press enter")
 
-def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False):
+def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False,kitty=False):
     reduced_dir = os.path.join(param['reduced'], comet, night.replace('-','') + obs)
     profiles_dir = os.path.join(reduced_dir, "profiles")
     images_dir = os.path.join(reduced_dir, "images")
@@ -89,7 +89,7 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False):
     if check == True:
         while True:
             trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
-            trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
+            trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet,kitty=kitty)
             while True:
                 inp = input('relaunch hasercalctext (r) or overwrite results in reduced dir (c)? [r/c]')
                 if inp == 'r' or inp == 'R' or inp == 'c' or inp == 'C':
@@ -109,7 +109,7 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False):
                 break
     else:
         trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
-        trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet)
+        trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet,kitty=kitty)
         for path2, subdirs2, files2 in os.walk(param['tmpout']):
             for file in files2:
                 if 'haser' in file and 'tmp' not in file:
@@ -124,25 +124,36 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False):
 # haser_reduce_1night(comet, night, obs, Qfitlim)
 
 if __name__ == "__main__":
-    kitty = False
+    kitty = None
     redo_ZP=False
-    Qfitlim = (4.4, 5.0)
-    fc = {'OH':16,
+    
+    Qfitlim = (3.4, 4.3)
+    fc = {'OH':16, #2019 L3
           'NH':22,
-          'CN':31,
-          'C3':237,
-          'C2':185,
+          'CN':44,
+          'C3':235,
+          'C2':221,
           'CO+':56,
           'H2O':129}
-    comet = 'CK19L030'
+    
+    # Qfitlim = (4.4, 5.0)
+    # fc = {'OH':16, #2019 L3
+    #       'NH':22,
+    #       'CN':31,
+    #       'C3':237,
+    #       'C2':185,
+    #       'CO+':56,
+    #       'H2O':129}
+    comet = 'CK21A010'
     dt = datetime.datetime.now()
     comet_dir = os.path.join(param['reduced'], comet)
+    # comet_dir = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK19L030/20230220TS'
     for path, subdirs, files in os.walk(comet_dir):
         if (path.split('/')[-1] == 'haser') and os.path.isfile(
                 os.path.join(path, 'inputhaser-BC')):
             night = (path.split('/')[-2][:4] +'-'+ path.split('/')[-2][4:6] +'-'+ path.split('/')[-2][6:8])
             obs = path.split('/')[-2][8:10]
-            haser_reduce_1night(comet, night, obs, Qfitlim, check=False, redo_ZP=redo_ZP)
+            haser_reduce_1night(comet, night, obs, Qfitlim, check=False, redo_ZP=redo_ZP,kitty=kitty)
             if kitty == True:
                 try:
                     os.system(f'for f in {param["tmpout"]}/*_haserprofile.png ; do kitty +kitten icat "$f" ; done')
