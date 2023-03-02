@@ -54,6 +54,8 @@ def import_pa_from_eph(imname, target, observatory): #function to import and for
                     break
                 else:
                     i -=1
+        elif eph.parameters['COMMAND'] == '57P':
+            eph.record = '90000633'
         else:
             last_line = eph.query_result[-5]
             eph.record = [ elem for elem in last_line.split(" ") if elem != ''][0]
@@ -63,7 +65,7 @@ def import_pa_from_eph(imname, target, observatory): #function to import and for
             if [ elem for elem in eph.query_result[-5].split(" ") if elem != ''][2] != eph.parameters['COMMAND']:
                 print(eph.parameters['COMMAND'])
                 print(eph.query_result[-5])
-                input("WARNING: last line does not correspond to object?")
+                eph.record = input("WARNING: last line does not correspond to object? Enter selected record:")
             if int(previous_year) > int(year_record):
                 print('selected record: ', eph.record)
                 input('WARNING: check the epoch selected is the las one')
@@ -98,7 +100,7 @@ def generate_palist_reddir(dir_to_scan):
                 pa_table = pd.concat([pa_table, pa])
             export_path = os.path.join(path, 'centering', 'palist')
             pa_table.sort_values(by=['imname']).to_csv(export_path, index=False)
-            
+
 # generate_palist_reddir(param['reduced'])
 
 def generate_palist_tmpout(comet, observatory, working_folder=param['tmpout']):
@@ -118,10 +120,10 @@ def schleicher_0deg(afrho, pa):
     u_pf = pf_schleicher.loc[pf_schleicher['pa'] > pa][:1]['0deg'].values[0]
     l_pf = pf_schleicher.loc[pf_schleicher['pa'] <= pa][-1:]['0deg'].values[0]
     pf =  l_pf + (u_pf-l_pf)*((pa-l_pa)/(u_pa-l_pa))
-    
+
     afrho_corr = afrho / pf
     return afrho_corr
-    
+
 if __name__ == "__main__":
     # generate_palist_reddir(os.path.join(param['reduced'], 'PK22L030'))
     generate_palist_reddir('/home/Mathieu/Documents/TRAPPIST/reduced_data/0073P/20220929TS')

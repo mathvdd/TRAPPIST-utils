@@ -148,6 +148,8 @@ class ephemeris:
                 if convert_MPC_Horizon == True:
                     if (len(target) == 8) and (target[0:2] + target[5] + target[7] == 'CK00'):
                         self.parameters['COMMAND'] = '20' + target[2:4] + ' ' + target[4] + target[6]
+                    # elif target == '0057P':
+                    #     self.parameters['COMMAND'] = '90000633'
                     elif (len(target) == 5) and (target[0:3] + target[-1] == '000P'):
                         self.parameters['COMMAND'] = target[3:]
                     elif (len(target) == 5) and (target[0:2] + target[-1] == '00P'):
@@ -182,6 +184,8 @@ class ephemeris:
                             break
                         else:
                             i -=1
+                elif self.parameters['COMMAND'] == '57P':
+                    self.record = '90000633'
                 else:
                     last_line = self.query_result[-5]
                     # record = last_line.split(" ")
@@ -192,31 +196,31 @@ class ephemeris:
                     if [ elem for elem in self.query_result[-5].split(" ") if elem != ''][2] != self.parameters['COMMAND']:
                         print(self.parameters['COMMAND'])
                         print(self.query_result[-5])
-                        input("WARNING: last line does not correspond to object?")
+                        self.record = input("WARNING: last line does not correspond to object? Enter selected record:")
                     if int(previous_year) > int(year_record):
                         print('selected record: ', self.record)
                         input('WARNING: check the epoch selected is the las one')
             else:
                 self.already_quered = True
                 print('previous attempt: ', self.parameters['COMMAND'])
-    
+
     def generate_ephem_files(self, output_dir):
         """
         Generates ephem.brol and eph.dat file in 'output_dir'.
         Dates are expressed in MJD at the moment but can be changed in the script (then also need to be changed in afrhocalcext)
-        
+
         Parameters:
             output_dir (str): path to the output directory
         """
-        
+
         self.output_dir = output_dir
-        
+
         # table the data from the query
-        
+
         dataline = False
         SOE = False # used for not printing the SOE line
         data = []
-        
+
         for line in self.query_result:
             if line == '$$SOE':
                 SOE = True
@@ -361,30 +365,30 @@ if __name__ == "__main__":
         naut_start = df_moon.loc[df_moon['sol_marq'] == "*"][-1:].index[0]
         naut_end = df_moon.loc[df_moon['sol_marq'] == "*"][:1].index[0]
     df_moon = df_moon.loc[naut_start:naut_end]
-    
+
     if len(df_moon.loc[df_moon['elev']>0]) > 0:
         # print(df_moon.loc[df_moon['elev']>0].to_string())
         plt.plot(df_moon['date'], df_moon['elev'], ls='dashed', color='black')
         ax.text(df_moon.loc[df_moon['elev'].idxmax(), 'date'],
                 df_moon.loc[df_moon['elev'].idxmax(), 'elev'] + 1,
                 'Moon', ha='center')
-    
+
     #get and plot the comets
     for comet in comets:
-        
+
         df = import_eph(comet)
         df = df.loc[naut_start:naut_end]
-        
+
         if len(df.loc[df['elev']>0]) > 0:
             plt.plot(df['date'], df['elev'])
             lunang_start = int(float(df.loc[naut_start,'lun_ang']))
             lunang_end = int(float(df.loc[naut_end,'lun_ang']))
             ax.text(df.loc[df['elev'].idxmax(), 'date'],
                     df.loc[df['elev'].idxmax(), 'elev'] + 1,
-                    f"{comet}\n({str(lunang_start)}-{str(lunang_end)}°)", ha='center')
-    
-    
-    
+                    f"{comet} ({str(lunang_start)}-{str(lunang_end)}°)", ha='center')
+
+
+
     # #pretty plot
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
     plt.xlim(df_moon.loc[df_moon['sol_marq'] == "A"][:1]['date'],
