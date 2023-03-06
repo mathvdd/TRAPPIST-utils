@@ -587,23 +587,24 @@ def lookforcalib_old():
     
     ### uncomment line bellow if querying for a light image
     # imtype = ['LIGHT', 'Light Frame']
-    obj = "CK22E030" #target name in the fits header. only for lights and for the output path
+    obj = "CK20V020" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
     imtype = ['DARK', 'Dark Frame']
     exptime =1200 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
-    # imtype = ['FLAT', 'Flat Frame']
-    filt = 'BC' #filter. only for flats
+    #imtype = ['FLAT', 'Flat Frame']
+    filt = 'R' #filter. only for flats
     
     ### uncomment line bellow if querying for bias frames
     # imtype = ['BIAS', 'Bias Frame']
     
-    telescope = 'TN'
-    night = (2022,12,19) ### set the observation night
+    telescope = 'TS'
+    night = (2023,2,22) ### set the observation night
     
-    dayinterval = 30 # starting point for the search
+    dayinterval = 20
+    # starting point for the search
     
     ####################################
     
@@ -687,11 +688,10 @@ def lookforcalib_old():
             break
 
 if __name__ == "__main__":
-    lookforcalib_old()
+    # lookforcalib_old()
 
-# if __name__ == "__main__":
-#     NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '202212')
-    # NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.db", '202212')
+    NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '202303')
+    NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.db", '202303')
     
     # NAS_update("/NASTS/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '')
   

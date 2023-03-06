@@ -277,6 +277,8 @@ def generate_ZP(calib_dir, ephemeris, fitstable, ZPparams=ZP, output_dir=None):
             if filt in ZPtable_closest['filt'].values.tolist():
                 ZPval = ZPtable_closest.loc[ZPtable_closest['filt'] == filt, 'ZPmed']
                 ZPsig = ZPtable_closest.loc[ZPtable_closest['filt'] == filt, 'ZPsig']
+                print(filt)
+                print(ZPparams.get(filt))
                 line = filt + ' ' + ' '.join([str(int) for int in ZPparams.get(filt)]) + ' ' + str(ZPval.values)[1:-1] + ' ' + str(ZPsig.values)[1:-1]
                 f.write(line + '\n')
             else:

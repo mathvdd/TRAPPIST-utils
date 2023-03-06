@@ -15,7 +15,7 @@ import shutil
 import datetime
 import pandas as pd
 
-working_dir = '/home/Mathieu/Documents/TRAPPIST/CK21A010'
+working_dir = '/home/Mathieu/Documents/TRAPPIST/reduced_data/0398P'
 # Qfitlim = (3.5, 4.1) # limit in log10 km for the range over which Q is fitted
 
 kitty=None
