@@ -244,9 +244,9 @@ def generate_ZP(calib_dir, ephemeris, fitstable, ZPparams=ZP, output_dir=None):
     startdate = datetime.datetime.strptime(ephemeris.parameters['START_TIME'], '%Y-%m-%d %H:%M')
     # enddate = datetime.datetime.strptime(eph.parameters['STOP_TIME'], '%Y-%m-%d %H:%M')
     startdateJD = sum(jdcal.gcal2jd(startdate.year, startdate.month, startdate.day))
-    if startdateJD > 2459950:
-        print("WARNING: need tu update the code on February 24, 2023")
-        warning_flag = True
+    # if startdateJD > 2459950:
+    #     print("WARNING: need tu update the code on February 24, 2023")
+    #     warning_flag = True
     datediff = 10000000000
     for index, row in ZPtable.iterrows():
         midpointJD = 2450000 + (row['JDstart'] + (row['JDend'] - row['JDstart'])/2)
