@@ -76,9 +76,10 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False,ki
             shutil.copy(os.path.join(path, file), os.path.join(param['tmpout'], file))
     shutil.copy(os.path.join(haser_dir, 'inputhaser-BC'), os.path.join(param['tmpout'], 'inputhaser-BC'))
     shutil.copy(os.path.join(garbage_dir, 'ephem.brol'), os.path.join(param['tmpout'], 'ephem.brol'))
-       
+    # shutil.copy(os.path.join(garbage_dir, 'tmp.txt'), os.path.join(param['tmpout'], 'tmp.txt'))
+
     rewrite_fc_in_haserinput(fc)
-    
+
     if redo_ZP == True:
         redo_calib_dat(imdir= images_dir, comet=comet)
     elif redo_ZP == False:
@@ -120,44 +121,70 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False,ki
 
 
 # night = '2022-01-02'
-# obs = 'TS'     
+# obs = 'TS'
 # haser_reduce_1night(comet, night, obs, Qfitlim)
 
 if __name__ == "__main__":
     kitty = None
     redo_ZP=False
-    
-    Qfitlim = (3.4, 4.3)
-    fc = {'OH':16, #2019 L3
-          'NH':22,
-          'CN':44,
-          'C3':235,
-          'C2':221,
-          'CO+':56,
-          'H2O':129}
-    
-    # Qfitlim = (4.4, 5.0)
-    # fc = {'OH':16, #2019 L3
-    #       'NH':22,
-    #       'CN':31,
-    #       'C3':237,
-    #       'C2':185,
-    #       'CO+':56,
-    #       'H2O':129}
-    comet = 'CK21A010'
-    dt = datetime.datetime.now()
+
+    Qfitlim = (3.6, 4.1)
+
+    # fc = {'OH':15,
+    #       'NH':21,
+    #       'CN':27,
+    #       'C3':231,
+    #       'C2':193}
+
+    fc = {'OH':19,
+          'NH':24,
+          'CN':30,
+          'C3':248,
+          'C2':170}
+
+    # fc = {'OH':5,
+    #       'NH':20,
+    #       'CN':25,
+    #       'C3':190,
+    #       'C2':170}
+    #fc = {'OH':16, #2019 L3
+     #     'NH':22,
+    #      'CN':44,
+   #       'C3':235,
+  #        'C2':221,
+ #         'CO+':56,
+#          'H2O':129}
+
+    comet = '0398P'
+
     comet_dir = os.path.join(param['reduced'], comet)
-    # comet_dir = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK19L030/20230220TS'
-    for path, subdirs, files in os.walk(comet_dir):
+    # comet_dir = f'/home/Mathieu/Documents/TRAPPIST/reduced_data/{comet}/20220827TN'
+
+    dirlist = []
+    for path, subdirs, files in sorted(os.walk(comet_dir)):
         if (path.split('/')[-1] == 'haser') and os.path.isfile(
                 os.path.join(path, 'inputhaser-BC')):
-            night = (path.split('/')[-2][:4] +'-'+ path.split('/')[-2][4:6] +'-'+ path.split('/')[-2][6:8])
-            obs = path.split('/')[-2][8:10]
-            haser_reduce_1night(comet, night, obs, Qfitlim, check=False, redo_ZP=redo_ZP,kitty=kitty)
-            if kitty == True:
-                try:
-                    os.system(f'for f in {param["tmpout"]}/*_haserprofile.png ; do kitty +kitten icat "$f" ; done')
-                except:
-                    print('kitty command failed')
-                        
+            dirlist.append(path)
+
+    print(f'Found {len(dirlist)} directories')
+    print(f'Qfitlim = {Qfitlim}')
+    print(f'fc = {fc}')
+    input(f'!!! this will overwrite any previous reduction in {comet_dir}\nPress any key to continue')
+
+    dt = datetime.datetime.now()
+
+    count = 0
+    for path in dirlist:
+        count += 1
+        print(f'Current dir is {path}')
+        print(f'{count} / {len(dirlist)}')
+        night = (path.split('/')[-2][:4] +'-'+ path.split('/')[-2][4:6] +'-'+ path.split('/')[-2][6:8])
+        obs = path.split('/')[-2][8:10]
+        haser_reduce_1night(comet, night, obs, Qfitlim, check=False, redo_ZP=redo_ZP,kitty=kitty)
+        if kitty == True:
+            try:
+                os.system(f'for f in {param["tmpout"]}/*_haserprofile.png ; do kitty +kitten icat "$f" ; done')
+            except:
+                print('kitty command failed')
+
     print('Executed in ', datetime.datetime.now() - dt)
