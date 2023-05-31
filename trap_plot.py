@@ -545,9 +545,11 @@ def plot_centering_profile(input_dir, output_dir=None, solocomet=False, comet_na
                             vmaxzoom = centpixel_value
                         else:
                             vmaxzoom = zmax
-
+                        if vmaxzoom < vminzoom:
+                            vmaxzoom = vminzoom + 10
+                        print(vminzoom, vmaxzoom)
                         t2 = ax1.text(x=0.03,y=0.12,s=f'zmin = {str(int(vminmain))}{vminmainflag} ({str(int(vminzoom))})\nzmax = {str(int(vmaxmain))} ({str(int(vmaxzoom))})', transform=ax1.transAxes,
-                                                       horizontalalignment='left') 
+                                                       horizontalalignment='left')
 
                         t2.set_bbox(dict(facecolor='white', alpha=0.8))
                         axins.imshow(image_data, cmap ='binary',vmin=vminzoom,vmax=vmaxzoom)
