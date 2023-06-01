@@ -587,11 +587,11 @@ def lookforcalib_old():
     
     ### uncomment line bellow if querying for a light image
     # imtype = ['LIGHT', 'Light Frame']
-    obj = "CK20V020" #target name in the fits header. only for lights and for the output path
+    obj = "0260P" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
     imtype = ['DARK', 'Dark Frame']
-    exptime =1200 #exposure time. only for darks
+    exptime = 240 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
     #imtype = ['FLAT', 'Flat Frame']
@@ -601,9 +601,9 @@ def lookforcalib_old():
     # imtype = ['BIAS', 'Bias Frame']
     
     telescope = 'TS'
-    night = (2023,2,22) ### set the observation night
+    night = (2012,9,15) ### set the observation night
     
-    dayinterval = 20
+    dayinterval = 7
     # starting point for the search
     
     ####################################
@@ -688,10 +688,12 @@ def lookforcalib_old():
             break
 
 if __name__ == "__main__":
-    # lookforcalib_old()
+    lookforcalib_old()
 
-    NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '202303')
-    NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.db", '202303')
+    # NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '202304')
+    # NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '202305')
+    # NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.db", '202304')
+    # NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.db", '202305')
     
     # NAS_update("/NASTS/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '')
   

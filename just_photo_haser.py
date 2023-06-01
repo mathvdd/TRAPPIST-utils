@@ -16,7 +16,7 @@ import datetime
 import pandas as pd
 from just_haser import rewrite_fc_in_haserinput
 
-working_dir = '/home/Mathieu/Documents/TRAPPIST/reduced_data/0073P'
+working_dir = '/home/Mathieu/Documents/TRAPPIST/reduced_data/0260P'
 Qfitlim = (3.6, 4.1) # limit in log10 km for the range over which Q is fitted
 # Qfitlim = (None,None)
 # fc = None
