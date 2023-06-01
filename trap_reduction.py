@@ -17,10 +17,10 @@ from trapconfig import param
 # Add a rename fts to fits for TS images
 #Add check if all flats are there
 
-fc = {'OH':5,
-      'NH':20,
-      'CN':25,
-      'C3':190,
+fc = {'OH':19,
+      'NH':24,
+      'CN':30,
+      'C3':248,
       'C2':170,
       'CO+':56,
       'H2O':129}
@@ -38,6 +38,7 @@ ZP = {'OH': [3090, 10.56e-9,   1.791,  1.698e-2,  0.98,   1,  1.60],
       'B': [4440,  6.4e-9,    0.0,    1.,        1,     12,  0.25],
       'V': [5483,  3.67e-9,  -0.649,  1.,        1,     13,  0.14],
       'R': [6855,  1.92e-9,  -1.019,  1.,        1,     14,  0.098],
+      'Rc': [6855,  1.92e-9,  -1.019,  1.,        1,     14,  0.098],
       'I': [8637,  9.39e-10, -1.375,  1.,        1,     15,  0.043],
       'CO+': [4266, 7.323e-9, 0.338, 1.549e-2, 0.99, 6, 0.25],
       'H2O' : [7020, 1.38e-9, -1.249, 5.424e-3, 1., 10, 0.07],
@@ -268,11 +269,17 @@ def generate_ZP(calib_dir, ephemeris, fitstable, ZPparams=ZP, output_dir=None):
         output_path = os.path.join(output_dir, "calib.dat")
     with open(output_path, 'w') as f:
         # the Rc filter is refered as R in the fits headers and the calib.dat file # ! only for TS data after 2012-10-17
-        ZPtable_closest['filt'] = ZPtable_closest['filt'].replace(['Rc'],'R')
-        ZPtable_closest['filt'] = ZPtable_closest['filt'].replace(['Ic'],'I')
+        # print(ZPtable_closest['filt'])
+        if startdateJD > 2456217.5:
+            ZPtable_closest['filt'] = ZPtable_closest['filt'].replace(['Rc'],'R')
+            ZPtable_closest['filt'] = ZPtable_closest['filt'].replace(['Ic'],'I')
         ZPtable_closest['filt'] = ZPtable_closest['filt'].replace(['CO'],'CO+')
+        # print(ZPtable_closest['filt'])
         # ZPtable_closest.loc[ZPtable_closest['filt'] == "Rc", 'filt']  = 'R'
         # ZPtable_closest['filt'] = ZPtable_closest['filt'].replace({'Rc':'R'})
+        # print(filtlist)
+        # filtlist = list(map(lambda x: x.replace('Rc', 'R'), filtlist))
+        # print(filtlist)
         for filt in filtlist:
             if filt in ZPtable_closest['filt'].values.tolist():
                 ZPval = ZPtable_closest.loc[ZPtable_closest['filt'] == filt, 'ZPmed']
