@@ -266,7 +266,12 @@ class ephemeris:
         print('ephem.brol printed in ' + self.output_dir)
         print('eph.dat printed in ' + self.output_dir)
         
+        self.rh = data_table['                r'].astype(float).mean()
+        self.v = data_table['       rdot'].astype(float).mean()
         
+    # def v_rh(self):
+    #     self.rh = 
+    #     self.v =
 # ephemeris = ephemeris()
 # ephemeris.retrieve_param_from_fits(fits_dir)
 # ephemeris.query_input()

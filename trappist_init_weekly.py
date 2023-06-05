@@ -223,7 +223,7 @@ for path in list_to_reduce:
         ephemeris.retrieve_param_from_fits(param['tmpout'])
         ephemeris.query_input(unique_target=False, target=comet, convert_MPC_Horizon=True)
         ephemeris.generate_ephem_files(param['tmpout'])
-        
+
         print('--- generating calib file ---')
         ZP_warning = trap_reduction.generate_ZP(param['calib'], ephemeris, fitstable, output_dir=param['tmpout'])
         if ZP_warning == True:
@@ -350,6 +350,9 @@ for path in list_to_reduce:
                              
         if len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2','CO+','H2O']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]) > 0:            
        	    print('--- initiating haserinput ---')
+            import gfactor
+            gfactor.generate_tmptxt(ephemeris.v, ephemeris.rh)
+            
        	    while True:
                 haserinput_warning = trap_reduction.generate_haserinput(param['tmpout'])
                 if haserinput_warning == True:
@@ -389,7 +392,6 @@ for path in list_to_reduce:
             #         break
         else:
             print('No NB filters found, skipping Haser')
-        
         phase_angle.generate_palist_tmpout(comet, obs, param['tmpout'])
         # save the files in the reduced folder
         print('--- initiating reduced directory structure ---')
