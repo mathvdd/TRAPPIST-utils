@@ -43,7 +43,6 @@ if __name__ == "__main__":
     dt = datetime.datetime.now()
     conda = True if param['conda'] == 'True' else False
     
-    dirlist = []
     count = 0
     for path in sorted(dirlist):
         count += 1
