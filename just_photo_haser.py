@@ -16,7 +16,7 @@ import datetime
 import pandas as pd
 from just_haser import rewrite_fc_in_haserinput
 
-working_dir = '/home/Mathieu/Documents/TRAPPIST/reduced_data/0260P'
+working_dir = '/home/Mathieu/Documents/TRAPPIST/reduced_data/0057P'
 Qfitlim = (3.6, 4.1) # limit in log10 km for the range over which Q is fitted
 # Qfitlim = (None,None)
 # fc = None
@@ -44,11 +44,6 @@ if __name__ == "__main__":
     conda = True if param['conda'] == 'True' else False
     
     dirlist = []
-    for path, subdirs, files in sorted(os.walk(working_dir)):
-        if (path.split('/')[-1] == 'centering') and os.path.isfile(
-                os.path.join(path, 'centerlist')):
-            dirlist.append(path)
-    
     count = 0
     for path in sorted(dirlist):
         count += 1
