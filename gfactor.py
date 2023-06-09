@@ -131,7 +131,7 @@ def generate_tmptxt(v, rh):
     except:
         input('ERROR generating g-factor file')
 
-# v,rh=7.54,0.63
-# print(g_OH(v=v,rh=rh),g_NH(v=v,rh=rh),g_CN(v=v,rh=rh),g_C3(rh=rh),g_C2(rh=rh))
+# rh,v=2,-7.5
+# print(f"{'%.3f'%rh} {'%.3f'%v} {'%.2E'% g_OH(v=v,rh=rh)} {'%.2E'% g_NH(v=v,rh=rh)} {'%.2E'% g_CN(v=v,rh=rh)} {'%.2E'% g_C3(rh=rh)} {'%.2E'% g_C2(rh=rh)} 1")
 # if __name__ == "__main__":
 #     generate_tmptxt()
