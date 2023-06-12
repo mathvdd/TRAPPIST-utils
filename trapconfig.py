@@ -18,9 +18,9 @@ else:
     print('ERROR: could not find traputils.conf, see trapconfig.py')
 print('Config file loaded from', path_conf)
 
-#import parameters from the config file  
+#import parameters from the config file
 param = {} # will old the info given in trapconf
-with open(path_conf, 'r') as f: 
+with open(path_conf, 'r') as f:
     contents = f.readlines()
     for line in contents:
         if line[0] == '#':
