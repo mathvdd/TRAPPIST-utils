@@ -84,6 +84,11 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False,ki
         redo_calib_dat(imdir= images_dir, comet=comet)
     elif redo_ZP == False:
         shutil.copy(os.path.join(garbage_dir, 'calib.dat'), os.path.join(param['tmpout'], 'calib.dat'))
+    elif redo_ZP == None:
+        if os.path.isfile(os.path.join(garbage_dir, 'calib.dat')):
+            shutil.copy(os.path.join(garbage_dir, 'calib.dat'), os.path.join(param['tmpout'], 'calib.dat'))
+        else:
+            redo_calib_dat(imdir= images_dir, comet=comet)
     # input('end')
     conda = True if param['conda'] == 'True' else False #wether to use 'source activate to launch cl or not'
     print('--- launching hasercalctest ---')
@@ -126,9 +131,9 @@ def haser_reduce_1night(comet, night, obs, Qfitlim, check=True, redo_ZP=False,ki
 
 if __name__ == "__main__":
     kitty = None
-    redo_ZP=False
+    redo_ZP=None
 
-    Qfitlim = (3.6, 4.1)
+    Qfitlim = (4, 4.4)
 
     # fc = {'OH':15,
     #       'NH':21,
@@ -155,7 +160,7 @@ if __name__ == "__main__":
  #         'CO+':56,
 #          'H2O':129}
 
-    comet = '0398P'
+    comet = 'CK17K020'
 
     comet_dir = os.path.join(param['reduced'], comet)
     # comet_dir = f'/home/Mathieu/Documents/TRAPPIST/reduced_data/{comet}/20220827TN'
