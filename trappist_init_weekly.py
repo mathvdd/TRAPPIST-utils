@@ -225,7 +225,9 @@ for path in list_to_reduce:
         ephemeris.generate_ephem_files(param['tmpout'])
 
         print('--- generating calib file ---')
-        ZP_warning = trap_reduction.generate_ZP(param['calib'], ephemeris, fitstable, output_dir=param['tmpout'])
+        # ZP_warning = trap_reduction.generate_ZP(param['calib'], ephemeris, fitstable, output_dir=param['tmpout'])
+        filtlist = fitstable.loc[fitstable['type'].isin(['LIGHT', 'Light Frame']), 'filt'].drop_duplicates().values.tolist()
+        ZP_warning = trap_reduction.generate_ZP_new(param['calib'], obs, night, filtlist, output_dir=param['tmpout'])
         if ZP_warning == True:
             input("press enter")
         pixsize = trap_reduction.set_pixsize_in_clafrhocalcext(fitstable)
