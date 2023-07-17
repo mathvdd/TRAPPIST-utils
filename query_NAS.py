@@ -101,7 +101,9 @@ def NAS_update(NAS_path, export_path, keyword='', cometlist = 'current'):
     discarded_obj = []
 
     if os.path.isfile(export_path):
+        print("importing existing table")
         fitstable = pd.read_csv(export_path)
+        print("done importing")
     else:
         fitstable = pd.DataFrame(columns=('file','object', 'type', 'filter', 'date', 'exptime', 'binning', 'readmode'))
     
@@ -135,6 +137,7 @@ def NAS_update(NAS_path, export_path, keyword='', cometlist = 'current'):
     for path, subdirs, files in sorted(os.walk(NAS_path)):
         # count += 1
         if keyword in path:
+            print(datetime.datetime.now())
             print(path)
             for name in files:
                 if name.endswith(".fits") or name.endswith(".fts"):                    # if blacklist.str.contains(os.path.join(path,name)).any() == False:
