@@ -367,6 +367,10 @@ def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=[''
         LIGHTtable = LIGHTS.loc[(LIGHTS['start_night'] == night)]
         
         filtlist = LIGHTtable['filter'].drop_duplicates().values.tolist()
+        binnings = LIGHTtable['binning'].drop_duplicates().values.tolist()
+        if len(binnings) != 1:
+            input(f'WARNING found more than one binning ({binnings}) in light frames. ')
+        binning = binnings[0]
         exptimelist = LIGHTtable['exptime'].drop_duplicates().values.tolist()
         exptimelist.append(10)
         exptimelist.append(15)
@@ -454,7 +458,7 @@ def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=[''
 #     print(item)
 
 ###look for specific calib files around a given date
-def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, filt='R', dayinterval=0):
+def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, filt='R', dayinterval=0, binning = 2):
     """
     Look for a specific set of file the closest to the observation file in the database and download it. By default look for the files closest to the observation night
     
@@ -519,7 +523,8 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, f
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
                                           & (NASfitstable['date'] <= upper_interval)
                                           # & (NASfitstable['binning'] == 2)
-                                          & NASfitstable['type'].isin(imtype)]
+                                          & NASfitstable['type'].isin(imtype)
+                                          & (NASfitstable['binning'] == binning)]
         # elif imtype == 'BC':
         #     calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
         #                                   & (NASfitstable['date'] <= upper_interval)
@@ -637,13 +642,15 @@ def lookforcalib_old():
                                           & (NASfitstable['date'] <= upper_interval)
                                           # & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)
-                                          & (NASfitstable['exptime'] == exptime)]
+                                          & (NASfitstable['exptime'] == exptime)
+                                          & (NASfitstable['binning'] == binning)]
         elif 'FLAT' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
                                           & (NASfitstable['date'] <= upper_interval)
                                           # & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)
-                                          & (NASfitstable['filter'] == filt)]
+                                          & (NASfitstable['filter'] == filt)
+                                          & (NASfitstable['binning'] == binning)]
         elif 'LIGHT' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
                                           & (NASfitstable['date'] <= upper_interval)
@@ -656,7 +663,8 @@ def lookforcalib_old():
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
                                           & (NASfitstable['date'] <= upper_interval)
                                           # & (NASfitstable['binning'] == 2)
-                                          & NASfitstable['type'].isin(imtype)]
+                                          & NASfitstable['type'].isin(imtype)
+                                          & (NASfitstable['binning'] == binning)]
             # print(NASfitstable['object'][0])
         if len(calibtable.index) == 0:
             dayinterval += 1
