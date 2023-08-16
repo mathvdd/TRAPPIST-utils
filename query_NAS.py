@@ -177,28 +177,31 @@ def NAS_update(NAS_path, export_path, keyword='', cometlist = 'current'):
                             continue
                         # print(os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning) 
 
-                        if objlist.isin([imobject]).any():
-                            fitstable.loc[fitstable.shape[0]] = [os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning,imreadmode]
-                            if imbinning != 2:
-                                print(f"WARNING: found {name} ({imobject}) to be binning {imbinning}")
-                        elif imtype in (['DARK', 'Dark Frame','FLAT', 'Flat Frame','BIAS', 'Bias Frame']) and (imbinning == 2):
-                            fitstable.loc[fitstable.shape[0]] = [os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning,imreadmode]
-                        else:
-                            blacklisttable.loc[blacklisttable.shape[0]] = [os.path.join(path, name), imobject]
-                            if (len(imobject) != 0) and (imobject in discarded_obj) == False:
-                                discarded_obj.append(imobject)
+                        fitstable.loc[fitstable.shape[0]] = [os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning,imreadmode]
+# =============================================================================
+#                         if objlist.isin([imobject]).any():
+#                             fitstable.loc[fitstable.shape[0]] = [os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning,imreadmode]
+#                             if imbinning != 2:
+#                                 print(f"WARNING: found {name} ({imobject}) to be binning {imbinning}")
+#                         elif imtype in (['DARK', 'Dark Frame','FLAT', 'Flat Frame','BIAS', 'Bias Frame']) and (imbinning == 2):
+#                             fitstable.loc[fitstable.shape[0]] = [os.path.join(path, name), imobject, imtype, imfilter, imdate, imexptime, imbinning,imreadmode]
+#                         else:
+#                             blacklisttable.loc[blacklisttable.shape[0]] = [os.path.join(path, name), imobject]
+#                             if (len(imobject) != 0) and (imobject in discarded_obj) == False:
+#                                 discarded_obj.append(imobject)
+# =============================================================================
                     # else:
                     #     print('rejected', os.path.join(path, name))
     fitstable.sort_values(by=['date']).to_csv(export_path, index=False)
-    blacklisttable.to_csv(blacklist_path, index=False, sep=",", header=False)
-    print('Discarded objects:', discarded_obj)
+    # blacklisttable.to_csv(blacklist_path, index=False, sep=",", header=False)
+    # print('Discarded objects:', discarded_obj)
     print('Executed in ', datetime.datetime.now() - dt)
     
-# if __name__ == "__main__":
-    # NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '202212')
-    # NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.db", '202212')
+if __name__ == "__main__":
+    NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query_all.db", '202308')
+    NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_all.db", '202308')
     
-    # NAS_update("/NASTS/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '')
+    # NAS_update("/NASTS/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query_all.db", '')
   
   
 def queryZ(NAS_path):
@@ -378,14 +381,17 @@ def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=[''
         FLATtable = NASfitstable.loc[NASfitstable['type'].isin(['FLAT', 'Flat Frame'])
                                      & (NASfitstable['start_night'] > lower_interval)
                                      & (NASfitstable['start_night'] <= upper_interval)
-                                     & NASfitstable['filter'].isin(filtlist)]
+                                     & NASfitstable['filter'].isin(filtlist)
+                                     & (NASfitstable['binning'] == binning)]
         BIAStable = NASfitstable.loc[NASfitstable['type'].isin(['BIAS', 'Bias Frame'])
                                       & (NASfitstable['start_night'] > lower_interval)
-                                      & (NASfitstable['start_night'] <= upper_interval)]
+                                      & (NASfitstable['start_night'] <= upper_interval)
+                                      & (NASfitstable['binning'] == binning)]
         DARKtable = NASfitstable.loc[NASfitstable['type'].isin(['DARK', 'Dark Frame'])
                                       & (NASfitstable['start_night'] > lower_interval)
                                       & (NASfitstable['start_night'] <= upper_interval)
-                                      & NASfitstable['exptime'].isin(exptimelist)]
+                                      & NASfitstable['exptime'].isin(exptimelist)
+                                      & (NASfitstable['binning'] == binning)]
         all_calibtable = pd.concat([FLATtable,BIAStable,DARKtable])
         print(night, "lights",len(LIGHTtable), "flats",len(FLATtable),"bias", len(BIAStable),"darks", len(DARKtable))
 
@@ -504,13 +510,15 @@ def lookforcalib(NASfitstable, imtype, output_fold, night, obj='', exptime=15, f
                                           & (NASfitstable['date'] <= upper_interval)
                                           # & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)
-                                          & (NASfitstable['exptime'] == exptime)]
+                                          & (NASfitstable['exptime'] == exptime)
+                                          & (NASfitstable['binning'] == binning)]
         elif 'FLAT' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
                                           & (NASfitstable['date'] <= upper_interval)
                                           # & (NASfitstable['binning'] == 2)
                                           & NASfitstable['type'].isin(imtype)
-                                          & (NASfitstable['filter'] == filt)]
+                                          & (NASfitstable['filter'] == filt)
+                                          & (NASfitstable['binning'] == binning)]
         elif 'LIGHT' in imtype:
             calibtable = NASfitstable.loc[(NASfitstable['date'] > lower_interval)
                                           & (NASfitstable['date'] <= upper_interval)
