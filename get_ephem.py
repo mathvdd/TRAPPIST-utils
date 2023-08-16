@@ -165,6 +165,9 @@ class ephemeris:
             else:
                 self.parameters['COMMAND'] = input('Object name: ')
             
+            if 'DES=' not in self.parameters['COMMAND']:
+                self.parameters['COMMAND'] = 'DES='+self.parameters['COMMAND'] + '%3BCAP%3BNOFRAG%3B'
+                
             self.query_horizons()
             
             for line in self.query_result:
