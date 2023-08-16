@@ -133,25 +133,21 @@ if __name__ == "__main__":
     kitty = None
     redo_ZP=None
 
-    Qfitlim = (4, 4.4)
+    Qfitlim = (4, 4.5)
 
-    # fc = {'OH':15,
-    #       'NH':21,
-    #       'CN':27,
-    #       'C3':231,
-    #       'C2':193}
+    fc = {'OH':15, #22E3
+          'NH':21,
+          'CN':27,
+          'C3':231,
+          'C2':193}
 
-    fc = {'OH':19,
-          'NH':24,
-          'CN':30,
-          'C3':248,
-          'C2':170}
-
-    # fc = {'OH':5,
-    #       'NH':20,
-    #       'CN':25,
-    #       'C3':190,
+    # fc = {'OH':19, #default
+    #       'NH':24,
+    #       'CN':30,
+    #       'C3':248,
     #       'C2':170}
+
+
     #fc = {'OH':16, #2019 L3
      #     'NH':22,
     #      'CN':44,
@@ -160,10 +156,10 @@ if __name__ == "__main__":
  #         'CO+':56,
 #          'H2O':129}
 
-    comet = 'CK17K020'
+    comet = 'CK22E030'
 
     comet_dir = os.path.join(param['reduced'], comet)
-    # comet_dir = f'/home/Mathieu/Documents/TRAPPIST/reduced_data/{comet}/20220827TN'
+    comet_dir = f'/home/Mathieu/Documents/TRAPPIST/reduced_data/{comet}'
 
     dirlist = []
     for path, subdirs, files in sorted(os.walk(comet_dir)):

@@ -16,16 +16,17 @@ import datetime
 import pandas as pd
 from just_haser import rewrite_fc_in_haserinput
 
-working_dir = '/home/Mathieu/Documents/TRAPPIST/reduced_data/0057P'
-Qfitlim = (3.6, 4.1) # limit in log10 km for the range over which Q is fitted
-# Qfitlim = (None,None)
-# fc = None
-fc = {'OH':19,
-      'NH':24,
-      'CN':30,
-      'C3':248,
-      'C2':170}
-kitty=None
+working_dir = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK22E030/20230203TN'
+# Qfitlim = (3.6, 4.1) # limit in log10 km for the range over which Q is fitted
+Qfitlim = (None,None)
+fc = None
+# fc = {'OH':19,
+#       'NH':24,
+#       'CN':30,
+#       'C3':248,
+#       'C2':170}
+kitty=False
+
 
 if __name__ == "__main__":
     
