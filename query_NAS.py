@@ -603,28 +603,30 @@ def lookforcalib_old():
     
     ### uncomment line bellow if querying for a light image
     # imtype = ['LIGHT', 'Light Frame']
-    obj = "0004P" #target name in the fits header. only for lights and for the output path
+    obj = "CK22E030" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
     imtype = ['DARK', 'Dark Frame']
-    exptime = 180 #exposure time. only for darks
+    exptime = 1500 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
-    #imtype = ['FLAT', 'Flat Frame']
+    # imtype = ['FLAT', 'Flat Frame']
     filt = 'R' #filter. only for flats
     
     ### uncomment line bellow if querying for bias frames
     # imtype = ['BIAS', 'Bias Frame']
     
     telescope = 'TS'
-    night = (2021,12,5) ### set the observation night
+    night = (2023,4,23) ### set the observation night
     
     dayinterval = 7
     # starting point for the search
     
+    binning = 2
+    
     ####################################
     
-    NASfitstable = loadcsvtable("/home/Mathieu/Documents/TRAPPIST/raw_data/" + telescope + "_query.db") ### path to the indexed database
+    NASfitstable = loadcsvtable("/home/Mathieu/Documents/TRAPPIST/raw_data/" + telescope + "_query_all.db") ### path to the indexed database
     # print(NASfitstable.loc[ (NASfitstable['binning'] == 2)])
     # output_fold = "/home/Mathieu/Documents/TRAPPIST/raw_data/2020T2/TS/20210703/Calibration" ### path to the output folder
 
@@ -638,7 +640,7 @@ def lookforcalib_old():
     else:
         subf_day = '0' + str(night[2])
     subfold_name = subf_year + subf_month + subf_day
-    output_fold = "/home/Mathieu/Documents/TRAPPIST/raw_data/" + obj + "/" + telescope + "/" +  subfold_name + "/Calibration"
+    output_fold = "/home/Mathieu/Documents/TRAPPIST/raw_data_TRAPPIST/" + obj + "/" + telescope + "/" +  subfold_name + "/Calibration"
     
     obsnight = pd.Timestamp(year=night[0], month=night[1], day=night[2], hour=23, minute=59)
     
@@ -706,8 +708,8 @@ def lookforcalib_old():
                     count +=1
             break
 
-if __name__ == "__main__":
-    lookforcalib_old()
+# if __name__ == "__main__":
+    # lookforcalib_old()
 
     # NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '202304')
     # NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '202305')
