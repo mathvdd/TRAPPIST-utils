@@ -177,6 +177,13 @@ for path in list_to_reduce:
                     break
                 else:
                     no_file = False
+            if len(fitstable.loc[(fitstable['type'].isin(['LIGHT', 'Light Frame'])) & ~(fitstable['filt'] == 'Clear')]) == 0:
+                inp = input('Only "Clear" filter detected. press (s) for skip this night or enter to continue [s/enter]')
+                if inp == 's' or inp == 'S':
+                    no_file = True
+                    break
+                else:
+                    no_file = False
             if only_BVRI == True:
                 check_calib_warning, lighttable = trap_reduction.check_calib(fitstable,filt_list=['B','V','R','I','Rc','Ic'])
             else:
