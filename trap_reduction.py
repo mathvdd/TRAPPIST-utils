@@ -137,7 +137,9 @@ def check_calib(fitstable, filt_list=filt_list):
           \nThe extrapolated darks still need to be in the data folder\nCurrent configuration:')
     print(pd.read_csv(os.path.join(param['calib'], 'dark_substitution'), names=['exptime','scaled from'], sep=' ').transpose().to_string(header=False))
     print('\n')
-
+    
+    print(fitstable.loc[fitstable['type'].isin(['DARK', 'Dark Frame'])]['exptime'].value_counts(dropna=False))
+    print('\n')
     print(lighttable)
 
     nb_flat_dark15 = ((fitstable['type'].isin(['DARK', 'Dark Frame'])) & (fitstable.exptime == 15)).sum()
