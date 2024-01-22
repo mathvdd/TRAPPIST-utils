@@ -16,9 +16,9 @@ import datetime
 import pandas as pd
 from just_haser import rewrite_fc_in_haserinput
 
-working_dir = '/home/Mathieu/Documents/TRAPPIST/reduced_data/CK22E030/20230203TN'
+working_dir = '/home/Mathieu/Documents/TRAPPIST/reduced_data/0012P/20231218TN/centering'
 # Qfitlim = (3.6, 4.1) # limit in log10 km for the range over which Q is fitted
-Qfitlim = (None,None)
+Qfitlim = [None,None]
 fc = None
 # fc = {'OH':19,
 #       'NH':24,
@@ -26,6 +26,7 @@ fc = None
 #       'C3':248,
 #       'C2':170}
 kitty=False
+check_centering = True
 
 
 if __name__ == "__main__":
@@ -69,6 +70,7 @@ if __name__ == "__main__":
         
         print('--- copying previous reduction to tmpout ---')
         shutil.copy(os.path.join(root, 'centering', 'centerlist'), os.path.join(param['tmpout']))
+        shutil.copy(os.path.join(root, 'centering', 'center_comment'), os.path.join(param['tmpout']))
         for path2, subdirs2, files2 in os.walk(os.path.join(root, 'images')):
             for file in files2:
                 if file.endswith('.fits') and file.startswith('TRAP'):
@@ -98,6 +100,111 @@ if __name__ == "__main__":
         for index, item in centerlist.iterrows():
             trap_reduction.clafrhocalcext(param['iraf'], str(pixsize), item['file'], str(item['xcent']), str(item['ycent']), str(0), conda=conda)
         trap_plot.plot_centering_profile(param['tmpout'], comet_name=comet,kitty=kitty)
+        
+        def add_comment(row, comment):
+            row_comment = comment.loc[comment['file'] == row['file'], 'comment']
+            return row_comment.to_string(index = False)
+        if check_centering:
+            while True:
+                centerlist = pd.read_csv(os.path.join(param['tmpout'], 'centerlist'),header=None, sep=' '
+                                         ,usecols=[0,2,3,5,10],
+                                         names=['file', 'xcent', 'ycent', 'filt', 'ctnmethod'])
+                comment = pd.read_csv(os.path.join(param['tmpout'], 'center_comment'),header=None, sep=','
+                                         ,usecols=[0,1,2],
+                                         names=['file', 'filt', 'comment'])
+                centerlist['comment'] = centerlist.apply(lambda row: add_comment(row, comment), axis=1)
+                print(centerlist)
+                while True:
+                    solocomete = False
+                    inp = input('\nCheck individual images for centering.\
+                    \n   - Relaunch afrhocalcext for all images (r)\
+                    \n   - Relaunch afrhocalcext for an individual file (IMINDEX XCENTER YCENTER BOXSIZE)\
+                    \n     optional: YMIN YMAX\
+                    \n   - Bypass (b)\
+                    \n   - Add a comment (c IMINDEX comment)\
+                    \n   :')
+                    if inp == 'r' or inp == 'R' or inp == 'b' or inp == 'B' or inp.split(' ')[0] == 'c' or inp.split(' ')[0] == 'C':
+                        break
+                    elif len(inp.split(' ')) == 4 or len(inp.split(' ')) == 6: #check of good format for a one file reduction
+                        solocomete = True
+                        try:
+                            FILE = centerlist.iloc[[inp.split(' ')[0]]].file.values[0]
+                        except:
+                            solocomete = False
+                            print('IMINDEX wrong format')
+                        try:
+                            XCENTER = float(inp.split(' ')[1])
+                            if XCENTER ==0:
+                                XCENTER = centerlist.iloc[[inp.split(' ')[0]]].xcent.values[0]
+                        except:
+                            solocomete = False
+                            print('XCENTER wrong format')
+                        try:
+                            YCENTER = float(inp.split(' ')[2])
+                            if YCENTER ==0:
+                                YCENTER = centerlist.iloc[[inp.split(' ')[0]]].ycent.values[0]
+                        except:
+                            solocomete = False
+                            print('YCENTER wrong format')
+                        try:
+                            BOXSIZE = int(inp.split(' ')[3])
+                            if BOXSIZE !=0 and BOXSIZE < 3:
+                                print('Use a BOXSIZE value <= 3 or 0 to use the exact values of XCENTER and YCENTER')
+                                continue
+                        except:
+                            solocomete = False
+                            print('BOXSIZE wrong format')
+
+                        if len(inp.split(' ')) == 6:
+                            try:
+                                ZMIN = float(inp.split(' ')[4])
+                            except:
+                                solocomete = False
+                                print('ZMIN wrong format')
+                            try:
+                                ZMAX = float(inp.split(' ')[5])
+                            except:
+                                solocomete = False
+                                print('ZMAX wrong format')
+                        else:
+                            ZMIN = None
+                            ZMAX = None
+                                
+                        if solocomete == True: # break if good format
+                            break
+                    else:
+                        print('wrong input')
+                if solocomete == True:
+                    trap_reduction.clafrhocalcext(param['iraf'], str(pixsize), FILE, str(XCENTER), str(YCENTER), str(BOXSIZE), conda=conda)
+                    trap_plot.plot_centering_profile(param['tmpout'], solocomet=True, comet_name=comet,zmin=ZMIN,zmax=ZMAX, kitty=kitty)
+                    if kitty == True:
+                                try:
+                                    os.system(f'kitty +kitten icat "{param["tmpout"] + "/" +  FILE[:-5] + "_centering.png"}"')
+                                except:
+                                    print('kitty command failed')
+                    continue
+                if inp == 'r' or inp == 'R':
+                    print('relaunching afrhocalcext')
+                    trap_reduction.clafrhocalcext(param['iraf'], pixsize[1], str(0), str(0), str(0), str(0), conda=conda)
+                    trap_plot.plot_centering_profile(param['tmpout'], comet_name=comet,kitty=kitty)
+                    if kitty == True:
+                                try:
+                                    os.system(f'for f in {param["tmpout"]}/*_centering.png ; do kitty +kitten icat "$f" ; done')
+                                except:
+                                    print('kitty command failed')
+                    continue
+                elif inp == 'b' or inp == 'B':
+                    break
+                elif inp.split(' ')[0] == 'c' or inp.split(' ')[0] == 'C':
+                    try:
+                        FILE = centerlist.iloc[[inp.split(' ')[1]]].file.values[0]
+                    except:
+                        print('Comment wrong format')
+                        continue
+                    str_comment = inp.split(' ', 2)[-1]
+                    comment.loc[comment['file'] == FILE, 'comment'] = str_comment
+                    comment.to_csv(os.path.join(param['tmpout'], 'center_comment'), index=False, sep=",", header=False)
+        
         trap_reduction.clean_afrhotot(param['tmpout'])
 
         # haser is False
