@@ -32,6 +32,7 @@ skip = True # skip without asking raw data directory donwload if data already in
 # Qfitlim = (4.0, 4.5) # limit in log10 km for the range over which Q is fitted
 Qfitlim = (3.6, 4.1)
 only_BVRI = False
+no_CLEAR_Z=True
 kitty = False
 # fc = {'OH':15, #2022E3
 #       'NH':21,
@@ -230,7 +231,7 @@ for path in list_to_reduce:
             shutil.rmtree(param['tmpdata'])
         os.mkdir(param['tmpdata'])
         print('--- Renaming files to Trappist format and copying to tmpdata ---')
-        trap_reduction.pythrename(raw_dir, param['tmpdata'],only_BVRI=only_BVRI)
+        trap_reduction.pythrename(raw_dir, param['tmpdata'],only_BVRI=only_BVRI, no_CLEAR_Z=no_CLEAR_Z)
         if os.path.exists(param['tmpout']):
             shutil.rmtree(param['tmpout'])
         os.mkdir(param['tmpout'])
@@ -248,6 +249,10 @@ for path in list_to_reduce:
         print('--- generating calib file ---')
         # ZP_warning = trap_reduction.generate_ZP(param['calib'], ephemeris, fitstable, output_dir=param['tmpout'])
         filtlist = fitstable.loc[fitstable['type'].isin(['LIGHT', 'Light Frame']), 'filt'].drop_duplicates().values.tolist()
+        if no_CLEAR_Z and 'Clear' in filtlist:
+            filtlist.remove('Clear')
+        if no_CLEAR_Z and 'z' in filtlist:
+            filtlist.remove('z')
         ZP_warning = trap_reduction.generate_ZP_new(param['calib'], obs, night, filtlist, output_dir=param['tmpout'])
         if ZP_warning == True:
             input("press enter")

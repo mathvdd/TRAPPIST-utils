@@ -64,7 +64,7 @@ def renameftsfits(raw_path):
                 count += 1
     print("renamed", count, "fts files")
 
-def pythrename(raw_path, tmpdata_dir,only_BVRI=False):
+def pythrename(raw_path, tmpdata_dir,only_BVRI=False,no_CLEAR_Z=False):
     """
     Rename fits files to the trappist format and copy them to the tmpdata folder
 
@@ -82,6 +82,10 @@ def pythrename(raw_path, tmpdata_dir,only_BVRI=False):
                     if only_BVRI == True and hdul[0].header['IMAGETYP'] in ['LIGHT', 'Light Frame']:
                         obsfilt = hdul[0].header['FILTER']
                         if obsfilt in ['B','V','R','I','Rc','Ic']:
+                            shutil.copy(os.path.join(path, file), os.path.join(tmpdata_dir, "TRAP." + obsdate[:19] + ".fits"))
+                    elif no_CLEAR_Z and hdul[0].header['IMAGETYP'] in ['LIGHT', 'Light Frame']:
+                        obsfilt = hdul[0].header['FILTER']
+                        if obsfilt not in ['Clear','z']:
                             shutil.copy(os.path.join(path, file), os.path.join(tmpdata_dir, "TRAP." + obsdate[:19] + ".fits"))
                     else:
                         shutil.copy(os.path.join(path, file), os.path.join(tmpdata_dir, "TRAP." + obsdate[:19] + ".fits"))
