@@ -150,6 +150,12 @@ class ephemeris:
                         self.parameters['COMMAND'] = '20' + target[2:4] + ' ' + target[4] + target[6]
                     # elif target == '0057P':
                     #     self.parameters['COMMAND'] = '90000633'
+                    elif target == '0095P':
+                        self.parameters['COMMAND'] = '1977 UB'
+                    elif target == '0176P':
+                        self.parameters['COMMAND'] = '1999 RE70'
+                    elif target == 'CK22Q78E':
+                        self.parameters['COMMAND'] = '2022 QE78'
                     elif (len(target) == 5) and (target[0:3] + target[-1] == '000P'):
                         self.parameters['COMMAND'] = target[3:]
                     elif (len(target) == 5) and (target[0:2] + target[-1] == '00P'):
@@ -164,15 +170,15 @@ class ephemeris:
                     self.parameters['COMMAND'] = target
             else:
                 self.parameters['COMMAND'] = input('Object name: ')
-            
-            if 'DES=' not in self.parameters['COMMAND']:
+
+            if ('DES=' not in self.parameters['COMMAND']) and (self.parameters['COMMAND'] not in ['1977 UB', '1999 RE70']):
                 self.parameters['COMMAND'] = 'DES='+self.parameters['COMMAND'] + '%3BCAP%3BNOFRAG%3B'
-                
+
             self.query_horizons()
-            
+
             for line in self.query_result:
                 print(line)
-            
+
             if self.query_result[-4][:10] == '    Author':
                 self.already_quered = True
                 self.good_query = True
@@ -189,6 +195,8 @@ class ephemeris:
                             i -=1
                 elif self.parameters['COMMAND'] == '57P':
                     self.record = '90000633'
+                elif self.parameters['COMMAND'] == '95P':
+                    self.record = '1977 UB'
                 else:
                     last_line = self.query_result[-5]
                     # record = last_line.split(" ")
