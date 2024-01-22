@@ -311,15 +311,15 @@ if __name__ == "__main__":
                   #,'408P', '117P', '61P', '81P', '118P', '116P', '100P', '327P', '71P', '73P'
                     # ,'107P', '169P'
               ]
-    observatory = 'TN' #TS, TN, HCT, Deva
-    night = '2023-04-18'
+    observatory = 'OHP' #TS, TN, HCT, Deva, OHP
+    night = '2024-04-30'
     save_path = f'/home/Mathieu/visibility_plot_{observatory}_{night}.png'
     ##################
-    
+
     dt = datetime.datetime.now()
     def import_eph(target): #function to import and format the ephemeris
         print(target)
-        eph.parameters['STEP_SIZE'] = '10 m'
+        eph.parameters['STEP_SIZE'] = '1 m'
         eph.parameters['COMMAND'] = target
         eph.query_horizons()
         if eph.query_result[-4][:10] == '    Author':
@@ -361,17 +361,20 @@ if __name__ == "__main__":
     elif observatory == 'Deva':
         eph.parameters['CENTER'] = 'coord@399'
         eph.parameters['SITE_COORD'] = '79.6844445, 29.3608334,2540'
+    elif observatory == 'OHP':
+        eph.parameters['CENTER'] = '511'
+
     # datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%f')
     # - datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:%M')
     eph.parameters['START_TIME'] = datetime.datetime.strptime(night + 'T12:00', '%Y-%m-%dT%H:%M')
     eph.parameters['STOP_TIME'] = datetime.datetime.strptime(night + 'T12:00', '%Y-%m-%dT%H:%M') + datetime.timedelta(days=1)
-    
+
     #initiate the plot
-    fig = plt.figure(figsize=(12,8))
+    fig = plt.figure(figsize=(9,6))
     ax = fig.gca()
-    
+
     # for the moon
-     
+
     df_moon = import_eph('301')
     try:
         naut_start = df_moon.loc[df_moon['sol_marq'] == "A"][:1].index[0]
@@ -407,8 +410,9 @@ if __name__ == "__main__":
 
     # #pretty plot
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-    plt.xlim(df_moon.loc[df_moon['sol_marq'] == "A"][:1]['date'],
-              df_moon.loc[df_moon['sol_marq'] == "A"][-1:]['date'])
+
+    plt.xlim(df_moon.loc[df_moon['sol_marq'] == "A"][:1]['date'].values[0],
+              df_moon.loc[df_moon['sol_marq'] == "A"][-1:]['date'].values[0])
     plt.ylim(0,90)
     plt.axvline(x=df_moon.loc[df_moon['sol_marq'] == " "][:1]['date'],
                 color='black', ls='dotted', alpha=0.5)
@@ -419,7 +423,7 @@ if __name__ == "__main__":
     moon_illu_max = int(float(df_moon.loc[naut_end, 'lun_ill']))
     title = f'{night}\nMoon illumination {str(moon_illu_min)}-{str(moon_illu_max)}%'
     xmiddle = df_moon.loc[df_moon['sol_marq'] == "A"][:1]['date']+ (df_moon.loc[df_moon['sol_marq'] == "A"][-1:]['date'].values[0] - df_moon.loc[df_moon['sol_marq'] == "A"][:1]['date'].values[0])/2
-    ax.text(xmiddle, 80, title, ha='center', backgroundcolor='white', fontsize='large')
+    ax.text(xmiddle, 80, title, ha='center', fontsize='large',alpha=0.5)#,bbox=dict(facecolor='white', alpha=0))#, backgroundcolor='white'
     ax.set_xlabel('Time UT')
     ax.set_ylabel('Elevation (°)')
     # airmass from “Revised Optical Air Mass Tables and Approximation Formula”, Kasten F., Young A., Applied Optics, vol 28, no. 22, p. 4735-4738, Nov. 15, 1989.
@@ -430,25 +434,7 @@ if __name__ == "__main__":
     # ax2.set_xticks([10,20,30,40,50])
     # ax2.set_ylabels([38, 5.6, 2.9, 2, 1.6, 1.6, 1.1])
     print('Executed in', datetime.datetime.now() - dt)
+    # plt.show()
     plt.tight_layout()
     # plt.show()
     plt.savefig(save_path, bbox_inches='tight')
-
-    
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    
-        
