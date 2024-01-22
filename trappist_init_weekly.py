@@ -193,19 +193,29 @@ for path in list_to_reduce:
                 inp = input("\nSome calibration files are missing!\
                 \n   - Press enter to reload table\
                 \n   - Query for closest BC continuum file (BC)\
-                \n   - Query for missing 15s darks for flats (df), 10s darks for old TS data (df10)\
+                \n   - Query for missing 15s darks for flats (df), 10s darks for old TS data (df10) (df5,df30)\
                 \n   - Query for calibration files older than a week (give line index)\
                 \n   - bypass (b)\
                 \n   :")
-                            
+
                 if inp == 'b' or inp == 'B':
                     break
                 elif inp == 'bc' or inp == 'BC':
                     query_NAS.lookforcalib(NASfitstable, 'light', raw_dir[:-8], night,obj=comet, filt='BC')
-                elif inp == 'df' or inp == 'DF':
-                    query_NAS.lookforcalib(NASfitstable, 'dark', raw_dir[:-8], night, exptime=15)
-                elif inp == 'df10' or inp == 'DF10':
-                    query_NAS.lookforcalib(NASfitstable, 'dark', raw_dir[:-8], night, exptime=10)
+                elif inp.startswith('df') or inp.startswith('df'):
+                    if len(inp) == 2:
+                        query_NAS.lookforcalib(NASfitstable, 'dark', raw_dir[:-8], night, exptime=15)
+                    else:
+                        print(int(inp[2:]))
+                        query_NAS.lookforcalib(NASfitstable, 'dark', raw_dir[:-8], night, exptime=int(inp[2:]))
+                #elif inp == 'df' or inp == 'DF':
+            #        query_NAS.lookforcalib(NASfitstable, 'dark', raw_dir[:-8], night, exptime=15)
+        #        elif inp == 'df10' or inp == 'DF10':
+    #                query_NAS.lookforcalib(NASfitstable, 'dark', raw_dir[:-8], night, exptime=10)
+#                elif inp == 'df5' or inp == 'DF5':
+#                    query_NAS.lookforcalib(NASfitstable, 'dark', raw_dir[:-8], night, exptime=5)
+#                elif inp == 'df30' or inp == 'DF30':
+#                    query_NAS.lookforcalib(NASfitstable, 'dark', raw_dir[:-8], night, exptime=30)
                 else:
                     try:
                         ind = int(inp)
