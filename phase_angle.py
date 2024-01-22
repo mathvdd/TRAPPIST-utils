@@ -22,6 +22,13 @@ def import_pa_from_eph(imname, target, observatory): #function to import and for
     eph = get_ephem.ephemeris()
     if (len(target) == 8) and (target[0:2] + target[5] + target[7] == 'CK00'):
         eph.parameters['COMMAND'] = '20' + target[2:4] + ' ' + target[4] + target[6]
+
+    elif target == '0095P':
+        eph.parameters['COMMAND'] = '1977 UB'
+    elif target == '0176P':
+        eph.parameters['COMMAND'] = '1999 RE70'
+    elif target == 'CK22Q78E':
+        eph.parameters['COMMAND'] = '2022 QE78'
     elif (len(target) == 5) and (target[0:3] + target[-1] == '000P'):
         eph.parameters['COMMAND'] = target[3:]
     elif (len(target) == 5) and (target[0:2] + target[-1] == '00P'):
@@ -41,7 +48,7 @@ def import_pa_from_eph(imname, target, observatory): #function to import and for
     eph.parameters['STOP_TIME'] = eph.parameters['START_TIME'] + datetime.timedelta(minutes=1)
     eph.parameters['STEP_SIZE'] = '1 m'
     # eph.parameters['COMMAND'] = '2022 L3'
-    if 'DES=' not in eph.parameters['COMMAND']:
+    if ('DES=' not in eph.parameters['COMMAND']) and (eph.parameters['COMMAND'] not in ['1977 UB', '1999 RE70']):
         eph.parameters['COMMAND'] = 'DES='+eph.parameters['COMMAND'] + '%3BCAP%3BNOFRAG%3B'
     eph.query_horizons()
     if eph.query_result[-4][:10] == '    Author':
