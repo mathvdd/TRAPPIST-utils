@@ -323,6 +323,8 @@ def check_objects_names(startdate, enddate, NASfitstable, only_BVRI = False):
     for index, row in objects.iterrows():
         objects.loc[objects['object'] == row['object'], 'nb_nights'] = len(objects_table.loc[objects_table['object'] == row['object']]['start_night'].drop_duplicates())
         objects.loc[objects['object'] == row['object'], 'nb_images'] = len(objects_table.loc[objects_table['object'] == row['object']])
+        objects.loc[objects['object'] == row['object'], 'nb_NB'] = len(objects_table.loc[(objects_table['object'] == row['object'])
+                                                                                         & objects_table['filter'].isin(['OH','CN','C2','C3','NH','RC','BC','GC','UC'])])
     # objects.astype({'nb_nights': 'int32','nb_images': 'int32'}).dtypes
     return objects
     
