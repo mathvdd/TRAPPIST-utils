@@ -263,7 +263,7 @@ for path in list_to_reduce:
             filtlist.remove('Clear')
         if no_CLEAR_Z and 'z' in filtlist:
             filtlist.remove('z')
-        ZP_warning = trap_reduction.generate_ZP_new(param['calib'], obs, night, filtlist, output_dir=param['tmpout'])
+        ZP_warning = trap_reduction.generate_ZP_new_format(param['calib'], obs, night, filtlist, output_dir=param['tmpout'])
         if ZP_warning == True:
             input("press enter")
         pixsize = trap_reduction.set_pixsize_in_clafrhocalcext(fitstable)

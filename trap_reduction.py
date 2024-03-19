@@ -219,11 +219,111 @@ def get_fitstable(raw_dir):
                         except:
                             imobservatory = None
                         fitstable.loc[fitstable.shape[0]] = [imfile, imtype, imfilter, imexptime, imobservatory]
-                        
+
     return fitstable
 
-def generate_ZP_new(calib_dir, obs, date, filtlist, ZPparams=ZP, output_dir=None):
+def generate_ZP_new_format(calib_dir, obs, date, filtlist, ZPparams=ZP, output_dir=None):
+    #import the ZP tables for either TN or TS
+    warning_flag = False
+    ZP_table_header = ['filt_nb', 'JD_mean', 'ZP', 'n', 'del1', 'JD_start', 'JD_stop', 'del2', 'JD_center', 'del3', 'clean_start', 'clean_stop', 'del4']
+    # 1  numero du filtre
+    # 2  date (jj-2450000) moyenne des obs
+    # 3  zp
+    # 4  nombre de donnees
+    # 5 - 6 intervalle de temps
+    # 7  date centrale = (5+6)/2
+    if obs == 'TN':
+        ZPtable = pd.read_csv(os.path.join(calib_dir, "ZeP_North.dat"), names=ZP_table_header, sep="\s+",engine='python')
+        filt_nb = {1:'OH',2:'NH',3:None,4:'CN',5:'C3',6:None,7:'BC',8:'C2',9:'GC',10:None,
+                   11:'RC',12:'B',13:'V',14:'R',15:'I',16:None,17:'Iz',18:'exoBB',19:None,20:'NaI'}
+    elif obs == 'TS':
+        ZPtable = pd.read_csv(os.path.join(calib_dir, "ZeP_South.dat"), names=ZP_table_header, sep="(?<![])\s+")
+        filt_nb = {1:'OH',2:'NH',3:'UC',4:'CN',5:'C3',6:'CO',7:'BC',8:'C2',9:'GC',10:'H2O',
+           11:'RC',12:'B',13:'V',14:'R',15:'I',16:'z',17:'Iz',18:None,19:None,20:'NaI'}
+    else:
+        print('WARNING: observatory not well defined')
+        warning_flag = True
+    ZPtable.drop(['del1', 'del2', 'del3', 'del4'], axis=1, inplace=True)
+        
+    #format the table and add filter name
+    ZPtable['filt_name'] = ZPtable.apply(lambda x: filt_nb[x['filt_nb']], axis=1)
+    # ZPtable['clean_start'] = ZPtable.apply(lambda x: int(x['clean_start'][1:]) +1, axis=1) 
+    # #the values are x.5 and rounded so fall the UT date before, need to add 1 to be at noon on the cleaning day
+    # ZPtable['clean_stop'] = ZPtable.apply(lambda x: int(x['clean_stop'][:-1]) +1, axis=1) 
+    # ZPtable['JD_start'] += 1
+    # ZPtable['JD_stop'] += 1
+    # ZPtable['JD_center'] += 1
     
+   
+    #format the date
+    if len(date) == 8:
+        startdate = datetime.datetime.strptime(date, '%Y%m%d')
+    elif len(date) == 10:
+        startdate = datetime.datetime.strptime(date, '%Y-%m-%d')
+    else:
+        print(date)
+        input('date format not recognised')
+    startdateJD = sum(jdcal.gcal2jd(startdate.year, startdate.month, startdate.day)) +0.5 -2450000
+
+    # define output file
+    if output_dir == None:
+        output_path = os.path.join(calib_dir, "calib.dat")
+    else:
+        output_path = os.path.join(output_dir, "calib.dat")
+
+    #import the clean dates
+    # cleandate = pd.read_csv(os.path.join(calib_dir, 'dateclean.txt'), names=['obs_name','date'], sep='\s+')  
+    # cleandate['obs'] = cleandate.apply(lambda x: 'TN' if x['obs_name'] == 'TRAPPIST-North' else ('TS' if x['obs_name'] == 'TRAPPIST-South' else None), axis=1)
+    # cleandate['JD'] = cleandate.apply(lambda x: sum(jdcal.gcal2jd(int(x['date'][:4]), int(x['date'][5:7]), int(x['date'][8:10]))) +0.5,axis=1) -2450000
+    # print(cleandate)
+    # up_cleandate_row = cleandate.loc[cleandate['JD'] >= startdateJD][:1]
+    # down_cleandate_row = cleandate.loc[cleandate['JD'] < startdateJD][-1:]
+    # up_cleandate = up_cleandate_row['JD'].values[0] if len(up_cleandate_row) == 1 else 10^7
+    # print(up_cleandate)
+    # down_cleandate = down_cleandate_row['JD'].values[0] if len(down_cleandate_row) == 1 else 0
+    # print(down_cleandate)
+    
+    # cleantab = 
+    
+    #prepare the lines for the files
+    lines = '\n# see see calib08140914.dat for column info'
+    comment =f'# ZP for {date}, JD {startdateJD}, {obs}'
+    #check if the date is posterior to the last period in the Zp file
+    last_ZP = ZPtable['clean_stop'][-1:].values[0]
+    last_interval = False
+    if startdateJD > last_ZP:
+        comment += f'\n# Startdate after the last ZP interval ending at {last_ZP}'
+        warning_flag = True
+        last_interval = True
+        
+    for filt in filtlist:
+        #filter for the filter
+        ZPfilt = ZPtable.loc[ZPtable['filt_name'] == filt]
+
+        #look inside the cleaning period
+        if last_interval:
+            ZPfilt = ZPfilt.loc[(ZPfilt['clean_start'] < startdateJD) & (ZPfilt['clean_stop'] == last_ZP)]
+        else:
+            ZPfilt = ZPfilt.loc[(ZPfilt['clean_start'] < startdateJD) & (ZPfilt['clean_stop'] > startdateJD)]
+        
+        if len(ZPfilt) == 0:
+            comment += f'error finding the corresponding ZP for {filt} in interval'
+            warning_flag = True
+        else:
+            ZPline = ZPfilt.iloc[(ZPfilt['JD_center']-startdateJD).abs().argsort()][:1]
+
+            lines += f"\n{filt} {' '.join([str(int) for int in ZPparams.get(filt)])} {str(ZPline['ZP'].values[0])}"
+
+    print(comment)
+    #write in the file
+    with open(output_path, 'w') as f:
+        f.write(comment)
+        f.write(lines)
+
+    return warning_flag
+
+def generate_ZP_new(calib_dir, obs, date, filtlist, ZPparams=ZP, output_dir=None):
+
     #import the ZP tables for either TN or TS
     warning_flag = False
     if obs == 'TN':
