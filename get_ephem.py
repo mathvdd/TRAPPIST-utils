@@ -121,6 +121,7 @@ class ephemeris:
         for param in self.parameters:
             self.query_url += '&' + param + "='" + str(self.parameters[param]) + "'"
             
+        print(self.query_url)
         # fetch the data
         self.query_result = requests.get(self.query_url).text.split('\n')
         
@@ -293,13 +294,15 @@ if __name__ == "__main__":
     import matplotlib.dates as mdates
 
     ### PARAMETERS ###
-    comets = ['2017 K2', '2019 L3', '81P', '2019 U5', '2019 T4', '118P', '29P', '2021 Y1', '2021 E3', '2021 P4'
-              ,'2022 P1','73P', '96P','2022 A2'
-              ,'2019 E3', '2014 UN271','71P','237P','364P'
-               ,'2022 U2','2022 E3','2020 V2','2023 A3'
-    #'65P','31P','16P','84P','19P','71P','21P','4P','45P','81P','96P','22P','26P','62P','43P','68P','10P','126P','32P','67P','76P','78P','93P','98P','9P','73P','398P'
-            #,'91P','52P','79P','69P','192P','37P','111P','106P','114P','115P','40P'
-            #,'2022 E3', '2020 V2',
+    #comets = ['12P', '13P','144P','90000950','62P','2023 A3','2021 S3', '29P','479P','32P'
+    #comets = ['2014 UN271', '2021 S3'
+    comets = ['1997 CU26','29P','62P','81P','95P','96P','90000950','144P','237P','238P','358P', #problems with 103P so put the jpl number
+               '2014 UN271','2017 K2','2019 E3','2019 L3','2020 K1','2020 V2','2021 C5','2021 G2','2021 T4','2021 S3','2022 A2',
+                '2022 E3','2022 QE78', '2022 R6','2023 A3','2023 P1', '2024 E1'
+    # comets = ['12P', '13P', '144P', '62P', '2023 A3', '2021 S3', '29P', '2022 E2','207P'
+    #comets=['65P','31P','16P','84P','19P','71P','21P','4P','45P','81P','96P','22P','26P','62P','43P','68P','10P','126P','32P','67P','76P','78P','93P','98P','9P','73P','398P'
+    #        ,'91P','52P','79P','69P','192P','37P','111P','106P','114P','115P','40P'
+    #        ,'2022 E3', '2020 V2',
     #'2017 K2', '2022 P1', '2022 E3'
                 #,'2022 L1', '2019 E3','2021 E3','2021 P4'
                 # ,'2020 R7'
@@ -311,8 +314,8 @@ if __name__ == "__main__":
                   #,'408P', '117P', '61P', '81P', '118P', '116P', '100P', '327P', '71P', '73P'
                     # ,'107P', '169P'
               ]
-    observatory = 'OHP' #TS, TN, HCT, Deva, OHP
-    night = '2024-04-30'
+    observatory = 'TS' #TS, TN, HCT, Deva, OHP
+    night = '2024-03-10'
     save_path = f'/home/Mathieu/visibility_plot_{observatory}_{night}.png'
     ##################
 
@@ -418,7 +421,7 @@ if __name__ == "__main__":
                 color='black', ls='dotted', alpha=0.5)
     plt.axvline(x=df_moon.loc[df_moon['sol_marq'] == " "][-1:]['date'],
                 color='black', ls='dotted', alpha=0.5)
-    plt.axhline(y=20, color='black', ls='dotted')
+    plt.axhline(y=30, color='black', ls='dotted')
     moon_illu_min = int(float(df_moon.loc[naut_start, 'lun_ill']))
     moon_illu_max = int(float(df_moon.loc[naut_end, 'lun_ill']))
     title = f'{night}\nMoon illumination {str(moon_illu_min)}-{str(moon_illu_max)}%'

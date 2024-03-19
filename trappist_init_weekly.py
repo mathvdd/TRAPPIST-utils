@@ -20,12 +20,12 @@ import phase_angle
 
 ########################
 # INPUT PARAMETERS
-startdate = '2010-12-07' #the night starting
-enddate = '2024-12-08' #starting that night not included
-obs = 'TS'
-comets = ['0067P']
+startdate = '2024-02-12' #the night starting
+enddate = '2024-02-28' #starting that night not included
+obs = 'TN'
+comets = []
 # comets = ['0081P','CK19L030','CK17K020','CK22P010','CK21Y010','CK20K010',
-#           '0096P','CK22U020','CK20V020','CK22E030','CK19U050'] #'0364P' list of comets to take into account. set empty to take all 
+#           '0096P','CK22U020','CK20V020','CK22E030','CK19U050'] #'0364P' list of comets to take into account. set empty to take all
 skip = True # skip without asking raw data directory donwload if data already in raw_data.
 # skip reduction if there is already a set of reduced data
 # If set to False, will ask what to do in both cases
@@ -41,6 +41,13 @@ kitty = False
 #       'C2':193,
 #       'CO+':56,
 #       'H2O':129}
+fc = {'OH':19,
+      'NH':24,
+      'CN':30,
+      'C3':248,
+      'C2':170,
+      'CO+':56,
+      'H2O':129}
 fc = {'OH':19,
       'NH':24,
       'CN':30,
@@ -115,12 +122,10 @@ for comet in inlist:
     output_path = os.path.join(param['raw'], comet, obs)
     query_NAS.get_files(comet, NASfitstable, output_path, dayinterval=7, dateinterval=(startdate, enddate),
                         skip_existing=skip, only_BVRI = only_BVRI)
-# input('download finished')      
+# input('download finished')
 # makes list of folders to reduce
 list_to_reduce = []
-# list_to_reduce = ['/home/Mathieu/Documents/TRAPPIST/raw_data/0073P/TN/20221221',
-#                   '/home/Mathieu/Documents/TRAPPIST/raw_data/0081P/TN/20221221',
-#                   '/home/Mathieu/Documents/TRAPPIST/raw_data/CK22A020/TN/20221221']
+list_to_reduce = ['/home/Mathieu/Documents/TRAPPIST/raw_data_TRAPPIST/0013P/TN/20240225']
 for comet in inlist:
     output_path = os.path.join(param['raw'], comet, obs)
     for path, subdirs, files in os.walk(output_path):
@@ -279,7 +284,7 @@ for path in list_to_reduce:
         def add_comment(row, comment):
             row_comment = comment.loc[comment['file'] == row['file'], 'comment']
             return row_comment.to_string(index = False)
-        
+
         while True:
             centerlist = pd.read_csv(os.path.join(param['tmpout'], 'centerlist'),header=None, sep=' '
                                      ,usecols=[0,2,3,5,10],
@@ -344,7 +349,7 @@ for path in list_to_reduce:
                     else:
                         ZMIN = None
                         ZMAX = None
-                            
+
                     if solocomete == True: # break if good format
                         break
                 else:
@@ -379,18 +384,18 @@ for path in list_to_reduce:
                 str_comment = inp.split(' ', 2)[-1]
                 comment.loc[comment['file'] == FILE, 'comment'] = str_comment
                 comment.to_csv(os.path.join(param['tmpout'], 'center_comment'), index=False, sep=",", header=False)
-                
+
         trap_reduction.clean_afrhotot(param['tmpout'])
         # print(len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2','CO+','H2O']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]))
         if len(fitstable.loc[fitstable['filt'].isin(['CO+','H2O']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]) > 0:
             print(fitstable)
             input('CO+ or H2O filter detected')
-                             
-        if len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2','CO+','H2O']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]) > 0:            
+
+        if len(fitstable.loc[fitstable['filt'].isin(['OH','CN','NH','C3','C2','CO+','H2O']) & fitstable['type'].isin(['LIGHT', 'Light Frame'])]) > 0:
        	    print('--- initiating haserinput ---')
             import gfactor
             gfactor.generate_tmptxt(ephemeris.v, ephemeris.rh)
-            
+
        	    while True:
                 haserinput_warning = trap_reduction.generate_haserinput(param['tmpout'], fc)
                 if haserinput_warning == True:
@@ -407,7 +412,7 @@ for path in list_to_reduce:
                         break
                 else:
                     break
-            
+
             print('--- launching hasercalctest ---')
             trap_reduction.clhasercalctest(param['iraf'], arg='yes', Qproflow=Qfitlim[0], Qprofhigh=Qfitlim[1], conda=conda)
             trap_plot.plot_haserprofile(param['tmpout'],comet_name=comet,kitty=kitty)
@@ -439,7 +444,7 @@ for path in list_to_reduce:
         haser_dir = os.path.join(reduced_dir, "haser")
         garbage_dir = os.path.join(reduced_dir, "probably_garbage")
         centering_dir = os.path.join(reduced_dir, "centering")
-        
+
         if not os.path.exists(reduced_dir):
             os.makedirs(reduced_dir)
             print("created", reduced_dir)
@@ -461,7 +466,7 @@ for path in list_to_reduce:
         if not os.path.exists(centering_dir):
             os.makedirs(centering_dir)
             print("created", centering_dir)
-        
+
         print('--- copying files in reduced directory ---')
         for path2, subdirs2, files2 in os.walk(param['tmpout']):
             for file in files2:
@@ -487,7 +492,5 @@ for path in list_to_reduce:
                 else:
                     shutil.copy(os.path.join(path2, file), os.path.join(garbage_dir, file))
                     print('copied', file, "in reduced dir")
-                
+
 print('Executed in ', datetime.datetime.now() - dt)
-    
-    

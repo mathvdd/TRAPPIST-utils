@@ -197,9 +197,12 @@ def NAS_update(NAS_path, export_path, keyword='', cometlist = 'current'):
     # print('Discarded objects:', discarded_obj)
     print('Executed in ', datetime.datetime.now() - dt)
     
-if __name__ == "__main__":
-    NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query_all.db", '202308')
-    NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_all.db", '202308')
+# if __name__ == "__main__":
+#     NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_all.db", '202311')
+#     NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query_all.db", '202311')
+#     NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_all.db", '202312')
+#     NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query_all.db", '202312')
+    # NAS_update("/home/Mathieu/Documents/TRAPPIST/raw_data_TRAPPIST/CK17K020", "/home/Mathieu/Documents/TRAPPIST/prosetest_22E3_20230216/test.db", '')
     
     # NAS_update("/NASTS/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query_all.db", '')
   
@@ -605,23 +608,23 @@ def lookforcalib_old():
     
     ### uncomment line bellow if querying for a light image
     # imtype = ['LIGHT', 'Light Frame']
-    obj = "CK22E030" #target name in the fits header. only for lights and for the output path
+    obj = "0144P" #target name in the fits header. only for lights and for the output path
     
     ### uncomment line bellow if querying for dark frames
     imtype = ['DARK', 'Dark Frame']
-    exptime = 1500 #exposure time. only for darks
+    exptime = 900 #exposure time. only for darks
         
     ### uncomment line bellow if querying for flat frames
     # imtype = ['FLAT', 'Flat Frame']
-    filt = 'R' #filter. only for flats
+    filt = 'I' #filter. only for flats
     
     ### uncomment line bellow if querying for bias frames
     # imtype = ['BIAS', 'Bias Frame']
     
-    telescope = 'TS'
-    night = (2023,4,23) ### set the observation night
+    telescope = 'TN'
+    night = (2024,2,5) ### set the observation night
     
-    dayinterval = 7
+    dayinterval = 10
     # starting point for the search
     
     binning = 2
@@ -710,13 +713,12 @@ def lookforcalib_old():
                     count +=1
             break
 
-# if __name__ == "__main__":
-    # lookforcalib_old()
+#if __name__ == "__main__":
+#    lookforcalib_old()
 
-    # NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '202304')
-    # NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '202305')
-    # NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.db", '202304')
-    # NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query.db", '202305')
-    
-    # NAS_update("/NASTS/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query.db", '')
-  
+if __name__ == "__main__":
+    # NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_all.db", '202402')
+    NAS_update("/NASTN/Data_TrappistNord/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TN_query_all.db", '202403')
+    # NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query_all.db", '202402')
+    NAS_update("/NASTS2/Data_Trappist/Data_Trappist/ACP Astronomy/Images", "/home/Mathieu/Documents/TRAPPIST/raw_data/TS_query_all.db", '202403')
+ 

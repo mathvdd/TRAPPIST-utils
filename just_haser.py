@@ -133,19 +133,28 @@ if __name__ == "__main__":
     kitty = None
     redo_ZP=None
 
-    Qfitlim = (4, 4.5)
+    Qfitlim = (4.2, 4.5) #default
+    # Qfitlim = (4.8, 5.2)
 
-    fc = {'OH':15, #22E3
-          'NH':21,
-          'CN':27,
-          'C3':231,
-          'C2':193}
+   # fc = {'OH':15, #22E3
+   #       'NH':21,
+   #       'CN':27,
+   #       'C3':231,
+   #       'C2':193}
 
-    # fc = {'OH':19, #default
-    #       'NH':24,
-    #       'CN':30,
-    #       'C3':248,
-    #       'C2':170}
+    # fc = {'OH':5, #old
+    #   'NH':20,
+    #   'CN':25,
+    #   'C3':190,
+    #   'C2':170,
+    #   'CO+':56,
+    #   'H2O':129}
+
+    fc = {'OH':19, #default
+          'NH':24,
+          'CN':30,
+          'C3':248,
+          'C2':170}
 
 
     #fc = {'OH':16, #2019 L3
@@ -156,17 +165,18 @@ if __name__ == "__main__":
  #         'CO+':56,
 #          'H2O':129}
 
-    comet = 'CK22E030'
+    comet = '0012P'
 
     comet_dir = os.path.join(param['reduced'], comet)
-    comet_dir = f'/home/Mathieu/Documents/TRAPPIST/reduced_data/{comet}'
+    comet_dir = f'/home/Mathieu/Documents/TRAPPIST/reduced_data/{comet}/20231115TN'
 
     dirlist = []
     for path, subdirs, files in sorted(os.walk(comet_dir)):
         if (path.split('/')[-1] == 'haser') and os.path.isfile(
                 os.path.join(path, 'inputhaser-BC')):
             dirlist.append(path)
-
+    print(dirlist)
+    # dirlist = ['/home/Mathieu/Documents/TRAPPIST/reduced_data/0012P/20231001TN/haser']
     print(f'Found {len(dirlist)} directories')
     print(f'Qfitlim = {Qfitlim}')
     print(f'fc = {fc}')
