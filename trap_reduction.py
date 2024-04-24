@@ -238,7 +238,8 @@ def generate_ZP_new_format(calib_dir, obs, date, filtlist, ZPparams=ZP, output_d
         filt_nb = {1:'OH',2:'NH',3:None,4:'CN',5:'C3',6:None,7:'BC',8:'C2',9:'GC',10:None,
                    11:'RC',12:'B',13:'V',14:'R',15:'I',16:None,17:'Iz',18:'exoBB',19:None,20:'NaI'}
     elif obs == 'TS':
-        ZPtable = pd.read_csv(os.path.join(calib_dir, "ZeP_South.dat"), names=ZP_table_header, sep="(?<![])\s+")
+        ZPtable = pd.read_csv(os.path.join(calib_dir, "ZeP_South.dat"), names=ZP_table_header, sep="\s+", engine='python')
+        # ZPtable = pd.read_csv(os.path.join(calib_dir, "ZeP_South.dat"), names=ZP_table_header, sep="(?<![])\s+")
         filt_nb = {1:'OH',2:'NH',3:'UC',4:'CN',5:'C3',6:'CO',7:'BC',8:'C2',9:'GC',10:'H2O',
            11:'RC',12:'B',13:'V',14:'R',15:'I',16:'z',17:'Iz',18:None,19:None,20:'NaI'}
     else:
