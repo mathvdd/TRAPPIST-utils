@@ -309,11 +309,19 @@ def generate_ZP_new_format(calib_dir, obs, date, filtlist, ZPparams=ZP, output_d
             ZPfilt = ZPfilt.loc[(ZPfilt['clean_start'] < startdateJD) & (ZPfilt['clean_stop'] > startdateJD)]
         
         if len(ZPfilt) == 0:
-            comment += f'error finding the corresponding ZP for {filt} in interval'
-            warning_flag = True
+            print(obs,startdateJD)
+            if (obs == 'TS') and (startdateJD > 7879) and (startdateJD < 8008) :
+                # no ZP for the 7879 - 8008 interval on TS
+                ZPfilt = ZPtable.loc[ZPtable['filt_name'] == filt]
+                ZPline = ZPfilt.iloc[(ZPfilt['JD_center']-startdateJD).abs().argsort()][:1]
+                lines += f"\n{filt} {' '.join([str(int) for int in ZPparams.get(filt)])} {str(ZPline['ZP'].values[0])}"
+                comment += f'no ZP for the 7879 - 8008 interval on TS, taking the closest'
+                
+            else:
+                comment += f'error finding the corresponding ZP for {filt} in interval'
+                warning_flag = True
         else:
             ZPline = ZPfilt.iloc[(ZPfilt['JD_center']-startdateJD).abs().argsort()][:1]
-
             lines += f"\n{filt} {' '.join([str(int) for int in ZPparams.get(filt)])} {str(ZPline['ZP'].values[0])}"
 
     print(comment)
