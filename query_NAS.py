@@ -397,6 +397,24 @@ def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=[''
                                       & (NASfitstable['start_night'] <= upper_interval)
                                       & NASfitstable['exptime'].isin(exptimelist)
                                       & (NASfitstable['binning'] == binning)]
+
+        # continue to search for flats if less than 5
+        for filt in filtlist:
+            flat_li = lower_interval
+            flat_ui = upper_interval
+            while len(FLATtable.loc[FLATtable['filter'] == filt]) < 5:
+                flat_li += 7
+                flat_ui += 7
+                print(f'Looking for flats {filt} with an interval of {flat_li} days')
+                new_FLAT = NASfitstable.loc[NASfitstable['type'].isin(['FLAT', 'Flat Frame'])
+                                             & (NASfitstable['start_night'] > flat_li)
+                                             & (NASfitstable['start_night'] <= flat_ui)
+                                             & (NASfitstable['filter'] == filt)
+                                             & (NASfitstable['binning'] == binning)]
+
+                FLATtable = FLATtable.loc[FLATtable['filter'] != filt]
+                FLATtable = pd.concat([FLATtable, new_FLAT])
+
         all_calibtable = pd.concat([FLATtable,BIAStable,DARKtable])
         print(night, "lights",len(LIGHTtable), "flats",len(FLATtable),"bias", len(BIAStable),"darks", len(DARKtable))
 
