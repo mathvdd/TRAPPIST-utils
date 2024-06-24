@@ -403,9 +403,9 @@ def get_files(obj_name, NASfitstable, output_path, dayinterval, dateinterval=[''
             flat_li = lower_interval
             flat_ui = upper_interval
             while len(FLATtable.loc[FLATtable['filter'] == filt]) < 5:
-                flat_li += 7
-                flat_ui += 7
-                print(f'Looking for flats {filt} with an interval of {flat_li} days')
+                flat_li -= pd.Timedelta(days=7)
+                flat_ui += pd.Timedelta(days=7)
+                print(f'Looking for flats {filt} with bigger interval')
                 new_FLAT = NASfitstable.loc[NASfitstable['type'].isin(['FLAT', 'Flat Frame'])
                                              & (NASfitstable['start_night'] > flat_li)
                                              & (NASfitstable['start_night'] <= flat_ui)
