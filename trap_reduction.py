@@ -299,6 +299,16 @@ def generate_ZP_new_format(calib_dir, obs, date, filtlist, ZPparams=ZP, output_d
         last_interval = True
         
     for filt in filtlist:
+
+        #correct for old Rc and Ic filt names
+        little_c_filt = False
+        if filt == 'Rc':
+            filt = 'R'
+            little_c_filt = True
+        elif filt == 'Ic':
+            filt = 'I'
+            little_c_filt = True
+
         #filter for the filter
         ZPfilt = ZPtable.loc[ZPtable['filt_name'] == filt]
 
@@ -321,6 +331,14 @@ def generate_ZP_new_format(calib_dir, obs, date, filtlist, ZPparams=ZP, output_d
                 comment += f'error finding the corresponding ZP for {filt} in interval'
                 warning_flag = True
         else:
+
+            if little_c_filt:
+                #change again to Ic and Rc in the calib.dat file
+                if filt == 'R':
+                    filt = 'Rc'
+                elif filt == 'I':
+                    filt = 'Ic'
+
             ZPline = ZPfilt.iloc[(ZPfilt['JD_center']-startdateJD).abs().argsort()][:1]
             lines += f"\n{filt} {' '.join([str(int) for int in ZPparams.get(filt)])} {str(ZPline['ZP'].values[0])}"
 
