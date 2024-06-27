@@ -226,27 +226,30 @@ def get_fitstable(raw_dir):
 def generate_ZP_new_format(calib_dir, obs, date, filtlist, ZPparams=ZP, output_dir=None):
     #import the ZP tables for either TN or TS
     warning_flag = False
-    ZP_table_header = ['filt_nb', 'JD_mean', 'ZP', 'n', 'del1', 'JD_start', 'JD_stop', 'del2', 'JD_center', 'del3', 'clean_start', 'clean_stop', 'del4']
-    # 1  numero du filtre
-    # 2  date (jj-2450000) moyenne des obs
-    # 3  zp
-    # 4  nombre de donnees
-    # 5 - 6 intervalle de temps
-    # 7  date centrale = (5+6)/2
+
     if obs == 'TN':
+        ZP_table_header = ['filt_nb', 'JD_mean', 'ZP', 'n', 'JD_start', 'JD_stop', 'JD_center', 'clean_start', 'clean_stop']
         ZPtable = pd.read_csv(os.path.join(calib_dir, "ZeP_North.dat"), names=ZP_table_header, sep="\s+",engine='python')
         filt_nb = {1:'OH',2:'NH',3:None,4:'CN',5:'C3',6:None,7:'BC',8:'C2',9:'GC',10:None,
                    11:'RC',12:'B',13:'V',14:'R',15:'I',16:None,17:'Iz',18:'exoBB',19:None,20:'NaI'}
     elif obs == 'TS':
+        ZP_table_header = ['filt_nb', 'JD_mean', 'ZP', 'n', 'del1', 'JD_start', 'JD_stop', 'del2', 'JD_center', 'del3', 'clean_start', 'clean_stop', 'del4']
+        # 1  numero du filtre
+        # 2  date (jj-2450000) moyenne des obs
+        # 3  zp
+        # 4  nombre de donnees
+        # 5 - 6 intervalle de temps
+        # 7  date centrale = (5+6)/2
         ZPtable = pd.read_csv(os.path.join(calib_dir, "ZeP_South.dat"), names=ZP_table_header, sep="\s+", engine='python')
         # ZPtable = pd.read_csv(os.path.join(calib_dir, "ZeP_South.dat"), names=ZP_table_header, sep="(?<![])\s+")
+        ZPtable.drop(['del1', 'del2', 'del3', 'del4'], axis=1, inplace=True)
         filt_nb = {1:'OH',2:'NH',3:'UC',4:'CN',5:'C3',6:'CO',7:'BC',8:'C2',9:'GC',10:'H2O',
            11:'RC',12:'B',13:'V',14:'R',15:'I',16:'z',17:'Iz',18:None,19:None,20:'NaI'}
     else:
         print('WARNING: observatory not well defined')
         warning_flag = True
-    ZPtable.drop(['del1', 'del2', 'del3', 'del4'], axis=1, inplace=True)
-        
+
+
     #format the table and add filter name
     ZPtable['filt_name'] = ZPtable.apply(lambda x: filt_nb[x['filt_nb']], axis=1)
     # ZPtable['clean_start'] = ZPtable.apply(lambda x: int(x['clean_start'][1:]) +1, axis=1) 
